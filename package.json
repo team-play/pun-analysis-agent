@@ -1,12 +1,20 @@
 {
-  "name": "pun-analysis-agent",
-  "private": true,
-  "version": "0.1.0",
-  "packageManager": "pnpm@10.18.2",
-  "devDependencies": {
-    "@biomejs/biome": "^2.5.13"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
-  }
+	"name": "pun-analysis-agent",
+	"private": true,
+	"version": "0.1.0",
+	"packageManager": "pnpm@10.18.2",
+	"scripts": {
+		"check:mermaid": "node scripts/check-mermaid.mjs",
+		"lint": "biome check ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.13",
+		"jsdom": "^30.0.1",
+		"mermaid": "^12.0.0"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild"
+		]
+	}
 }
