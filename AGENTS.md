@@ -40,3 +40,7 @@ This runs entirely on free tiers (Cloud Run, Firebase Hosting, Gemini's free quo
 | `/analyze` p95 latency | TBD | not yet measured |
 | Inference container memory ceiling | TBD | not yet measured |
 | `/api/chat` end-to-end latency (excluding cold start) | TBD | not yet measured |
+
+## Docs alignment
+
+After committing a change, check whether it touched anything the docs describe — a new script, a changed command, a stack swap, a new CI step, a new skill — and diff that against `README.md`, `docs/project-spec.md`, `docs/local-setup.md`, and this file. If any of them have drifted, make a **separate follow-up commit** that updates the docs rather than leaving the mismatch for someone else to discover or folding the fix into the commit that caused it — a distinct commit keeps "why did the docs change" answerable from the log alone.
