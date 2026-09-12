@@ -11,7 +11,7 @@ A conversational agent that detects and explains puns in text, built as a Gemini
 | Frontend | [`frontend/`](frontend/) — React chat UI on Firebase Hosting | TBD |
 | Data / Eval | [`eval/`](eval/) — dataset curation, evaluation, write-up | TBD |
 
-See [`docs/contracts.md`](docs/contracts.md) for the two cross-domain API contracts (`/analyze` and `/api/chat`).
+See [`docs/project-spec.md`](docs/project-spec.md) for the full spec (stack, architecture, task breakdown), [`docs/contracts.md`](docs/contracts.md) for the two cross-domain API contracts (`/analyze` and `/api/chat`), and [`docs/local-setup.md`](docs/local-setup.md) to get a dev server running locally.
 
 ## Getting started
 
