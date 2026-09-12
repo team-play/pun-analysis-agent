@@ -9,3 +9,9 @@ on:
     branches: [main]
     paths:
       - "inference/**"
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No deploy logic yet — see the comment at the top of this file."
