@@ -69,8 +69,13 @@ uv run marimo edit notebooks/dummy_notebook.py
 
 ```bash
 # from the repo root — covers backend/ and frontend/ (shared Biome config)
-pnpm exec biome check .
+pnpm run lint
+
+# also from the repo root — validates every ```mermaid block in the repo's docs
+pnpm run check:mermaid
 
 # inside inference/ or eval/
 uv run ruff check .
 ```
+
+[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) runs all of the above on every push/PR, so failures show up in CI even if you skip running them locally.
