@@ -3,9 +3,13 @@
 	"private": true,
 	"version": "0.1.0",
 	"packageManager": "pnpm@10.18.2",
+	"engines": {
+		"node": ">=22"
+	},
 	"scripts": {
 		"check:mermaid": "node scripts/check-mermaid.mjs",
-		"lint": "biome check ."
+		"lint": "biome check .",
+		"verify-setup": "node scripts/verify-setup.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.13",

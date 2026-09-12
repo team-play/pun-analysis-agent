@@ -4,6 +4,8 @@ Instructions for any agent (Claude Code or otherwise) working in this repo.
 
 ## Discovery
 
+If your local environment isn't set up yet, start with [`docs/agent-setup.md`](docs/agent-setup.md) — tool-agnostic setup instructions any agent can follow to bootstrap this repo on a fresh machine.
+
 Before making a change — especially one that touches more than one domain — read:
 - [`docs/local-setup.md`](docs/local-setup.md) for how each package (`inference/`, `backend/`, `frontend/`, `eval/`) is installed and run locally.
 - [`docs/project-spec.md`](docs/project-spec.md) for the stack, architecture, and which domain owns what.

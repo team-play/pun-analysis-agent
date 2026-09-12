@@ -2,6 +2,10 @@
 
 Quick-start for going from a fresh clone to a running dev server in each domain. See [`project-spec.md`](project-spec.md) for the why behind the stack, and [`contracts.md`](contracts.md) for the API shapes.
 
+## Automated setup
+
+If you (or the agent helping you) would rather not go through the manual steps below one by one, see [`agent-setup.md`](agent-setup.md) — a tool-agnostic guide any agent can follow to detect what's installed, install what's missing (with confirmation), install dependencies, and validate the result via `node scripts/verify-setup.mjs`. The sections below are the manual/reference path — what that guide is automating, spelled out per domain.
+
 ## Secrets
 
 API keys (Gemini, Firebase, GCP) are stored as **GitHub org/repo Secrets**, which power CI — they're not something you can pull down as a member, since GitHub only exposes secret values to Actions runners, not to people.
