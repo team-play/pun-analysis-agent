@@ -1,0 +1,11 @@
+# Placeholder workflow for the Genkit backend Cloud Run service.
+#
+# This will build the Docker image in `backend/` and deploy it to Cloud Run
+# once the service has a real, working Dockerfile and build step to deploy.
+# No deploy logic yet — filled in in a follow-up pass.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"

@@ -1,0 +1,11 @@
+# Placeholder workflow for the Firebase Hosting frontend.
+#
+# This will build the React app in `frontend/` and deploy it to Firebase
+# Hosting once there's a real build step to deploy. No deploy logic yet —
+# filled in in a follow-up pass.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
