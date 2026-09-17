@@ -9,6 +9,7 @@ If your local environment isn't set up yet, start with [`docs/agent-setup.md`](d
 Before making a change — especially one that touches more than one domain — read:
 - [`docs/local-setup.md`](docs/local-setup.md) for how each package (`inference/`, `backend/`, `frontend/`, `eval/`) is installed and run locally.
 - [`docs/project-spec.md`](docs/project-spec.md) for the stack, architecture, and which domain owns what.
+- [`docs/engineering-practices.md`](docs/engineering-practices.md) for cross-domain isolation, testing, dev-experience, and the progressive-enhancement order Backend/Frontend get built in.
 - [`docs/contracts.md`](docs/contracts.md) for the exact `/analyze` and `/api/chat` schemas. Treat these as the source of truth — if a change requires altering either shape, update `contracts.md` in the same change and flag it, since both sides of the contract depend on it.
 - [`docs/tasks.md`](docs/tasks.md) for how work is tracked. See the Backlog.md workflow block below for the moment-to-moment task commands.
 
@@ -27,6 +28,10 @@ Before making a change — especially one that touches more than one domain — 
 Before considering any non-trivial change done, solicit a critical, adversarial review from a subagent (e.g. this repo's `code-review` skill, or an equivalent independent review pass) rather than self-certifying the diff. Two things are non-negotiable in that review:
 - **Test coverage** — new logic needs tests that would actually fail if the logic were wrong, not just tests that exercise the happy path.
 - **Human-readable code** — a teammate who wasn't in the room should be able to follow the code without extra explanation.
+
+## Architectural review
+
+Any change that touches architectural matters — the `/analyze` or `/api/chat` contracts in [`docs/contracts.md`](docs/contracts.md), the stack/service topology or sync points in [`docs/project-spec.md`](docs/project-spec.md), the cross-domain isolation guarantees or progressive-enhancement phase order in [`docs/engineering-practices.md`](docs/engineering-practices.md), or introducing a new service, dependency, or deploy target — needs a review from a subagent briefed specifically to look for architectural problems before the change is considered done, in addition to (not instead of) the code review above. Architectural review looks for a different class of issue than code review: hidden coupling between domains, a "Phase N only" claim that something earlier actually depends on, contradictions between two docs describing the same boundary, or an isolation/contract claim that doesn't hold up against how the pieces actually connect. Brief that subagent with the specific docs/files the change touches and ask it to verify claims against the current repo state, not just read the diff in isolation.
 
 ## Performance
 

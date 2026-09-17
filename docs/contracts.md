@@ -26,3 +26,5 @@ POST /api/chat
 { "messages": [{ "role": string, "content": string }] }
 → streamed response (Genkit flow stream format)
 ```
+
+The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool calls — see [`engineering-practices.md`](engineering-practices.md)). The shape of `tool-call` events within this same stream, needed once the `analyze_pun` tool exists (Phase 2), is **not yet specified** — agreeing it is sync point 3 in [`project-spec.md`](project-spec.md)'s "Sync points," same tier as the schemas above.

@@ -87,6 +87,8 @@ This domain can work independently once the contract is agreed — no dependency
 
 **Contract consumed:** Inference's `/analyze` schema — can build and test against a mocked response before Inference's real endpoint is live.
 
+**Design:** see [`engineering-practices.md`](engineering-practices.md) for the build order (a plain Gemini proxy before the `analyze_pun` tool) and for keeping this domain testable without live Gemini quota or a running Inference service.
+
 ---
 
 ### 3. Frontend
@@ -98,6 +100,8 @@ This domain can work independently once the contract is agreed — no dependency
 - Loading/error states, basic styling
 
 **Contract consumed:** only `/api/chat`. Can build entirely against a stubbed backend response, no dependency on Inference.
+
+**Design:** see [`design/frontend-design.md`](design/frontend-design.md) for the component library, visual design, and state management approach, and [`engineering-practices.md`](engineering-practices.md) for the isolation/testing/progressive-enhancement rules this and the Backend domain build against.
 
 ---
 
@@ -118,5 +122,6 @@ This domain can work independently once the contract is agreed — no dependency
 The only hard dependencies across domains:
 1. **Day one:** agree the `/analyze` request/response schema (Inference ↔ Backend, Data/Eval)
 2. **Before Frontend wires up its streaming display:** agree the `/api/chat` streaming shape (Backend ↔ Frontend)
+3. **Before Frontend builds tool-call rendering:** agree the shape of `tool-call` events within the `/api/chat` Genkit stream (Backend ↔ Frontend) — this is Phase 2 of the progressive-enhancement plan in [`engineering-practices.md`](engineering-practices.md); Phase 1's plain-text stream shape from sync point 2 doesn't need it.
 
 Everything else — model choice, dataset selection, UI styling — is independently swappable within a domain without breaking another.
