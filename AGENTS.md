@@ -10,6 +10,7 @@ Before making a change — especially one that touches more than one domain — 
 - [`docs/local-setup.md`](docs/local-setup.md) for how each package (`inference/`, `backend/`, `frontend/`, `eval/`) is installed and run locally.
 - [`docs/project-spec.md`](docs/project-spec.md) for the stack, architecture, and which domain owns what.
 - [`docs/contracts.md`](docs/contracts.md) for the exact `/analyze` and `/api/chat` schemas. Treat these as the source of truth — if a change requires altering either shape, update `contracts.md` in the same change and flag it, since both sides of the contract depend on it.
+- [`docs/tasks.md`](docs/tasks.md) for how work is tracked. See the Backlog.md workflow block below for the moment-to-moment task commands.
 
 ## Coding guide
 
@@ -46,3 +47,27 @@ This runs entirely on free tiers (Cloud Run, Firebase Hosting, Gemini's free quo
 ## Docs alignment
 
 After committing a change, check whether it touched anything the docs describe — a new script, a changed command, a stack swap, a new CI step, a new skill — and diff that against `README.md`, `docs/project-spec.md`, `docs/local-setup.md`, and this file. If any of them have drifted, make a **separate follow-up commit** that updates the docs rather than leaving the mismatch for someone else to discover or folding the fix into the commit that caused it — a distinct commit keeps "why did the docs change" answerable from the log alone.
+
+<!-- BACKLOG.MD GUIDELINES START -->
+<!-- backlog.md-instructions-version: 1.52.0 -->
+<CRITICAL_INSTRUCTION>
+
+## Backlog.md Workflow
+
+This project uses Backlog.md for task and project management.
+
+**At the beginning of each conversation in this project, run `backlog instructions overview` before answering or taking action. Re-read it only if you have not read it yet in the current conversation.**
+
+Use the overview to decide whether to search, read, create, or update Backlog tasks.
+
+Before task lifecycle actions, read the matching detailed guide:
+- `backlog instructions task-creation` before creating or splitting tasks
+- `backlog instructions task-execution` before planning, changing status or assignee, adding a plan or implementation notes, or implementing task work
+- `backlog instructions task-finalization` before checking acceptance criteria, writing final summaries, or moving tasks to terminal statuses
+
+Use `backlog <command> --help` before running unfamiliar commands. Help shows options, fields, and examples.
+
+Do not edit Backlog task, draft, document, decision, or milestone markdown files directly. Use the `backlog` CLI so metadata, relationships, and history stay consistent.
+
+</CRITICAL_INSTRUCTION>
+<!-- BACKLOG.MD GUIDELINES END -->
