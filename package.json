@@ -8,7 +8,9 @@
 	},
 	"scripts": {
 		"check:mermaid": "node scripts/check-mermaid.mjs",
+		"dev": "pnpm --parallel --filter frontend --filter backend run dev",
 		"lint": "biome check .",
+		"test": "pnpm --filter frontend --filter backend run test",
 		"verify-setup": "node scripts/verify-setup.mjs"
 	},
 	"devDependencies": {

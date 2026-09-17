@@ -6,6 +6,8 @@ Quick-start for going from a fresh clone to a running dev server in each domain.
 
 If you (or the agent helping you) would rather not go through the manual steps below one by one, see [`agent-setup.md`](agent-setup.md) — a tool-agnostic guide any agent can follow to detect what's installed, install what's missing (with confirmation), install dependencies, and validate the result via `node scripts/verify-setup.mjs`. The sections below are the manual/reference path — what that guide is automating, spelled out per domain.
 
+Working across Frontend and Backend at once? `pnpm dev` from the repo root runs both dev servers concurrently (see "Lint / test / format everywhere" below) instead of opening two terminals.
+
 ## Secrets
 
 API keys (Gemini, Firebase, GCP) are stored as **GitHub org/repo Secrets**, which power CI — they're not something you can pull down as a member, since GitHub only exposes secret values to Actions runners, not to people.
@@ -39,6 +41,7 @@ Node/TypeScript + [Hono](https://hono.dev/) (a lightweight, TypeScript-first web
 cd backend
 pnpm install
 pnpm dev
+pnpm test
 ```
 
 The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. Sanity-check it with:
@@ -46,6 +49,8 @@ The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:80
 ```bash
 curl localhost:8080/health
 ```
+
+`pnpm test` runs Node's built-in test runner (`node:test`, via `tsx`) against [`backend/tests/`](../backend/tests/) — see [`engineering-practices.md`](engineering-practices.md) for why no separate test framework is needed here.
 
 ## Frontend (`frontend/`)
 
@@ -55,9 +60,12 @@ Vite + React, pnpm.
 cd frontend
 pnpm install
 pnpm dev
+pnpm test
 ```
 
-Opens the dev server at `http://localhost:5173`.
+Opens the dev server at `http://localhost:5173`. `pnpm test` runs Vitest + React Testing Library (config in [`frontend/vite.config.ts`](../frontend/vite.config.ts)) — see [`design/frontend-design.md`](design/frontend-design.md)'s "Development & testing" section for what's covered.
+
+Once the `ChatModelAdapter` from [`design/frontend-design.md`](design/frontend-design.md) exists, an env flag (e.g. `VITE_CHAT_ADAPTER=stub|live`, see [`engineering-practices.md`](engineering-practices.md)) will pick between a stubbed backend and this repo's real one — not implemented yet, so `frontend/` currently has no live `/api/chat` to point at.
 
 ## Eval (`eval/`)
 
@@ -69,9 +77,15 @@ uv sync
 uv run marimo edit notebooks/dummy_notebook.py
 ```
 
-## Lint / format everywhere
+## Lint / test / format everywhere
 
 ```bash
+# from the repo root — runs both frontend/ and backend/ dev servers together
+pnpm dev
+
+# from the repo root — runs both frontend/ and backend/ test suites
+pnpm run test
+
 # from the repo root — covers backend/ and frontend/ (shared Biome config)
 pnpm run lint
 
@@ -82,4 +96,4 @@ pnpm run check:mermaid
 uv run ruff check .
 ```
 
-[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) runs all of the above on every push/PR, so failures show up in CI even if you skip running them locally.
+[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) and [`.github/workflows/test.yml`](../.github/workflows/test.yml) run all of the above (lint/mermaid/ruff, and the frontend/backend test suites, respectively) on every push/PR, so failures show up in CI even if you skip running them locally.
