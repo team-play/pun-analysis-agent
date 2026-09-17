@@ -9,6 +9,7 @@ If your local environment isn't set up yet, start with [`docs/agent-setup.md`](d
 Before making a change — especially one that touches more than one domain — read:
 - [`docs/local-setup.md`](docs/local-setup.md) for how each package (`inference/`, `backend/`, `frontend/`, `eval/`) is installed and run locally.
 - [`docs/project-spec.md`](docs/project-spec.md) for the stack, architecture, and which domain owns what.
+- [`docs/engineering-practices.md`](docs/engineering-practices.md) for cross-domain isolation, testing, dev-experience, and the progressive-enhancement order Backend/Frontend get built in.
 - [`docs/contracts.md`](docs/contracts.md) for the exact `/analyze` and `/api/chat` schemas. Treat these as the source of truth — if a change requires altering either shape, update `contracts.md` in the same change and flag it, since both sides of the contract depend on it.
 - [`docs/tasks.md`](docs/tasks.md) for how work is tracked. See the Backlog.md workflow block below for the moment-to-moment task commands.
 
