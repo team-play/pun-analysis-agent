@@ -68,6 +68,8 @@ Four domains, one lead each. Three of the four can start immediately against moc
 
 **Contract exposed:** `/analyze` — see [`contracts.md`](contracts.md).
 
+**Design:** see [`design/sense-selection.md`](design/sense-selection.md) for the sense-selection approach and the tiered fallback for WordNet's coverage gaps.
+
 This domain can work independently once the contract is agreed — no dependency on the backend or frontend services.
 
 ---

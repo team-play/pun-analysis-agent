@@ -12,9 +12,12 @@ POST /analyze
     "pun_type": "homographic" | "homophonic" | null,
     "words_involved": [string],
     "explanation": string,
-    "confidence": float
+    "confidence": float,
+    "sense_source": "wordnet" | "wiktionary" | "llm_fallback" | null
   }
 ```
+
+`sense_source` reports which tier of the sense-selection fallback chain produced `explanation` — `null` when `is_pun` is `false` (no sense selection needed) or when every tier failed (the graceful-failure case). See [`design/sense-selection.md`](design/sense-selection.md) for the full tiered design this field tracks.
 
 ## `/api/chat` (Backend → Frontend)
 
