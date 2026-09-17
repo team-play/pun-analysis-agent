@@ -71,7 +71,7 @@ Adding a `sense_source: "wordnet" | "wiktionary" | "llm_fallback" | null` field 
 
 - No phonetic pipeline yet for homophonic puns — steps 1–4 above only find double senses of *one* word, not sound-alike word pairs.
 - The selectional-preference seed lists in step 4 are hand-built, not learned — unclear how much coverage they get before falling back to Tier 1 gloss scoring.
-- Which of Prateek/Livia owns detection vs. sense selection — to be decided at PR time (see [`../milestones/milestone-3.md`](../milestones/milestone-3.md)).
+- Domain ownership is settled (Andi leads Sense Selection, Livia leads Detection, Yai leads Conversational, Prateek leads Eval — see [`../milestones/milestone-3.md`](../milestones/milestone-3.md)), but the exact hand-off point between Andi (starting at Tier 0) and Yai (starting at Tier 3) within Sense Selection is still open.
 - Wiktionary dump size/licensing footprint inside the Cloud Run image is unverified — may need to prune to single-word entries before bundling.
 - The margin threshold from Tier 1 (when two senses count as "close enough" to be a pun) is unset until Eval runs this against real data (see below).
 

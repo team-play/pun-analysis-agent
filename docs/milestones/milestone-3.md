@@ -28,12 +28,12 @@ flowchart LR
 
 | Domain | Scope | Lead |
 |---|---|---|
-| Conversational (Frontend + Backend/Orchestration) | React chat UI, Genkit `analyze_pun` tool, streaming, error handling | Andi J. Castillo, Yai Torres |
-| Inference — Detection | pun / non-pun classifier, `pun_type` (homographic vs. homophonic) | Prateek Grover / Livia Esquejo (split TBD) |
-| Inference — Sense Selection | POS tagging, WordNet sense retrieval, context scoring, `explanation` text — this is where the approach below lives | Prateek Grover / Livia Esquejo (split TBD) |
-| Data / Eval | dataset curation, precision/recall on detection, calibrating the sense-selection threshold below against SemEval | Led by Prateek & Livia, all four contribute |
+| Conversational (Frontend + Backend/Orchestration) | React chat UI, Genkit `analyze_pun` tool, streaming, error handling | Yai Torres |
+| Inference — Detection | pun / non-pun classifier, `pun_type` (homographic vs. homophonic) | Livia Esquejo |
+| Inference — Sense Selection | POS tagging, WordNet sense retrieval, context scoring, `explanation` text | Andi J. Castillo (lead) |
+| Data / Eval | dataset curation, precision/recall on detection, calibrating the sense-selection threshold below against SemEval | Prateek Grover (lead); all four contribute |
 
-Andi and Yai are pairing on Frontend + Conversational first since we expect that work to close out ahead of schedule, freeing them to help on Eval and Inference later. Prateek and Livia are starting on Inference now, splitting pun detection and sense selection between them (who takes which side is still open). Eval is a shared responsibility across all four, led by Prateek and Livia since they'll have the most context on what Inference is actually producing. The animal-pun stretch goal (Q3) is scoped as an Andi/Yai integration task, time permitting, once Frontend + Conversational are done.
+Yai leads Frontend + Conversational solo, with the explicit strategy of finishing it fast so Yai can then support Andi on Sense Selection — Andi starts at Tier 0 (the WordNet/embedding-scoring end), Yai agreed to pick up Tier 3 (the LLM fallback, see more below), and they meet in the middle once both are free. Livia leads Pun Detection and Prateek leads Data/Eval, though Eval is a shared responsibility all four contribute to once Inference has something to evaluate.
 
 ### The sense-selection approach
 
@@ -61,4 +61,4 @@ Full citations for the chapters referenced above are in [`../references.md`](../
 
 ## Question 3: Are your selected jokes involve information in specific domains (module 3)?
 
-Our baseline implementation will focus on food-based puns. We currently have a stretch goal of including animal puns; our mascot is an otter so it makes sense to include both 🦦!
+Our strategy is to fully nail one domain before expanding: food-based puns are the baseline, and only once that pipeline (detection, sense selection, explanation) works end-to-end do we treat a second domain as a stretch goal. Animal puns are the natural candidate for that stretch goal — our mascot is an otter, so covering both would be fitting 🦦!
