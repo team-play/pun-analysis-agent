@@ -29,6 +29,10 @@ Before considering any non-trivial change done, solicit a critical, adversarial 
 - **Test coverage** — new logic needs tests that would actually fail if the logic were wrong, not just tests that exercise the happy path.
 - **Human-readable code** — a teammate who wasn't in the room should be able to follow the code without extra explanation.
 
+## Architectural review
+
+Any change that touches architectural matters — the `/analyze` or `/api/chat` contracts in [`docs/contracts.md`](docs/contracts.md), the stack/service topology or sync points in [`docs/project-spec.md`](docs/project-spec.md), the cross-domain isolation guarantees or progressive-enhancement phase order in [`docs/engineering-practices.md`](docs/engineering-practices.md), or introducing a new service, dependency, or deploy target — needs a review from a subagent briefed specifically to look for architectural problems before the change is considered done, in addition to (not instead of) the code review above. Architectural review looks for a different class of issue than code review: hidden coupling between domains, a "Phase N only" claim that something earlier actually depends on, contradictions between two docs describing the same boundary, or an isolation/contract claim that doesn't hold up against how the pieces actually connect. Brief that subagent with the specific docs/files the change touches and ask it to verify claims against the current repo state, not just read the diff in isolation.
+
 ## Performance
 
 This runs entirely on free tiers (Cloud Run, Firebase Hosting, Gemini's free quota), so memory and compute efficiency are a design constraint from the start, not a later optimization pass:
