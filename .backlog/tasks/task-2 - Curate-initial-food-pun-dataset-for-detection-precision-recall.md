@@ -4,8 +4,9 @@ title: Curate initial food-pun dataset for detection precision/recall
 status: To Do
 assignee: []
 created_date: '2026-09-16 19:45'
-updated_date: '2026-09-16 19:48'
-labels: []
+updated_date: '2026-09-17 09:02'
+labels:
+  - dataset
 dependencies: []
 references:
   - docs/milestones/milestone-3.md

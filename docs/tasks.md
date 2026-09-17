@@ -26,7 +26,9 @@ Always go through the `backlog` CLI (or its web UI) rather than hand-editing tas
 
 ## Domain
 
-One project uses one task-ID prefix (`TASK-*` here), so domain isn't in the ID. Backlog.md has a `project` field built for exactly this — tagging each task with one project in a monorepo — configured in [`.backlog/config.yml`](../.backlog/config.yml) as `projects: ["frontend", "backend", "inference", "eval"]`, matching the [domain table in the README](../README.md#domains). Set it with `--project <domain>` on `task create`/`task edit`, and filter with `backlog task list --project inference`. Reserve `--label` for cross-cutting, non-exclusive tags (e.g. `stretch-goal`) instead of domain — a task belongs to exactly one domain, which is what `project` (single-value) models, not `labels` (multi-value).
+One project uses one task-ID prefix (`TASK-*` here), so domain isn't in the ID. Backlog.md has a `project` field built for exactly this — tagging each task with one project in a monorepo — configured in [`.backlog/config.yml`](../.backlog/config.yml) as `projects: ["frontend", "backend", "inference", "eval"]`. This is deliberately kept 1:1 with the repo's actual package folders (matching the [domain table in the README](../README.md#domains)), not with how work happens to be split between people right now — that keeps it stable even as the finer split changes. Set it with `--project <domain>` on `task create`/`task edit`, and filter with `backlog task list --project inference`.
+
+For a finer split within one domain — e.g. Inference's detection vs. WSD workstreams, or Eval's dataset-curation vs. analysis work — use `--label` instead of `project`: `wsd`, `pun-classifier`, `dataset`, `evaluation` are pre-declared in `config.yml`. Labels are multi-value and don't have to be exclusive, which fits sub-team split better than `project` (single-value, meant to track physical ownership) — a task can be tagged `--project inference --label wsd` for the common case, or carry both `wsd` and `pun-classifier` labels if it's genuinely glue work between the two.
 
 ## Dependencies and due dates
 
