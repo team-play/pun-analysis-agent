@@ -27,4 +27,15 @@ POST /api/chat
 → streamed response (Genkit flow stream format)
 ```
 
-The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool calls — see [`engineering-practices.md`](engineering-practices.md)). The shape of `tool-call` events within this same stream, needed once the `analyze_pun` tool exists (Phase 2), is **not yet specified** — agreeing it is sync point 3 in [`project-spec.md`](project-spec.md)'s "Sync points," same tier as the schemas above.
+The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool calls — see [`engineering-practices.md`](engineering-practices.md)). Phase 2 (once the `analyze_pun` tool exists) adds `toolRequest`/`toolResponse` chunks to that same stream, per Genkit's own flow-streaming format — Backend forwards these unmodified, it doesn't re-wrap them:
+
+```
+{ "content": [{ "toolRequest": { "name": "analyze_pun", "input": { "text": string }, "ref"?: string } }] }
+{ "content": [{ "toolResponse": { "name": "analyze_pun", "output": <the /analyze response shape above>, "ref"?: string } }] }
+```
+
+`output` is always a well-formed `/analyze`-shaped object per that endpoint's own graceful-degradation design (low `confidence` and `sense_source: null` on failure, never a raw error) — so the tool never needs a separate error signal at this layer.
+
+Genkit's `ref` field exists to disambiguate concurrent calls to the *same* tool, but is inconsistently populated and unneeded here: `analyze_pun` is the only tool and is never called more than once concurrently in a single turn. So Frontend's `ChatModelAdapter` doesn't correlate by `ref` — it mints a `toolCallId` client-side the moment a `toolRequest` chunk for `analyze_pun` arrives, holds it as the one pending call, and attaches the next `toolResponse` chunk's `output` to that same assistant-ui `{ type: "tool-call", toolCallId, toolName, args, result }` part. If a second concurrent tool or genuinely concurrent `analyze_pun` calls are ever needed, this correlation rule needs revisiting alongside `ref`-based matching — not a case this project currently has.
+
+This closes sync point 3 in [`project-spec.md`](project-spec.md)'s "Sync points."
