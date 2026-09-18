@@ -6,7 +6,7 @@ A conversational agent that detects and explains puns in text, built as a Gemini
 
 | Domain | Owns | Owner |
 |---|---|---|
-| Inference | [`inference/`](inference/) — pun classifier, WSD, `/analyze` endpoint | Livia Esquejo (Pun Detection), Andi J. Castillo (Sense Selection) |
+| Inference | [`inference/`](inference/) — pun classifier, WSD, `/analyze` endpoint | Livia Esquejo Castro (Pun Detection), Andi J. Castillo-Mauricio (Sense Selection) |
 | Backend | [`backend/`](backend/) — Genkit orchestration, `analyze_pun` tool, `/api/chat` | Yai Torres |
 | Frontend | [`frontend/`](frontend/) — React chat UI on Firebase Hosting | Yai Torres |
 | Data / Eval | [`eval/`](eval/) — dataset curation, evaluation, write-up | Prateek Grover (lead); all four contribute |
