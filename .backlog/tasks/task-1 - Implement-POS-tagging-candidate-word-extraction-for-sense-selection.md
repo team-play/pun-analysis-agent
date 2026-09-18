@@ -4,7 +4,8 @@ title: Implement POS-tagging candidate-word extraction for sense selection
 status: To Do
 assignee: []
 created_date: '2026-09-16 19:45'
-updated_date: '2026-09-17 09:02'
+updated_date: '2026-09-17 23:41'
+due_date: '2026-09-21'
 labels:
   - wsd
 dependencies: []

@@ -4,10 +4,9 @@ title: Wire chat UI to streamed /api/chat responses
 status: To Do
 assignee: []
 created_date: '2026-09-16 19:45'
-updated_date: '2026-09-16 19:48'
+updated_date: '2026-09-17 23:33'
 labels: []
-dependencies:
-  - TASK-3
+dependencies: []
 references:
   - docs/contracts.md
 project: frontend

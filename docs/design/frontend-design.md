@@ -87,7 +87,7 @@ What *is* Phase 2 work is extending that same adapter to also parse `tool-call` 
 
 - Identify which of the default theme's Tailwind tokens (colors, spacing, radii) to override to reach the Claude-inspired palette/layout, once the interface is running against real content.
 - Settle on the exact accent shade (a muted gold in the Boilermaker Gold family, not the literal brand hex) once it's tested against the warm-neutral background for contrast/accessibility.
-- Confirm the Genkit stream event shape for tool calls once the Backend domain's `/api/chat` contract is finalized, to lock down the adapter's parsing logic — this is now tracked as a formal sync point in [`../project-spec.md`](../project-spec.md), not just an incidental TODO.
+- ~~Confirm the Genkit stream event shape for tool calls~~ — resolved: sync point 3 is closed in [`../contracts.md`](../contracts.md), which specifies the `toolRequest`/`toolResponse` chunk shapes and the client-side `toolCallId` correlation rule the adapter's parsing logic should follow.
 - The shared stub-fixture format (so Frontend's stub and Backend's Phase 2 fixture don't drift apart) is still open — see [`../engineering-practices.md`](../engineering-practices.md)'s open items.
 - The one test that exists today (`frontend/src/App.test.tsx`) only smoke-tests the default Vite starter page — it gets replaced once the real greeting/chat UI lands, not extended.
 - CORS middleware on Backend (needed for the `live` adapter flag and for the deployed Firebase↔Cloud-Run pairing) isn't implemented yet — flagged in "Development & testing" above, owned by Backend.
