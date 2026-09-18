@@ -29,8 +29,8 @@ flowchart LR
 | Domain | Scope | Lead |
 |---|---|---|
 | Conversational (Frontend + Backend/Orchestration) | React chat UI, Genkit `analyze_pun` tool, streaming, error handling | Yai Torres |
-| Inference — Detection | pun / non-pun classifier, `pun_type` (homographic vs. homophonic) | Livia Esquejo |
-| Inference — Sense Selection | POS tagging, WordNet sense retrieval, context scoring, `explanation` text | Andi J. Castillo (lead) |
+| Inference — Detection | pun / non-pun classifier, `pun_type` (homographic vs. homophonic) | Livia Esquejo Castro |
+| Inference — Sense Selection | POS tagging, WordNet sense retrieval, context scoring, `explanation` text | Andi J. Castillo-Mauricio (lead) |
 | Data / Eval | dataset curation, precision/recall on detection, calibrating the sense-selection threshold below against SemEval | Prateek Grover (lead); all four contribute |
 
 Yai leads Frontend + Conversational solo, with the explicit strategy of finishing it fast so Yai can then support Andi on Sense Selection — Andi starts at Tier 0 (the WordNet/embedding-scoring end), Yai agreed to pick up Tier 3 (the LLM fallback, see more below), and they meet in the middle once both are free. Livia leads Pun Detection and Prateek leads Data/Eval, though Eval is a shared responsibility all four contribute to once Inference has something to evaluate.
