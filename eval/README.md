@@ -25,7 +25,7 @@ License: SemEval-2017 Task 7 data is distributed by the task organizers for rese
 
 ### `datasets/sentences_animal.csv`, `datasets/sentences_food.csv`
 
-Hand-authored sentence sets for the food/animal domain baseline referenced by `TASK-2.2`. Not yet reviewed for integration as training/eval data — see `TASK-2.2` for the pending verification against the original ≥30-pair bar.
+Hand-authored sentence sets for a food/animal domain baseline (from [PR #8](https://github.com/team-play/pun-analysis-agent/pull/8)). This is a separate dataset from the food/animal rows already present in `semeval2017_task7_puns.csv` via its own `category` column — `TASK-2.2` covers verifying *that* SemEval-internal subset against the original ≥30-pair bar, not this file. No backlog task currently tracks this dataset or whether it should be integrated; that's an open question for review, not yet decided.
 
 Columns follow the `semeval2017_task7_puns.csv` convention above, plus one extra:
 
