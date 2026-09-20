@@ -19,6 +19,25 @@ For local dev:
 
 Put local secrets in `.env` / `.env.local` files inside the relevant package folder. The root [`.gitignore`](../.gitignore) already excludes `.env*`, so they won't get committed by accident.
 
+### Frontend deploy secrets (CI only)
+
+[`deploy-frontend.yml`](../.github/workflows/deploy-frontend.yml) builds `frontend/` and deploys it to Firebase Hosting (`pun-agent.web.app`) on every push to `main` that touches `frontend/**`, via [`FirebaseExtended/action-hosting-deploy`](https://github.com/FirebaseExtended/action-hosting-deploy). The target Firebase project ID (`pun-agent`) is committed in [`frontend/.firebaserc`](../frontend/.firebaserc) — not a secret, since a project ID isn't sensitive.
+
+The one repo secret it needs (Settings → Secrets and variables → Actions) is already set:
+
+- `GCP_SA_KEY` — the JSON key for `github-actions-deployer@pun-agent.iam.gserviceaccount.com`, the shared deploy service account for the whole `pun-agent` GCP project. It holds `roles/firebasehosting.admin` (this workflow) plus `roles/run.admin` and `roles/artifactregistry.writer` (for the backend/inference Cloud Run deploys in later tasks) — reused across all three deploy workflows rather than minting a separate key per target.
+
+If it ever needs rotating:
+
+```bash
+gcloud iam service-accounts keys create github-actions-deployer-key.json \
+  --iam-account="github-actions-deployer@pun-agent.iam.gserviceaccount.com"
+```
+
+Paste the contents into the `GCP_SA_KEY` secret, then delete the local file and revoke the old key (`gcloud iam service-accounts keys list`/`delete`) — it's a credential, not something to keep on disk or leave active once replaced.
+
+No local Firebase login is required to develop `frontend/` day-to-day; this secret only matters for the CI deploy step.
+
 ## Inference (`inference/`)
 
 Python + [`uv`](https://docs.astral.sh/uv/) (fast, reproducible dependency management — resolves and installs into a project-local `.venv` without needing a separate virtualenv command) + FastAPI + `ruff`.
