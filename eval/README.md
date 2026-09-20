@@ -22,3 +22,19 @@ Columns:
 `pun_type` and `source_corpus` agree for every `is_pun: True` row (they're derived from the same SemEval corpus split); they diverge only on `is_pun: False` rows, where `pun_type` is empty and `source_corpus` still records origin.
 
 License: SemEval-2017 Task 7 data is distributed by the task organizers for research use; see the [task page](https://alt.qcri.org/semeval2017/task7/) for terms.
+
+### `datasets/sentences_animal.csv`, `datasets/sentences_food.csv`
+
+Hand-authored sentence sets for the food/animal domain baseline referenced by `TASK-2.2`. Not yet reviewed for integration as training/eval data — see `TASK-2.2` for the pending verification against the original ≥30-pair bar.
+
+Columns follow the `semeval2017_task7_puns.csv` convention above, plus one extra:
+
+| Column | Meaning |
+|---|---|
+| `id` | Row id, `animal_*` / `food_*` prefix per file (this project's own scheme; SemEval's `het_*`/`hom_*` prefixes don't apply here). |
+| `is_pun` | `True`/`False`, as above. |
+| `pun_type` | `homographic` \| `homophonic` \| empty, as above. |
+| `source_corpus` | `sentences_animal` \| `sentences_food` — the originating file, mirroring how SemEval's `source_corpus` records which sub-corpus a row came from. |
+| `category` | `animal` \| `food` — matches the file, since each file is domain-pure. |
+| `text` | The sentence. |
+| `pun_target` | The word the pun is built around (e.g. `otter`, `dough`). No SemEval equivalent; named `pun_target` rather than `word` to leave room for multi-word spans, though every value here is currently a single word. |
