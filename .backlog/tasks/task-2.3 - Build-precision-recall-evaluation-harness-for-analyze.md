@@ -4,9 +4,11 @@ title: Build precision/recall evaluation harness for /analyze
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:05'
+updated_date: '2026-09-20 10:15'
 labels:
   - dataset
   - evaluation
+milestone: m-6
 dependencies:
   - TASK-9
   - TASK-16

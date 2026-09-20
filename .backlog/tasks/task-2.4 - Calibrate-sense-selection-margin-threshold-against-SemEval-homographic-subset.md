@@ -4,9 +4,11 @@ title: Calibrate sense-selection margin threshold against SemEval homographic su
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:05'
+updated_date: '2026-09-20 10:15'
 labels:
   - wsd
   - evaluation
+milestone: m-6
 dependencies:
   - TASK-1
   - TASK-19

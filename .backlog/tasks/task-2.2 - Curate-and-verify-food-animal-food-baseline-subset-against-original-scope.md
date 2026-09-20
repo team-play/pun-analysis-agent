@@ -4,8 +4,10 @@ title: Curate and verify food/animal-food baseline subset against original scope
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:05'
+updated_date: '2026-09-20 10:15'
 labels:
   - dataset
+milestone: m-6
 dependencies: []
 parent_task_id: TASK-2
 project: eval

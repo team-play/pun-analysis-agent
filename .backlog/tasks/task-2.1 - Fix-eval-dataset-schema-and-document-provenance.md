@@ -4,9 +4,10 @@ title: Fix eval dataset schema and document provenance
 status: Done
 assignee: []
 created_date: '2026-09-20 10:04'
-updated_date: '2026-09-20 10:05'
+updated_date: '2026-09-20 10:15'
 labels:
   - dataset
+milestone: m-6
 dependencies: []
 references:
   - docs/contracts.md
