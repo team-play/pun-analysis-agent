@@ -84,7 +84,7 @@ pnpm test
 
 Opens the dev server at `http://localhost:5173`. `pnpm test` runs Vitest + React Testing Library (config in [`frontend/vite.config.ts`](../frontend/vite.config.ts)) — see [`design/frontend-design.md`](design/frontend-design.md)'s "Development & testing" section for what's covered.
 
-Once the `ChatModelAdapter` from [`design/frontend-design.md`](design/frontend-design.md) exists, an env flag (e.g. `VITE_CHAT_ADAPTER=stub|live`, see [`engineering-practices.md`](engineering-practices.md)) will pick between a stubbed backend and this repo's real one — not implemented yet, so `frontend/` currently has no live `/api/chat` to point at.
+`VITE_CHAT_ADAPTER=stub|live` (see [`engineering-practices.md`](engineering-practices.md); example in [`frontend/.env.example`](../frontend/.env.example)) picks between a stubbed backend and this repo's real one. Unset defaults to `stub`, which is what local dev and CI always use today — `live` is a placeholder that throws until the real Genkit-backed `ChatModelAdapter` lands (TASK-8), since `frontend/` has no live `/api/chat` to point at yet.
 
 ## Eval (`eval/`)
 

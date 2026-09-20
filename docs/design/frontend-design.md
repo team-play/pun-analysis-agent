@@ -8,7 +8,7 @@ Complements [`../project-spec.md`](../project-spec.md). Owned by the Frontend do
 
 **Decision:** [assistant-ui](https://www.assistant-ui.com/)'s pre-styled `Thread` component, starting from its default Tailwind/shadcn theming and enhancing it toward a Claude-inspired look via Tailwind theme tokens. No custom semantic CSS layer, no from-scratch stylesheet — customization stays within what the default theme exposes.
 
-> Chat behavior and state (composer, message list, streaming, keyboard handling, tool-call display) come from assistant-ui's pre-styled `Thread`, with a custom `RemoteThreadListAdapter` backed by `localStorage` for thread list + per-thread message history (no server persistence). Sessions always start on a fresh thread; prior threads are available from the list but never auto-resumed. Visual design starts from the default theme and is adjusted toward a Claude-inspired look via Tailwind tokens — simplicity stays the priority over a fully custom design system.
+> Chat behavior and state (composer, message list, streaming, keyboard handling, tool-call display) come from assistant-ui's pre-styled `Thread`, with a `localStorage`-backed `RemoteThreadListAdapter` (wrapping assistant-ui's own `createLocalStorageAdapter`, not a from-scratch implementation) for thread list + per-thread message history (no server persistence). Sessions always start on a fresh thread; prior threads are available from the list but never auto-resumed. Visual design starts from the default theme and is adjusted toward a Claude-inspired look via Tailwind tokens — simplicity stays the priority over a fully custom design system.
 
 ### Why assistant-ui
 
@@ -52,8 +52,8 @@ Starts from assistant-ui's default Tailwind/shadcn theme (light/dark mode includ
 - **Export/reset:** conversation can be copied to clipboard as JSON (for eval) or reset, independent of the persistence layer — read directly off the runtime's message state.
 
 ### 3. Thread list
-- Backed by a custom `localStorage`-based `RemoteThreadListAdapter` (list, create, rename, archive, delete) — no server persistence.
-- Per-thread messages persisted via `ThreadHistoryAdapter`, also `localStorage`-backed.
+- Backed by a `localStorage`-based `RemoteThreadListAdapter` (list, create, rename, archive, delete) — assistant-ui's own `createLocalStorageAdapter`, wrapped with a thin `window.localStorage` adapter rather than reimplemented from scratch; no server persistence.
+- Per-thread messages persisted via the matching `ThreadHistoryAdapter` the same factory provides, also `localStorage`-backed.
 - A thread is only written to the stored list once the first message is sent (guarded via the adapter's `initialize()`), to avoid accumulating empty "New Chat" entries on every page load.
 - Individual threads deletable from the list.
 - **Schema drift across phases:** Phase 1 threads persist text-only message parts; Phase 2 adds `tool-call` parts to the shape `ThreadHistoryAdapter` writes. Persisted threads aren't version-tagged, so a thread saved under Phase 1 and reopened after Phase 2 ships is only guaranteed to render if the adapter treats missing tool-call parts as absent rather than malformed — worth an explicit check when Phase 2 lands, or a "clear local storage" note for dev environments if not.
@@ -85,9 +85,9 @@ What *is* Phase 2 work is extending that same adapter to also parse `tool-call` 
 
 ## Open items
 
-- Identify which of the default theme's Tailwind tokens (colors, spacing, radii) to override to reach the Claude-inspired palette/layout, once the interface is running against real content.
-- Settle on the exact accent shade (a muted gold in the Boilermaker Gold family, not the literal brand hex) once it's tested against the warm-neutral background for contrast/accessibility.
+- ~~Identify which of the default theme's Tailwind tokens (colors, spacing, radii) to override to reach the Claude-inspired palette/layout, once the interface is running against real content.~~ — resolved in TASK-6.1: `frontend/src/index.css`'s `:root`/`.dark` blocks retune `--background`/`--foreground`/`--primary`/etc. directly via oklch values, verified visually in both color schemes.
+- Settle on the exact accent shade (a muted gold in the Boilermaker Gold family, not the literal brand hex) — a candidate shade is in place (`--primary` in `frontend/src/index.css`) and was eyeballed against the warm-neutral background in both themes, but a formal contrast-ratio (WCAG) check hasn't been done yet.
 - ~~Confirm the Genkit stream event shape for tool calls~~ — resolved: sync point 3 is closed in [`../contracts.md`](../contracts.md), which specifies the `toolRequest`/`toolResponse` chunk shapes and the client-side `toolCallId` correlation rule the adapter's parsing logic should follow.
 - The shared stub-fixture format (so Frontend's stub and Backend's Phase 2 fixture don't drift apart) is still open — see [`../engineering-practices.md`](../engineering-practices.md)'s open items.
-- The one test that exists today (`frontend/src/App.test.tsx`) only smoke-tests the default Vite starter page — it gets replaced once the real greeting/chat UI lands, not extended.
+- ~~The one test that exists today (`frontend/src/App.test.tsx`) only smoke-tests the default Vite starter page — it gets replaced once the real greeting/chat UI lands, not extended.~~ — resolved in TASK-6: `App.test.tsx` now covers the greeting/chat transition, message rendering, loading state, tool-call rendering, error state, and thread-list persistence behavior.
 - CORS middleware on Backend (needed for the `live` adapter flag and for the deployed Firebase↔Cloud-Run pairing) isn't implemented yet — flagged in "Development & testing" above, owned by Backend.

@@ -3,3 +3,8 @@ packages:
   - "backend"
 allowBuilds:
   esbuild: true
+overrides:
+  # Pins @dotenvx/dotenvx's transitive systeminformation dependency to a
+  # release old enough to clear pnpm's minimumReleaseAge supply-chain
+  # policy — 5.33.13 was published hours before a CI run and got rejected.
+  systeminformation: 5.33.12
