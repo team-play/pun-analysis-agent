@@ -4,7 +4,7 @@ title: Curate and verify food/animal-food baseline subset against original scope
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-20 11:05'
+updated_date: '2026-09-20 11:16'
 labels:
   - dataset
 milestone: m-6
@@ -19,7 +19,7 @@ ordinal: 23000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-TASK-2 originally scoped Data/Eval's baseline to food-based puns (animal puns a stretch goal) with a >=30 pair minimum. PR #9 landed the full SemEval-2017 Task 7 corpus rather than a food-only set; nobody has verified the food/animal-food rows within it meet that original bar or decided whether TASK-16's baseline classifier should train/eval against just that subset or the full corpus.
+TASK-2 originally framed animal puns as a stretch goal pending data; that's no longer the blocker. SemEval's own category column already has food/animal rows well past the original >=30-pair bar (218 food, 234 animal, 29 animal/food), and PR #8/TASK-2.5 adds a further aggregated food+animal set (see TASK-2.6 for whether that gets folded in). Per milestone-3.md's domain-sequencing strategy, food is evaluated/improved first, with animal work following once that pipeline works end-to-end -- so this task's counting/verification covers both subsets now, but the TASK-16 training/eval decision it produces should be read as scoped to food first, with the equivalent animal call revisited once animal work begins.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
