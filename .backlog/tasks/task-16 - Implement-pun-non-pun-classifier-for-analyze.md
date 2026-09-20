@@ -2,13 +2,13 @@
 id: TASK-16
 title: Implement pun/non-pun classifier for /analyze
 status: In Progress
-assignee:
-  - Prateek
+assignee: []
 created_date: '2026-09-18 15:51'
-updated_date: '2026-09-18 16:13'
+updated_date: '2026-09-20 10:03'
 labels:
   - pun-classifier
-dependencies: []
+dependencies:
+  - TASK-1
 project: inference
 ordinal: 5000
 ---
