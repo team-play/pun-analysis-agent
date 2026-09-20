@@ -379,7 +379,7 @@ const ThreadWelcome: FC = () => {
 	return (
 		<div className="aui-thread-welcome-root mb-6 flex flex-col px-2">
 			<p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-2xl font-medium tracking-tight duration-200">
-				How can I help you today?
+				Got a pun for me?
 			</p>
 		</div>
 	);
@@ -435,7 +435,7 @@ const Composer: FC<{ autoFocus: boolean }> = ({ autoFocus }) => {
 			>
 				<ComposerAttachments />
 				<ComposerPrimitive.Input
-					placeholder="Send a message..."
+					placeholder="Type a phrase and I'll sniff out the pun..."
 					className="aui-composer-input caret-primary placeholder:text-muted-foreground/60 max-h-48 min-h-10 w-full resize-none bg-transparent px-2.5 py-1 text-base leading-6 outline-none"
 					rows={1}
 					autoFocus={autoFocus}

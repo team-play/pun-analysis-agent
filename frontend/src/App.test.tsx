@@ -16,7 +16,9 @@ const renderApp = () => {
 };
 
 const sendMessage = async (text: string) => {
-	const composer = await screen.findByPlaceholderText("Send a message...");
+	const composer = await screen.findByPlaceholderText(
+		"Type a phrase and I'll sniff out the pun...",
+	);
 	fireEvent.change(composer, { target: { value: text } });
 	fireEvent.keyDown(composer, { key: "Enter", code: "Enter" });
 };
@@ -29,11 +31,11 @@ describe("App", () => {
 	it("renders the greeting state with a prominent composer, and a header with just logo + name", async () => {
 		renderApp();
 
+		expect(await screen.findByText("Got a pun for me?")).toBeInTheDocument();
 		expect(
-			await screen.findByText("How can I help you today?"),
-		).toBeInTheDocument();
-		expect(
-			screen.getByPlaceholderText("Send a message..."),
+			screen.getByPlaceholderText(
+				"Type a phrase and I'll sniff out the pun...",
+			),
 		).toBeInTheDocument();
 
 		const header = screen.getByTestId("app-header");
@@ -44,14 +46,12 @@ describe("App", () => {
 
 	it("transitions off the greeting state and streams the Phase 1 text reply", async () => {
 		renderApp();
-		await screen.findByText("How can I help you today?");
+		await screen.findByText("Got a pun for me?");
 
 		await sendMessage("hello there");
 
 		expect(await screen.findByText("hello there")).toBeInTheDocument();
-		expect(
-			screen.queryByText("How can I help you today?"),
-		).not.toBeInTheDocument();
+		expect(screen.queryByText("Got a pun for me?")).not.toBeInTheDocument();
 
 		expect(
 			await screen.findByText(/stubbed backend/i, {}, { timeout: 3000 }),
@@ -60,7 +60,7 @@ describe("App", () => {
 
 	it("shows a loading indicator while the stub streams, and clears it once done", async () => {
 		renderApp();
-		await screen.findByText("How can I help you today?");
+		await screen.findByText("Got a pun for me?");
 
 		await sendMessage("hello there");
 
@@ -76,7 +76,7 @@ describe("App", () => {
 
 	it("renders a tool call and follow-up text for the Phase 2 fixture", async () => {
 		renderApp();
-		await screen.findByText("How can I help you today?");
+		await screen.findByText("Got a pun for me?");
 
 		await sendMessage("got a good pun for me?");
 
@@ -91,7 +91,7 @@ describe("App", () => {
 
 	it("renders an error state for a failed run", async () => {
 		renderApp();
-		await screen.findByText("How can I help you today?");
+		await screen.findByText("Got a pun for me?");
 
 		await sendMessage("please error out");
 
@@ -102,7 +102,7 @@ describe("App", () => {
 
 	it("only adds a thread to the sidebar once the first message is sent", async () => {
 		renderApp();
-		await screen.findByText("How can I help you today?");
+		await screen.findByText("Got a pun for me?");
 
 		expect(
 			document.querySelectorAll('[data-slot="aui_thread-list-item"]'),
@@ -133,6 +133,6 @@ describe("App", () => {
 		// The prior thread is listed...
 		expect(await screen.findByText("Yesterday's pun talk")).toBeInTheDocument();
 		// ...but the active view is still a fresh, empty thread.
-		expect(screen.getByText("How can I help you today?")).toBeInTheDocument();
+		expect(screen.getByText("Got a pun for me?")).toBeInTheDocument();
 	});
 });
