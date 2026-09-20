@@ -22,6 +22,9 @@
 	"pnpm": {
 		"onlyBuiltDependencies": [
 			"esbuild"
-		]
+		],
+		"overrides": {
+			"systeminformation": "5.33.12"
+		}
 	}
 }
