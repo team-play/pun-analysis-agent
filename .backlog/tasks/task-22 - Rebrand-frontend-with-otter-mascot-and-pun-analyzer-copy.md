@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-20 11:46'
-updated_date: '2026-09-20 11:55'
+updated_date: '2026-09-20 12:05'
 labels: []
 milestone: m-1
 dependencies:
@@ -47,6 +47,8 @@ Added OtterMark (frontend/src/components/icons/otter-mark.tsx), an inline lucide
 Verified: pnpm --dir frontend lint (biome check, clean), pnpm --dir frontend test (18/18 passing), pnpm --dir frontend build (succeeds). Manually exercised the running dev server in the browser pane: header/sidebar render the otter mark, greeting shows 'Got a pun for me?', composer placeholder shows the new copy, and sending a pun-triggering message still renders the analyze_pun tool-call fixture end-to-end correctly.
 
 Follow-up (same session): added a sidebar footer credit line ('Made with 🦦tter love by Team PLAY (CNIT-58100)') via SidebarFooter in threadlist-sidebar.aui.tsx, per user request to credit the team similarly to other apps' 'made by' footers. Re-verified pnpm --dir frontend lint/test (18/18) and visually confirmed rendering in the browser pane.
+
+Follow-up (same session): added a social share card. Composited the team's actual circular mascot logo (source: the team-provided 1254x1254 logo artwork, alpha-masked to a clean circle) with 'Pun Agent' title/tagline/Team PLAY byline into a 1200x630 og-image.jpg (frontend/public/og-image.jpg), and wired up og:*/twitter:* meta tags in index.html pointing at it (canonical URL https://pun-agent.web.app/, matching frontend/.firebaserc's 'pun-agent' project). Re-verified pnpm --dir frontend lint/test/build all pass.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
