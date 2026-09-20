@@ -1,8 +1,4 @@
-# Placeholder workflow for the Firebase Hosting frontend.
-#
-# This will build the React app in `frontend/` and deploy it to Firebase
-# Hosting once there's a real build step to deploy. No deploy logic yet —
-# filled in in a follow-up pass.
+name: Deploy Frontend
 
 on:
   push:
@@ -11,7 +7,21 @@ on:
       - "frontend/**"
 
 jobs:
-  placeholder:
+  deploy:
+    name: Build and deploy to Firebase Hosting
     runs-on: ubuntu-latest
     steps:
-      - run: echo "No deploy logic yet — see the comment at the top of this file."
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter frontend run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.GCP_SA_KEY }}
+          entryPoint: frontend
+          channelId: live
