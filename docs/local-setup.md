@@ -54,16 +54,17 @@ The dev server serves `POST /analyze` at `http://localhost:8000`.
 
 ## Backend (`backend/`)
 
-Node/TypeScript + [Hono](https://hono.dev/) (a lightweight, TypeScript-first web framework) + pnpm. Genkit will be added here once the `analyze_pun` flow is implemented.
+Node/TypeScript + [Hono](https://hono.dev/) (a lightweight, TypeScript-first web framework) + [Genkit](https://genkit.dev/) (Google's AI SDK, via the `@genkit-ai/google-genai` plugin) + pnpm.
 
 ```bash
 cd backend
 pnpm install
+cp .env.example .env.local  # then fill in GEMINI_API_KEY, per this doc's Secrets section
 pnpm dev
 pnpm test
 ```
 
-The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. Sanity-check it with:
+The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. `pnpm test` never needs `GEMINI_API_KEY` set — it runs against a Genkit test-double model instead (see [`engineering-practices.md`](engineering-practices.md)'s "Backend in isolation" section). Sanity-check the dev server with:
 
 ```bash
 curl localhost:8080/health
