@@ -4,6 +4,7 @@ title: 'Export conversation as JSON, and reset controls'
 status: To Do
 assignee: []
 created_date: '2026-09-18 00:02'
+updated_date: '2026-09-22 10:37'
 due_date: '2026-09-21'
 labels: []
 milestone: m-1
@@ -32,3 +33,10 @@ docs/design/frontend-design.md's 'Chat' component section specifies exporting th
 - [ ] #5 A reset action clears the current thread's runtime state back to the greeting state, independent of the export action and of the persistence layer
 - [ ] #6 Both actions are unit-tested against TASK-6.3's stub fixtures (Phase 1 text-only and Phase 2 tool-call shapes), no live backend required
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+<!-- DOD:END -->
