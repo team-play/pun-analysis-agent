@@ -21,3 +21,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter ${{ matrix.package }} run test
+
+  test-python:
+    name: Pytest (inference)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - working-directory: inference
+        run: uv sync --locked
+      - working-directory: inference
+        run: uv run pytest
