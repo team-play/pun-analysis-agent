@@ -4,7 +4,7 @@ title: Deploy inference to Cloud Run via CI
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:40'
-updated_date: '2026-09-17 23:41'
+updated_date: '2026-09-22 10:37'
 due_date: '2026-09-21'
 labels: []
 milestone: m-4
@@ -30,3 +30,10 @@ deploy-inference.yml is currently a placeholder, identical in structure to deplo
 - [ ] #3 Required secrets/config are documented in docs/local-setup.md and consumed from GitHub Secrets
 - [ ] #4 The deployed Cloud Run URL responds on whatever inference/ currently exposes, even before the real classifier/WSD logic lands
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+<!-- DOD:END -->

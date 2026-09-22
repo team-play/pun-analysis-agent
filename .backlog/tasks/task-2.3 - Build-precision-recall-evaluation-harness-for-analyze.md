@@ -4,7 +4,7 @@ title: Build precision/recall evaluation harness for /analyze
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-20 10:15'
+updated_date: '2026-09-22 10:37'
 labels:
   - dataset
   - evaluation
@@ -31,3 +31,10 @@ Milestone-3.md assigns Data/Eval 'precision/recall on detection' as an ongoing r
 - [ ] #2 Harness reports precision/recall for is_pun detection, and separately for pun_type classification restricted to true-positive pun rows
 - [ ] #3 Harness is runnable via a documented command in eval/README.md
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+<!-- DOD:END -->

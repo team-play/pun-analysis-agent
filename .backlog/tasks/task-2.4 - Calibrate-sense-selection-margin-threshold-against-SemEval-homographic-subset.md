@@ -4,7 +4,7 @@ title: Calibrate sense-selection margin threshold against SemEval homographic su
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-20 10:15'
+updated_date: '2026-09-22 10:37'
 labels:
   - wsd
   - evaluation
@@ -30,3 +30,10 @@ docs/design/sense-selection.md leaves the Tier 1 margin threshold (when two cand
 - [ ] #1 Margin threshold is calibrated against the homographic/is_pun:true subset of the eval dataset
 - [ ] #2 The chosen threshold and calibration methodology are recorded in docs/design/sense-selection.md's open questions section
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+<!-- DOD:END -->

@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:04'
+updated_date: '2026-09-22 10:37'
 labels:
   - wsd
 milestone: m-6
@@ -32,3 +33,10 @@ Steps 4-5 of docs/design/sense-selection.md's approach, plus Tier 1: score each 
 - [ ] #3 sense_source is set to wordnet or wiktionary per docs/contracts.md, reflecting which tier produced the winning senses
 - [ ] #4 Unit tests cover a confident-margin (pun) case and a low-margin (non-pun) case
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+<!-- DOD:END -->

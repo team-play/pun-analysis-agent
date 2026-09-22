@@ -4,7 +4,7 @@ title: Implement pun/non-pun classifier for /analyze
 status: In Progress
 assignee: []
 created_date: '2026-09-18 15:51'
-updated_date: '2026-09-20 10:03'
+updated_date: '2026-09-22 10:37'
 labels:
   - pun-classifier
 dependencies:
@@ -25,6 +25,13 @@ Detection component of the Inference service per docs/milestones/milestone-3.md:
 - [ ] #2 When is_pun is true, pun_type is classified as homographic or homophonic
 - [ ] #3 confidence score reflects classifier certainty
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+<!-- DOD:END -->
 
 ## Implementation Plan
 
