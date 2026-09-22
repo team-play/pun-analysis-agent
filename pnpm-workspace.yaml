@@ -2,7 +2,14 @@ packages:
   - "frontend"
   - "backend"
 allowBuilds:
+  # Both are transitive deps pulled in by genkit's OpenTelemetry/Firestore
+  # plumbing (via @genkit-ai/google-genai), not something our code calls
+  # directly — neither's postinstall/build step is needed for the published
+  # package to work as a dependency, so left disallowed rather than running
+  # untrusted install scripts on trust alone.
+  '@firebase/util': false
   esbuild: true
+  protobufjs: false
 overrides:
   # Pins @dotenvx/dotenvx's transitive systeminformation dependency to a
   # release old enough to clear pnpm's minimumReleaseAge supply-chain
