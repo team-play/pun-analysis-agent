@@ -2,9 +2,10 @@
 id: TASK-2.3
 title: Build precision/recall evaluation harness for /analyze
 status: To Do
-assignee: []
+assignee:
+  - Livia
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-22 10:37'
+updated_date: '2026-09-22 16:53'
 labels:
   - dataset
   - evaluation
@@ -28,8 +29,8 @@ Milestone-3.md assigns Data/Eval 'precision/recall on detection' as an ongoing r
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Harness calls /analyze for each dataset row via TASK-9's injectable client pattern and records is_pun/pun_type predictions
-- [ ] #2 Harness reports precision/recall for is_pun detection, and separately for pun_type classification restricted to true-positive pun rows
-- [ ] #3 Harness is runnable via a documented command in eval/README.md
+- [x] #2 Harness reports precision/recall for is_pun detection, and separately for pun_type classification restricted to true-positive pun rows
+- [x] #3 Harness is runnable via a documented command in eval/README.md
 <!-- AC:END -->
 
 ## Definition of Done
@@ -38,3 +39,9 @@ Milestone-3.md assigns Data/Eval 'precision/recall on detection' as an ongoing r
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Addressed an adversarial code review before finalizing: extracted slice_report as a module-level _slice_report function for testability, fixed a misleading is_pun validation error message, and documented fixture_analyzer's words_involved as a contract-shape placeholder (not a real prediction). Expanded eval/tests/test_evaluate_dataset.py from 9 to 21 tests, adding coverage the review flagged as missing: HTTP failure modes for analyze_endpoint (HTTPError/URLError/TimeoutError/invalid JSON), fixture_analyzer contract correctness, empty food_baseline slice (zero-row division-by-zero safety), animal/food category inclusion, malformed CSV rows (missing required column, unparseable is_pun), and main()/parse_args CLI behavior (exit codes, --output writing). Re-verified the fixture-mode self-validation numbers are unchanged after the refactor (4,030/4,030 rows, 0 errors). uv run ruff check . passes with zero findings.
+<!-- SECTION:NOTES:END -->

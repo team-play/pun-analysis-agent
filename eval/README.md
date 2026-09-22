@@ -22,3 +22,21 @@ Columns:
 `pun_type` and `source_corpus` agree for every `is_pun: True` row (they're derived from the same SemEval corpus split); they diverge only on `is_pun: False` rows, where `pun_type` is empty and `source_corpus` still records origin.
 
 License: SemEval-2017 Task 7 data is distributed by the task organizers for research use; see the [task page](https://alt.qcri.org/semeval2017/task7/) for terms.
+
+## Precision/recall evaluation harness
+
+`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run. The analyzer is an injectable callable (a live HTTP call or a fixture), so it can run against a real Inference deployment or a deterministic fixture without changing the scoring logic.
+
+Run against a live Inference instance:
+
+```powershell
+uv run python evaluate_dataset.py --endpoint http://127.0.0.1:8000/analyze
+```
+
+Run against gold-label fixtures to sanity-check the evaluator itself (no HTTP calls):
+
+```powershell
+uv run python evaluate_dataset.py --fixture
+```
+
+Both report a `food_baseline` slice (`category` in `food`/`animal/food`) and an `all_categories` slice. Use `--dataset` to point at a different CSV and `--output` to also write the JSON result to a file. See [`reports/task-2.3-harness-validation.md`](reports/task-2.3-harness-validation.md) for a recorded fixture-mode self-validation run against the full dataset; a live run against a real `/analyze` classifier is blocked on TASK-16.
