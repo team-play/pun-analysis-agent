@@ -85,7 +85,13 @@ pnpm test
 
 Opens the dev server at `http://localhost:5173`. `pnpm test` runs Vitest + React Testing Library (config in [`frontend/vite.config.ts`](../frontend/vite.config.ts)) — see [`design/frontend-design.md`](design/frontend-design.md)'s "Development & testing" section for what's covered.
 
-`VITE_CHAT_ADAPTER=stub|live` (see [`engineering-practices.md`](engineering-practices.md); example in [`frontend/.env.example`](../frontend/.env.example)) picks between a stubbed backend and this repo's real one. Unset defaults to `stub`, which is what local dev and CI always use today — `live` is a placeholder that throws until the real Genkit-backed `ChatModelAdapter` lands (TASK-8), since `frontend/` has no live `/api/chat` to point at yet.
+`VITE_CHAT_ADAPTER=stub|live` (see [`engineering-practices.md`](engineering-practices.md); example in [`frontend/.env.example`](../frontend/.env.example)) picks between a stubbed backend and this repo's real one. Unset defaults to `stub`, which is what CI and unit tests always use. `live` streams real replies from the Backend at `VITE_BACKEND_URL` (its base URL, e.g. `http://localhost:8080` for the Backend dev server above) and fails fast at startup if that's unset. To chat with real Gemini locally, run the Backend dev server, then start the frontend with both set (e.g. in `frontend/.env.local`):
+
+```bash
+VITE_CHAT_ADAPTER=live VITE_BACKEND_URL=http://localhost:8080 pnpm dev
+```
+
+The frontend must stay on `http://localhost:5173`: that's the dev origin Backend's CORS allowlist accepts by default (`CORS_ORIGIN` in `backend/` overrides it).
 
 ## Eval (`eval/`)
 

@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-23 08:47'
+updated_date: '2026-09-23 08:48'
 due_date: '2026-09-21'
 labels: []
 milestone: m-2
@@ -37,7 +37,7 @@ Genkit isn't one of assistant-ui's built-in framework adapters, so reaching any 
 <!-- DOD:BEGIN -->
 - [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
 - [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -59,4 +59,6 @@ Genkit isn't one of assistant-ui's built-in framework adapters, so reaching any 
 Implemented parser + live adapter test-first against real recorded streams. Rendered verification (Playwright, live mode, local backend, real Gemini): 19 distinct on-screen snapshots growing 29->1085 chars (incremental, AC#1), markdown + accents render correctly, thread list/theme unchanged; a real Gemini 503 mid-stream error rendered in assistant-ui's error box. Code review (high) findings: fixed body not cancelled on early exit (+test), added getChatModelAdapter live-branch tests, synced plan. Refuted empirically: 'empty assistant turn after a failed reply breaks later turns' -- Gemini accepted {role:assistant, content:''} via the real backend. Not acted on: payload shape guards in parseEvent (backend error shape is pinned by its express parity test), path-preserving URL join (Cloud Run URLs have no path; contract path is root /api/chat), O(n^2) buffer re-scan (KB-sized events). Follow-up idea: backend forwards Gemini's raw developer-facing error text to users. 35/35 frontend tests, tsc, biome clean. DoD#2 architectural review judged N/A: no contract/topology/dependency change (the Genkit-client option that would have changed the contract was rejected).
 
 Pairing follow-ups: added an adapter test for an error event arriving after message chunks (partial text is yielded before the throw; assistant-ui's local runtime then marks the message incomplete/error and keeps that content), and renamed the 200-then-error test so 'mid-stream' isn't misread as 'after some text'. 36/36 frontend tests, tsc, biome clean. AC #1/#3/#4 checked on the evidence above; AC #2 stays open until TASK-13 deploys the backend. DoD #2 checked as not applicable: no contracts.md, topology, isolation/phase-order, dependency, service, or deploy-target change.
+
+Docs drift fixed in a separate follow-up commit: local-setup.md (live mode + VITE_BACKEND_URL + CORS origin note replace the 'placeholder that throws' text), frontend-design.md (env flag now documented, parsing tests use recorded streams, fixture-sharing confirmed for Phase 1, CORS open item marked resolved by TASK-7). README.md, project-spec.md, AGENTS.md checked: no drift.
 <!-- SECTION:NOTES:END -->
