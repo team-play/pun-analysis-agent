@@ -78,8 +78,8 @@ async function main() {
 	await check("backend dev server responds on /health", () =>
 		checkDevServer({
 			cwd: `${ROOT}/backend`,
-			command: "pnpm",
-			args: ["exec", "tsx", "src/index.ts"],
+			command: "node",
+			args: ["src/index.ts"],
 			env: { PORT: "8091" },
 			url: "http://localhost:8091/health",
 		}),

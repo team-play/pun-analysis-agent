@@ -1,7 +1,7 @@
 import { getCallableJSON } from "genkit/context";
 import type { Context } from "hono";
 import { stream as honoStream } from "hono/streaming";
-import { chatInputSchema, type createChatFlow } from "../flows/chat.js";
+import { chatInputSchema, type createChatFlow } from "../flows/chat.ts";
 
 type ChatFlow = ReturnType<typeof createChatFlow>;
 
