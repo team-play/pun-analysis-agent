@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-23 13:46'
-updated_date: '2026-09-23 13:47'
+updated_date: '2026-09-23 13:52'
 labels:
   - backend
   - tooling
@@ -46,3 +46,12 @@ Node 24 (the repo floor since the Node 24 upgrade, PR #33) runs .ts files direct
 6. Docs: engineering-practices.md test-runner bullet, local-setup.md backend test line.
 7. Verify: tests, build + run dist, lint, Docker build + /health, verify-setup backend check.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Verified on Node 24.21: 13/13 tests via `node --test` default discovery (switched from a quoted glob, which silently matched nothing under cmd.exe on Windows); tsc emits ./x.js in dist and dist serves /health; `node src/index.ts` serves /health; --watch restarts on dependency change; lint clean; verify-setup 11/11. Docker not available locally, so AC #3 (image serves /health) rests on the PR build job plus main's post-deploy smoke test.
+tsx and esbuild remain in pnpm-lock.yaml only as stale resolutions of Vite's optional peers: a from-scratch resolve drops both (Vite 8 needs neither), but --fix-lockfile, dedupe, update and remove/re-add all keep them, and a full regeneration bumps unrelated versions. Left for the next lockfile regeneration; at that point allowBuilds' esbuild entry becomes stale.
+The lockfile also dropped stale @google-cloud/firestore/firebase-admin peer suffixes on genkit entries (leftovers from TASK-13's ignoredOptionalDependencies).
+Adversarial review: no blockers; both should-fixes applied. Open: verify-setup.mjs only checks Node is present, and without tsx, Node <22.18 now fails with ERR_UNKNOWN_FILE_EXTENSION.
+<!-- SECTION:NOTES:END -->
