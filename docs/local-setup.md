@@ -94,7 +94,7 @@ The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:80
 curl localhost:8080/health
 ```
 
-`pnpm test` runs Node's built-in test runner (`node:test`, via `tsx`) against [`backend/tests/`](../backend/tests/) — see [`engineering-practices.md`](engineering-practices.md) for why no separate test framework is needed here.
+`pnpm dev` and `pnpm test` run the TypeScript directly on Node 24, with no loader like `tsx`. `pnpm test` uses Node's built-in test runner (`node:test`) against [`backend/tests/`](../backend/tests/) — see [`engineering-practices.md`](engineering-practices.md) for why no separate test framework is needed here.
 
 ## Frontend (`frontend/`)
 
