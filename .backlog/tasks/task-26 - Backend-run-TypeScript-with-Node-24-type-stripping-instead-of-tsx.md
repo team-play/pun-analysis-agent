@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-23 13:46'
-updated_date: '2026-09-23 13:52'
+updated_date: '2026-09-23 13:59'
 labels:
   - backend
   - tooling
@@ -54,4 +54,7 @@ Verified on Node 24.21: 13/13 tests via `node --test` default discovery (switche
 tsx and esbuild remain in pnpm-lock.yaml only as stale resolutions of Vite's optional peers: a from-scratch resolve drops both (Vite 8 needs neither), but --fix-lockfile, dedupe, update and remove/re-add all keep them, and a full regeneration bumps unrelated versions. Left for the next lockfile regeneration; at that point allowBuilds' esbuild entry becomes stale.
 The lockfile also dropped stale @google-cloud/firestore/firebase-admin peer suffixes on genkit entries (leftovers from TASK-13's ignoredOptionalDependencies).
 Adversarial review: no blockers; both should-fixes applied. Open: verify-setup.mjs only checks Node is present, and without tsx, Node <22.18 now fails with ERR_UNKNOWN_FILE_EXTENSION.
+
+Lockfile regenerated from scratch (its own commit): pnpm restores the lockfile from node_modules/.pnpm/lock.yaml, so node_modules had to be removed too. tsx and esbuild are gone (984 -> 955 packages); in-range bumps: hono 4.13.8, biome 2.5.14 (biome.json $schema bumped), jsdom 30.1.1, @types/node 24.13.6, cn 0.3.3. allowBuilds esbuild entry removed. Lint, 13/13 backend, 18/18 frontend, both builds, mermaid pass.
+verify-setup.mjs now fails when the running Node major is below engines.node (checked both ways: passes on 24.21; with engines temporarily at >=99 it reports "Node 24.21.0 is older than engines.node").
 <!-- SECTION:NOTES:END -->
