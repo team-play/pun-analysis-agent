@@ -1,4 +1,5 @@
 import { execFile, spawn } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import { setTimeout as sleep } from "node:timers/promises";
 import { promisify } from "node:util";
 
@@ -36,6 +37,23 @@ async function waitForServer(url, { timeoutMs = 8000, intervalMs = 300 } = {}) {
 	throw new Error(`timed out waiting for ${url}`);
 }
 
+// Compares the Node running this script against the minimum major in the
+// root package.json's engines field (">=24"), since pnpm doesn't enforce it.
+// Read with readFile rather than a JSON import so an old Node gets this
+// check's message instead of a syntax error.
+async function checkNodeVersion() {
+	const { engines } = JSON.parse(
+		await readFile(`${ROOT}/package.json`, "utf8"),
+	);
+	const required = Number(engines.node.match(/\d+/)[0]);
+	const actual = Number(process.versions.node.split(".")[0]);
+	if (actual < required) {
+		throw new Error(
+			`Node ${process.versions.node} is older than engines.node "${engines.node}"`,
+		);
+	}
+}
+
 async function checkDevServer({ cwd, command, args, env, url }) {
 	const child = spawn(command, args, {
 		cwd,
@@ -54,9 +72,7 @@ async function checkDevServer({ cwd, command, args, env, url }) {
 
 async function main() {
 	await check("git present", () => run("git", ["--version"]));
-	await check("node present (>=24, see package.json engines)", () =>
-		run("node", ["--version"]),
-	);
+	await check("node satisfies package.json engines", checkNodeVersion);
 	await check("pnpm present", () => run("pnpm", ["--version"]));
 	await check("uv present", () => run("uv", ["--version"]));
 
