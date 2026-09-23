@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-23 08:56'
-updated_date: '2026-09-23 09:17'
+updated_date: '2026-09-23 09:38'
 labels: []
 milestone: m-2
 dependencies:
@@ -60,6 +60,8 @@ Depends on TASK-23: that task makes the Backend's error-event message itself use
 
 <!-- SECTION:NOTES:BEGIN -->
 First pass put user-facing text at each throw site; code review (high) showed that left fetch rejections ('Failed to fetch'), mid-reply connection drops and garbled events leaking raw browser text, so the mapping moved to a single boundary in the adapter (parser now only distinguishes Backend's error event via FlowErrorEvent). Also fixed from review: rejected response.text() on non-2xx, error event without a message, non-2xx wording ('couldn't be sent' was inaccurate for 5xx). Not acted on: exporting the strings for tests (tests pin literal text on purpose, AC #3), the stub's dev-facing failure text (dev tool, out of scope), backend skipping the log on a failure concurrent with a disconnect (rare; TASK-23 code; quota errors recur on the next request). Rendered check (Playwright, live mode): backend down -> 'Couldn't get a reply', 500 -> same, recorded error event after a chunk -> 'Something went wrong. Please try again.' with the partial text kept, missing result and garbled event -> 'cut off' with partial text kept; all developer details in the console. Earlier run also showed a real Gemini 503 through the TASK-23 backend as 'The assistant is busy right now...' with no status prefix. 42/42 frontend tests, tsc, biome clean.
+
+Stop-button check (2026-09-23, real stack: #27+#28+#30 via a worktree of this branch, backend with the real Gemini key, Playwright in live mode): asked for a 600-word story and clicked stop once ~100 chars had rendered. The browser aborted the /api/chat request (net::ERR_ABORTED); no error box and no console errors, so failWith rethrew the abort untouched and assistant-ui showed a cancel; the partial story stayed on screen with copy/retry and the send button back. Rendered text froze at 465 chars (unchanged 2s and 4s after the click; the full story would be ~3,500), so the stream stopped. It grew from 108 to 465 right after the click, most likely assistant-ui's smooth-streaming reveal (MarkdownTextPrimitive defaults smooth=true) catching up on text that had already arrived; how much had arrived wasn't measured. Backend (#28): the stop left no '/api/chat flow failed' entry and no abort/cancel mention in its log. The log's only entry was a real Gemini 503 from a first attempt, which rendered as 'The assistant is busy right now...' and was logged with its upstream detail (code 503), confirming #28's detail logging on a real failure.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
