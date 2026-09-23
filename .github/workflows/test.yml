@@ -32,3 +32,14 @@ jobs:
         run: uv sync --locked
       - working-directory: inference
         run: uv run pytest
+
+  test-eval:
+    name: Unittest (eval)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - working-directory: eval
+        run: uv sync --locked
+      - working-directory: eval
+        run: uv run python -m unittest discover -s tests
