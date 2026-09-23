@@ -88,7 +88,14 @@ def expected_output(row: DatasetRow) -> dict[str, Any]:
 def validate_response(response: Any) -> dict[str, Any]:
     if not isinstance(response, dict):
         raise EvaluationError("response must be a JSON object")
-    required_fields = {"is_pun", "pun_type", "words_involved", "explanation", "confidence", "sense_source"}
+    required_fields = {
+        "is_pun",
+        "pun_type",
+        "words_involved",
+        "explanation",
+        "confidence",
+        "sense_source",
+    }
     missing_fields = required_fields - response.keys()
     if missing_fields:
         raise EvaluationError(f"response is missing fields: {sorted(missing_fields)}")
@@ -96,17 +103,27 @@ def validate_response(response: Any) -> dict[str, Any]:
     if not isinstance(is_pun, bool):
         raise EvaluationError(f"response is_pun must be a boolean, got {is_pun!r}")
     pun_type = response.get("pun_type")
-    if pun_type is not None and (not isinstance(pun_type, str) or pun_type not in ALLOWED_PUN_TYPES):
+    if pun_type is not None and (
+        not isinstance(pun_type, str) or pun_type not in ALLOWED_PUN_TYPES
+    ):
         raise EvaluationError(f"response has invalid pun_type: {pun_type!r}")
     if not response["is_pun"] and pun_type is not None:
         raise EvaluationError("response must use pun_type=null when is_pun is false")
+    if response["is_pun"] and pun_type is None:
+        raise EvaluationError("response must set pun_type when is_pun is true")
     words_involved = response.get("words_involved")
-    if not isinstance(words_involved, list) or not all(isinstance(word, str) for word in words_involved):
+    if not isinstance(words_involved, list) or not all(
+        isinstance(word, str) for word in words_involved
+    ):
         raise EvaluationError("response words_involved must be a list of strings")
     if not isinstance(response.get("explanation"), str):
         raise EvaluationError("response explanation must be a string")
     confidence = response.get("confidence")
-    if isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1:
+    if (
+        isinstance(confidence, bool)
+        or not isinstance(confidence, (int, float))
+        or not 0 <= confidence <= 1
+    ):
         raise EvaluationError("response confidence must be a number between 0 and 1")
     sense_source = response.get("sense_source")
     if sense_source is not None and sense_source not in ALLOWED_SENSE_SOURCES:
@@ -211,7 +228,9 @@ def _slice_report(outcomes: list[tuple[DatasetRow, dict[str, Any] | None]]) -> d
     }
 
 
-def evaluate(rows: list[DatasetRow], analyzer: Callable[[DatasetRow], dict[str, Any]]) -> dict[str, Any]:
+def evaluate(
+    rows: list[DatasetRow], analyzer: Callable[[DatasetRow], dict[str, Any]]
+) -> dict[str, Any]:
     errors: list[dict[str, str]] = []
     outcomes: list[tuple[DatasetRow, dict[str, Any] | None]] = []
     successful_rows: list[DatasetRow] = []
@@ -228,9 +247,7 @@ def evaluate(rows: list[DatasetRow], analyzer: Callable[[DatasetRow], dict[str, 
         successful_predictions.append(prediction)
 
     food_outcomes = [
-        (row, prediction)
-        for row, prediction in outcomes
-        if row.category in {"food", "animal/food"}
+        (row, prediction) for row, prediction in outcomes if row.category in {"food", "animal/food"}
     ]
     return {
         "dataset_rows": len(rows),
@@ -250,9 +267,13 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path(__file__).with_name("datasets") / "semeval2017_task7_puns.csv",
     )
-    parser.add_argument("--endpoint", default=os.environ.get("PUN_ANALYZE_URL", "http://localhost:8000/analyze"))
+    parser.add_argument(
+        "--endpoint", default=os.environ.get("PUN_ANALYZE_URL", "http://localhost:8000/analyze")
+    )
     parser.add_argument("--timeout", type=float, default=10.0)
-    parser.add_argument("--fixture", action="store_true", help="Use gold labels to validate the evaluator pipeline")
+    parser.add_argument(
+        "--fixture", action="store_true", help="Use gold labels to validate the evaluator pipeline"
+    )
     parser.add_argument("--output", type=Path, help="Write JSON results to this path")
     return parser.parse_args()
 
@@ -261,7 +282,11 @@ def main() -> int:
     args = parse_args()
     try:
         rows = load_dataset(args.dataset)
-        analyzer = fixture_analyzer if args.fixture else lambda row: analyze_endpoint(args.endpoint, row.text, args.timeout)
+        analyzer = (
+            fixture_analyzer
+            if args.fixture
+            else lambda row: analyze_endpoint(args.endpoint, row.text, args.timeout)
+        )
         result = evaluate(rows, analyzer)
     except (EvaluationError, OSError) as exc:
         print(f"evaluation failed: {exc}", file=sys.stderr)

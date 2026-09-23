@@ -41,8 +41,7 @@ class EvaluateDatasetTests(unittest.TestCase):
 
     def test_load_dataset_accepts_null_pun_type_for_non_pun_rows(self) -> None:
         path = self._write_dataset(
-            "id,is_pun,pun_type,category,text\n"
-            "het_3,False,,general,No pun here.\n"
+            "id,is_pun,pun_type,category,text\nhet_3,False,,general,No pun here.\n"
         )
 
         rows = load_dataset(path)
@@ -51,18 +50,14 @@ class EvaluateDatasetTests(unittest.TestCase):
 
     def test_load_dataset_rejects_pun_type_set_on_non_pun_row(self) -> None:
         path = self._write_dataset(
-            "id,is_pun,pun_type,category,text\n"
-            "het_3,False,homographic,general,No pun here.\n"
+            "id,is_pun,pun_type,category,text\nhet_3,False,homographic,general,No pun here.\n"
         )
 
         with self.assertRaises(EvaluationError):
             load_dataset(path)
 
     def test_load_dataset_rejects_missing_pun_type_on_pun_row(self) -> None:
-        path = self._write_dataset(
-            "id,is_pun,pun_type,category,text\n"
-            "hom_1,True,,general,A pun.\n"
-        )
+        path = self._write_dataset("id,is_pun,pun_type,category,text\nhom_1,True,,general,A pun.\n")
 
         with self.assertRaises(EvaluationError):
             load_dataset(path)
@@ -89,6 +84,10 @@ class EvaluateDatasetTests(unittest.TestCase):
     def test_validate_response_rejects_non_pun_with_type(self) -> None:
         with self.assertRaises(EvaluationError):
             validate_response(valid_response(pun_type="homographic"))
+
+    def test_validate_response_rejects_pun_without_type(self) -> None:
+        with self.assertRaises(EvaluationError):
+            validate_response(valid_response(is_pun=True, pun_type=None))
 
     def test_validate_response_rejects_non_object(self) -> None:
         with self.assertRaises(EvaluationError):
@@ -169,7 +168,9 @@ class EvaluateDatasetTests(unittest.TestCase):
 class AnalyzeEndpointTests(unittest.TestCase):
     def test_analyze_endpoint_wraps_http_error(self) -> None:
         with (
-            patch("evaluate_dataset.urlopen", side_effect=HTTPError("http://x", 500, "boom", {}, None)),
+            patch(
+                "evaluate_dataset.urlopen", side_effect=HTTPError("http://x", 500, "boom", {}, None)
+            ),
             self.assertRaises(EvaluationError),
         ):
             analyze_endpoint("http://x", "text", 1.0)
@@ -243,9 +244,13 @@ class MainCliTests(unittest.TestCase):
         self.assertIn("dataset_rows", output_path.read_text(encoding="utf-8"))
 
     def test_main_reports_nonzero_exit_on_dataset_error(self) -> None:
-        dataset_path = self._write_dataset("id,is_pun,pun_type,text\nhom_1,True,homographic,A pun.\n")
+        dataset_path = self._write_dataset(
+            "id,is_pun,pun_type,text\nhom_1,True,homographic,A pun.\n"
+        )
 
-        with patch.object(sys, "argv", ["evaluate_dataset.py", "--fixture", "--dataset", str(dataset_path)]):
+        with patch.object(
+            sys, "argv", ["evaluate_dataset.py", "--fixture", "--dataset", str(dataset_path)]
+        ):
             exit_code = main()
 
         self.assertEqual(exit_code, 1)

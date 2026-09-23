@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - Livia
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-22 16:53'
+updated_date: '2026-09-23 15:40'
 labels:
   - dataset
   - evaluation
@@ -44,4 +44,6 @@ Milestone-3.md assigns Data/Eval 'precision/recall on detection' as an ongoing r
 
 <!-- SECTION:NOTES:BEGIN -->
 Addressed an adversarial code review before finalizing: extracted slice_report as a module-level _slice_report function for testability, fixed a misleading is_pun validation error message, and documented fixture_analyzer's words_involved as a contract-shape placeholder (not a real prediction). Expanded eval/tests/test_evaluate_dataset.py from 9 to 21 tests, adding coverage the review flagged as missing: HTTP failure modes for analyze_endpoint (HTTPError/URLError/TimeoutError/invalid JSON), fixture_analyzer contract correctness, empty food_baseline slice (zero-row division-by-zero safety), animal/food category inclusion, malformed CSV rows (missing required column, unparseable is_pun), and main()/parse_args CLI behavior (exit codes, --output writing). Re-verified the fixture-mode self-validation numbers are unchanged after the refactor (4,030/4,030 rows, 0 errors). uv run ruff check . passes with zero findings.
+
+Addressed yaitorr's PR #23 code review: (1) validate_response() now also rejects is_pun=true responses with a missing/null pun_type (previously only checked the reverse direction), matching load_dataset()'s existing bidirectional enforcement and TASK-2.3's own description; added test_validate_response_rejects_pun_without_type as a regression test, reproducing the reviewer's exact repro case. (2) eval/reports/task-2.3-harness-validation.md and eval/README.md's repro commands switched from PowerShell-only (Push-Location/Pop-Location) to plain bash, matching docs/local-setup.md convention. (3) CI wiring gap was fixed directly on this branch by yaitorr (test-eval job added to .github/workflows/test.yml). (4) inference/main.py's AnalyzeResponse missing sense_source is a pre-existing inference/-side gap, not introduced by this PR; needs its own follow-up once a live run against TASK-16's classifier is attempted. 22/22 tests passing, ruff clean.
 <!-- SECTION:NOTES:END -->

@@ -6,10 +6,9 @@ Dataset: `eval/datasets/semeval2017_task7_puns.csv` at revision `824b22c` (4,030
 
 Command:
 
-```powershell
-Push-Location eval
+```bash
+cd eval
 uv run python evaluate_dataset.py --fixture
-Pop-Location
 ```
 
 `--fixture` mode scores the harness against gold labels instead of a live `/analyze` call, so this is a self-validation of the harness (dataset loading, `/analyze` contract validation, and precision/recall/F1 math), not a classifier quality measurement. A live run against a real classifier is blocked on TASK-16 (owned separately, still In Progress) and TASK-9 (Backend's injectable client, not yet built).

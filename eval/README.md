@@ -29,13 +29,13 @@ License: SemEval-2017 Task 7 data is distributed by the task organizers for rese
 
 Run against a live Inference instance:
 
-```powershell
+```bash
 uv run python evaluate_dataset.py --endpoint http://127.0.0.1:8000/analyze
 ```
 
 Run against gold-label fixtures to sanity-check the evaluator itself (no HTTP calls):
 
-```powershell
+```bash
 uv run python evaluate_dataset.py --fixture
 ```
 
