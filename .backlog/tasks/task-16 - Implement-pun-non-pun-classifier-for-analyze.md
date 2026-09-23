@@ -4,7 +4,7 @@ title: Implement pun/non-pun classifier for /analyze
 status: In Progress
 assignee: []
 created_date: '2026-09-18 15:51'
-updated_date: '2026-09-22 10:37'
+updated_date: '2026-09-23 10:29'
 labels:
   - pun-classifier
 dependencies:
@@ -23,7 +23,7 @@ Detection component of the Inference service per docs/milestones/milestone-3.md:
 <!-- AC:BEGIN -->
 - [ ] #1 Given input text, returns is_pun boolean per docs/contracts.md /analyze schema
 - [ ] #2 When is_pun is true, pun_type is classified as homographic or homophonic
-- [ ] #3 confidence score reflects classifier certainty
+- [ ] #3 confidence is the classifier's probability that the text is a pun (docs/contracts.md); detection alone sets is_pun, pun_type and confidence, and sense selection never changes them
 <!-- AC:END -->
 
 ## Definition of Done

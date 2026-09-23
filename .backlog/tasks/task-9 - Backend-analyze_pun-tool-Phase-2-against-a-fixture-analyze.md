@@ -4,7 +4,7 @@ title: 'Backend: analyze_pun tool (Phase 2) against a fixture /analyze'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-22 10:37'
+updated_date: '2026-09-23 10:29'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -28,8 +28,8 @@ Per docs/engineering-practices.md's Phase 2 plan: implement the analyze_pun tool
 <!-- AC:BEGIN -->
 - [ ] #1 analyze_pun tool request/response match the /analyze schema in docs/contracts.md exactly
 - [ ] #2 Inference is called through an injectable client; tests substitute a fixture /analyze response instead of a live HTTP call
-- [ ] #3 Non-2xx or malformed Inference responses don't crash the chat flow — the tool degrades to a well-formed low-confidence result or a plain conversational reply
-- [ ] #4 The tool-call event shape (toolRequest/toolResponse chunks, toolCallId correlation rule) is implemented exactly as finalized in docs/contracts.md, closing sync point 3
+- [ ] #3 The tool-call event shape (toolRequest/toolResponse chunks, toolCallId correlation rule) is implemented exactly as finalized in docs/contracts.md, closing sync point 3
+- [ ] #4 Non-2xx, malformed or timed-out Inference responses don't crash the chat flow: the tool returns docs/contracts.md's undetermined /analyze result (is_pun: true, sense_source: llm_fallback, confidence: 0, no words), so Gemini judges the text itself
 <!-- AC:END -->
 
 ## Definition of Done
