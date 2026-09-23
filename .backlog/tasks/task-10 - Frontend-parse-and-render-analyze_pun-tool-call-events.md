@@ -4,7 +4,7 @@ title: 'Frontend: parse and render analyze_pun tool-call events'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-23 10:29'
+updated_date: '2026-09-23 10:44'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -29,7 +29,8 @@ Extends the Phase 1 ChatModelAdapter to also parse tool-call stream events per t
 - [ ] #2 A resolved pun explanation is visually distinguished from plain chat text
 - [ ] #3 Adapter's tool-call parsing is unit-tested against recorded fixture events matching the Backend task's documented shape
 - [ ] #4 ChatModelAdapter mints a toolCallId on each analyze_pun toolRequest chunk and attaches the next toolResponse chunk's output to that same call, per docs/contracts.md's correlation rule, producing assistant-ui's {type: 'tool-call', toolCallId, toolName, args, result} part shape
-- [ ] #5 An analyze_pun result with sense_source llm_fallback (empty explanation) renders sensibly, e.g. marked as senses supplied by Gemini at lower confidence, backed by an llm_fallback stub fixture
+- [ ] #5 An llm_fallback result (empty explanation) renders as senses supplied by Gemini at lower confidence, backed by a stub fixture
+- [ ] #6 An undetermined result (is_pun: null) renders as 'Inference couldn't analyze this' with no confidence shown, checked with an explicit is_pun === null test (a truthiness check would show it as 'not a pun'), backed by a stub fixture; tool results are typed with a shared AnalyzeResult type (is_pun: boolean | null, confidence: number | null) so the compiler catches unhandled nulls
 <!-- AC:END -->
 
 ## Definition of Done

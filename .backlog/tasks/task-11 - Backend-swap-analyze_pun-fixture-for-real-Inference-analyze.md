@@ -4,7 +4,7 @@ title: 'Backend: swap analyze_pun fixture for real Inference /analyze'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-23 10:29'
+updated_date: '2026-09-23 10:44'
 due_date: '2026-09-21'
 labels: []
 milestone: m-4
@@ -46,4 +46,6 @@ TASK-9 deliberately calls Inference through an injectable client backed by a fix
 
 <!-- SECTION:NOTES:BEGIN -->
 Accepted gap (2026-09-23 Tier 3 redesign): real Inference can go live emitting sense_source llm_fallback before Backend has fallback guidance (TASK-20, which needs TASK-12 in m-5). Until then, llm_fallback results reach Gemini unguided; it usually improvises an explanation. Deliberately not made a dependency, to avoid pulling m-5 work ahead of m-4.
+
+Also accepted: from TASK-9 (m-3) onward Backend returns the undetermined result (is_pun: null) on timeouts/errors, but Gemini has no instruction for it until TASK-20 (m-6). is_pun: null is fairly self-explanatory to Gemini, so this gap is accepted too.
 <!-- SECTION:NOTES:END -->

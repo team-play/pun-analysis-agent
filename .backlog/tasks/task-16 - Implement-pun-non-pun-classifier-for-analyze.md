@@ -4,7 +4,7 @@ title: Implement pun/non-pun classifier for /analyze
 status: In Progress
 assignee: []
 created_date: '2026-09-18 15:51'
-updated_date: '2026-09-23 10:29'
+updated_date: '2026-09-23 10:44'
 labels:
   - pun-classifier
 dependencies:
@@ -21,9 +21,10 @@ Detection component of the Inference service per docs/milestones/milestone-3.md:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Given input text, returns is_pun boolean per docs/contracts.md /analyze schema
-- [ ] #2 When is_pun is true, pun_type is classified as homographic or homophonic
-- [ ] #3 confidence is the classifier's probability that the text is a pun (docs/contracts.md); detection alone sets is_pun, pun_type and confidence, and sense selection never changes them
+- [ ] #1 When is_pun is true, pun_type is classified as homographic or homophonic
+- [ ] #2 confidence is the classifier's probability that the text is a pun (docs/contracts.md); detection alone sets is_pun, pun_type and confidence, and sense selection never changes them
+- [ ] #3 Given input text, returns is_pun true/false per docs/contracts.md's /analyze schema, or null (with null pun_type and confidence) when it can't judge the text
+- [ ] #4 inference/main.py's AnalyzeResponse widens is_pun to bool | None and confidence to float | None (required but nullable, no defaults), with a test for the undetermined case, so FastAPI's response_model doesn't turn it into a 500
 <!-- AC:END -->
 
 ## Definition of Done

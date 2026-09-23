@@ -8,23 +8,24 @@ The only two hard cross-domain dependencies in this project. Any change here mus
 POST /analyze
 { "text": string }
 → {
-    "is_pun": bool,
+    "is_pun": bool | null,
     "pun_type": "homographic" | "homophonic" | null,
     "words_involved": [string],
     "explanation": string,
-    "confidence": float,
+    "confidence": float | null,
     "sense_source": "wordnet" | "wiktionary" | "llm_fallback" | null
   }
 ```
 
 `is_pun`, `pun_type` and `confidence` come from pun detection alone: `confidence` is the detector's probability that the text is a pun. Sense selection only runs when `is_pun` is `true` and never changes those three fields.
 
+`is_pun: null` means **undetermined**: Inference couldn't judge the text at all (e.g. detection itself failed). `is_pun` and `confidence` are `null` together, and only in this case. `pun_type`, `confidence` and `sense_source` are then `null`, `words_involved` is `[]` and `explanation` is `""`. Backend's `analyze_pun` tool returns this same object when Inference is unreachable, times out, or answers with something malformed, and Gemini reads it as "Inference couldn't judge; decide yourself whether this is a pun at all".
+
 `sense_source` reports how sense selection resolved: which tier produced `explanation`, or that none did (full design in [`design/sense-selection.md`](design/sense-selection.md)):
 
 - `"wordnet"` / `"wiktionary"`: that tier found a confident sense pair, and `explanation` describes it.
 - `"llm_fallback"`: `is_pun` is `true`, but no tier found a confident sense pair (or sense selection failed). This is a hand-off, not a record: Inference never calls an LLM itself. `explanation` is `""`, and `words_involved` still lists the suspected word(s) when Inference found any. Backend's Gemini receives this unchanged as the `analyze_pun` tool output and supplies two plausible senses and the explanation itself, so Gemini is only ever called from Backend.
-- **Undetermined**, a special case of `"llm_fallback"`: when Inference can't judge the text at all (e.g. detection itself failed), it returns `is_pun: true`, `pun_type: null`, `confidence: 0`, `words_involved: []`, `explanation: ""`, `sense_source: "llm_fallback"`. Backend's `analyze_pun` tool returns this same object when Inference is unreachable, times out, or answers with something malformed. Gemini reads it as "Inference couldn't judge; decide yourself whether this is a pun at all".
-- `null`: `is_pun` is `false`, so no sense selection was needed.
+- `null`: sense selection didn't run, because `is_pun` is `false` (not a pun) or `null` (undetermined).
 
 ## `/api/chat` (Backend → Frontend)
 

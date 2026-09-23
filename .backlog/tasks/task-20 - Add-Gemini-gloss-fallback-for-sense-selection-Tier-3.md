@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:04'
-updated_date: '2026-09-23 10:30'
+updated_date: '2026-09-23 10:44'
 labels:
   - wsd
 milestone: m-6
@@ -23,7 +23,7 @@ ordinal: 20000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Tier 3 of docs/design/sense-selection.md's sense-selection chain, redesigned 2026-09-23: Inference never calls Gemini. When Tiers 0-2 can't find a confident sense pair, Inference returns is_pun: true with sense_source: "llm_fallback" (empty explanation, suspected word(s) in words_involved), and Backend's Gemini, which receives that unchanged as the analyze_pun tool output, supplies two plausible senses and the explanation itself. The same signal with confidence 0 and no words is docs/contracts.md's undetermined result (Inference couldn't judge the text, or Backend couldn't reach it), where Gemini also decides whether the text is a pun at all. Detection alone decides is_pun, so detector false positives land here too.
+Tier 3 of docs/design/sense-selection.md's sense-selection chain, redesigned 2026-09-23: Inference never calls Gemini. When Tiers 0-2 can't find a confident sense pair, Inference returns is_pun: true with sense_source: "llm_fallback" (empty explanation, suspected word(s) in words_involved), and Backend's Gemini, which receives that unchanged as the analyze_pun tool output, supplies two plausible senses and the explanation itself. The same instruction covers docs/contracts.md's undetermined result (is_pun: null: Inference couldn't judge the text, or Backend couldn't reach it), where Gemini decides whether the text is a pun at all. Detection alone decides is_pun, so detector false positives land here too.
 
 Why: keeping every Gemini call in Backend means one service owns the Gemini key and its free-tier quota (TASK-13 gives Backend's Cloud Run service its own key, in a project without billing), and Inference stays a pure NLP service with no LLM dependency, no key of its own and nothing extra to mock. The original version of this task had Inference prompt Gemini 'via Genkit, already in the stack', but Genkit only exists in Backend (TypeScript); inference/ has no Genkit or Gemini dependency.
 
@@ -33,10 +33,10 @@ Split with TASK-12, which owns the system instruction's structure and persona, i
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 inference/ gains no LLM dependency: no Gemini or Genkit package and no Gemini key
-- [ ] #2 A Backend test using Genkit's test double asserts that, for an llm_fallback tool result, the model request carries the fallback guidance and the tool output unchanged; real replies are spot-checked against live Gemini and recorded in the task notes
-- [ ] #3 When the analyze_pun tool result has sense_source "llm_fallback", Gemini's reply explains the pun using two plausible senses of the suspected word that it supplies itself, presented as a lower-confidence reading, or says the text likely isn't a pun (detector false positives land here too)
-- [ ] #4 For the undetermined result (confidence 0, no words), Gemini judges the text itself, pun or not, without implying Inference backed its answer
-- [ ] #5 The fallback adds no model or Inference calls beyond Genkit's standard tool loop: in tests, the mock model sees exactly two requests for a tool-using turn
+- [ ] #2 When the analyze_pun tool result has sense_source "llm_fallback", Gemini's reply explains the pun using two plausible senses of the suspected word that it supplies itself, presented as a lower-confidence reading, or says the text likely isn't a pun (detector false positives land here too)
+- [ ] #3 The fallback adds no model or Inference calls beyond Genkit's standard tool loop: in tests, the mock model sees exactly two requests for a tool-using turn
+- [ ] #4 For the undetermined result (is_pun: null), Gemini judges the text itself, pun or not, without implying Inference backed its answer
+- [ ] #5 A Backend test using Genkit's test double asserts that, for both an llm_fallback and an undetermined (is_pun: null) tool result, the model request carries the matching guidance and the tool output unchanged; real replies are spot-checked against live Gemini and recorded in the task notes
 <!-- AC:END -->
 
 ## Definition of Done
