@@ -2,7 +2,7 @@
 # live there:  docker build -f backend/Dockerfile .
 # What gets sent is allowlisted in backend/Dockerfile.dockerignore.
 
-FROM node:22-slim AS build
+FROM node:24-slim AS build
 WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Same pnpm as local dev and CI: the version pinned in package.json's
@@ -19,7 +19,7 @@ RUN pnpm --filter backend run build
 # workspace's own node_modules; in this throwaway build stage that's harmless.
 RUN pnpm --filter backend deploy --legacy --prod --frozen-lockfile /prod/backend
 
-FROM node:22-slim
+FROM node:24-slim
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /prod/backend/package.json ./

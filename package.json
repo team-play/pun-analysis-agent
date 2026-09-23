@@ -4,7 +4,7 @@
 	"version": "0.1.0",
 	"packageManager": "pnpm@12.5.1",
 	"engines": {
-		"node": ">=22"
+		"node": ">=24"
 	},
 	"scripts": {
 		"check:mermaid": "node scripts/check-mermaid.mjs",

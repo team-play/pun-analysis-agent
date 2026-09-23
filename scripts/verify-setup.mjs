@@ -54,7 +54,7 @@ async function checkDevServer({ cwd, command, args, env, url }) {
 
 async function main() {
 	await check("git present", () => run("git", ["--version"]));
-	await check("node present (>=22, see package.json engines)", () =>
+	await check("node present (>=24, see package.json engines)", () =>
 		run("node", ["--version"]),
 	);
 	await check("pnpm present", () => run("pnpm", ["--version"]));
