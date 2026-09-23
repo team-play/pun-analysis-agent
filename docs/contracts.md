@@ -49,3 +49,13 @@ The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool cal
 Genkit's `ref` field exists to disambiguate concurrent calls to the *same* tool, but is inconsistently populated and unneeded here: `analyze_pun` is the only tool and is never called more than once concurrently in a single turn. So Frontend's `ChatModelAdapter` doesn't correlate by `ref` — it mints a `toolCallId` client-side the moment a `toolRequest` chunk for `analyze_pun` arrives, holds it as the one pending call, and attaches the next `toolResponse` chunk's `output` to that same assistant-ui `{ type: "tool-call", toolCallId, toolName, args, result }` part. If a second concurrent tool or genuinely concurrent `analyze_pun` calls are ever needed, this correlation rule needs revisiting alongside `ref`-based matching — not a case this project currently has.
 
 This closes sync point 3 in [`project-spec.md`](project-spec.md)'s "Sync points."
+
+### Failed replies
+
+A reply that fails after streaming has started (the `200` is already sent, so the status can't change) ends with one error event instead of the final `result`:
+
+```
+error: { "error": { "status": string, "message": string } }
+```
+
+`message` is a user-facing sentence that Frontend can display as-is: Backend never forwards an upstream error's own message or details, and logs those server-side instead. `status` is Genkit's status code, kept for diagnostics (e.g. `UNAVAILABLE` or `DEADLINE_EXCEEDED` when the model is overloaded or slow, `RESOURCE_EXHAUSTED` when quota runs out, `INTERNAL` for anything unexpected); Frontend shouldn't branch on specific values. In Phase 2, a turn that fails after a `toolRequest` chunk ends with this event and no matching `toolResponse`, so Frontend has to settle that pending tool call itself. A request rejected before streaming starts (e.g. a body that doesn't match the shape above) gets a non-2xx JSON response instead, and a client that disconnects mid-reply gets no error event.
