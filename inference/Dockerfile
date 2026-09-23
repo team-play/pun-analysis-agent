@@ -5,6 +5,7 @@ RUN pip install --no-cache-dir uv
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
+RUN uv run python -m wn download oewn:2025
 
 COPY . .
 

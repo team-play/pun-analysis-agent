@@ -71,6 +71,7 @@ Python + [`uv`](https://docs.astral.sh/uv/) (fast, reproducible dependency manag
 ```bash
 cd inference
 uv sync
+uv run python -m wn download oewn:2025  # one-time: sense-selection's WordNet data
 uv run pytest
 uv run ruff check .
 uv run uvicorn main:app --reload
