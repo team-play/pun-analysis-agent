@@ -1,10 +1,11 @@
 ---
 id: TASK-13
 title: Deploy backend to Cloud Run via CI
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@yaisiel.torres'
 created_date: '2026-09-17 23:40'
-updated_date: '2026-09-22 10:37'
+updated_date: '2026-09-23 09:54'
 due_date: '2026-09-21'
 labels: []
 milestone: m-2
@@ -37,3 +38,9 @@ deploy-backend.yml is currently a placeholder, identical in structure to deploy-
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Key decisions (2026-09-23, with @yaisiel.torres): the Cloud Run service gets its own new Gemini API key, created in the AI Studio project gen-lang-client-0125403786 (display name 'pun-agent', billing OFF), not in the GCP project pun-agent (billing ON, required by Cloud Run). Reason: with billing off the key stays on Gemini's free tier, so abuse of the public /api/chat can only exhaust quota, never charge the card (the abuse hole itself is TASK-25, Firebase App Check). Known trade-off: free-tier limits are per project, so production shares quota with local-dev keys in that project (pun-agent-local). Own key rather than reusing the existing 'pun-agent' key, so it can be revoked without breaking local dev. The key is stored in Secret Manager in pun-agent and read by a dedicated least-privilege runtime service account (not the default compute SA, which has Editor).
+<!-- SECTION:NOTES:END -->
