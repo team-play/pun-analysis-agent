@@ -1,6 +1,6 @@
 ---
 name: setup-local-env
-description: Bootstraps a fresh contributor's local dev environment for the pun-analysis-agent monorepo — detects the OS (macOS, Windows/WSL2, or native Windows), checks for git/Node.js/pnpm/uv, proposes install commands for anything missing (always with confirmation before running one), installs project dependencies, and validates the result. Use this whenever someone asks to set up, bootstrap, or get started with this repo locally; is a new contributor asking "how do I get this running" or "what do I need to install"; mentions missing tools like git, node, pnpm, or uv in the context of this project; or says something like "I just cloned this, what now" or "set up my machine for this project."
+description: Bootstraps a fresh contributor's local dev environment for the pun-analysis-agent monorepo — detects the OS (macOS, Windows/WSL2, or native Windows), checks for git/Node.js/pnpm/uv, proposes install commands for anything missing (always with confirmation before running one), installs project dependencies, and validates the result. Use this whenever someone asks to set up, bootstrap, or get started with this repo locally; is a new contributor asking "how do I get this running" or "what do I need to install"; mentions missing tools like git, node, pnpm, or uv in the context of this project; has an outdated Node (below 24) or hits `ERR_UNKNOWN_FILE_EXTENSION ".ts"` running the backend; or says something like "I just cloned this, what now" or "set up my machine for this project."
 ---
 
 # Setup Local Environment
