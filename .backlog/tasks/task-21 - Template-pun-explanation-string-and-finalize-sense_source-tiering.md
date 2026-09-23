@@ -4,7 +4,7 @@ title: Template pun explanation string and finalize sense_source tiering
 status: To Do
 assignee: []
 created_date: '2026-09-20 10:04'
-updated_date: '2026-09-23 10:41'
+updated_date: '2026-09-23 16:10'
 labels:
   - wsd
 milestone: m-6
@@ -27,7 +27,7 @@ Step 6 of docs/design/sense-selection.md's approach: once TASK-19 has produced a
 <!-- AC:BEGIN -->
 - [ ] #1 Given a winning sense pair, explanation is templated per docs/design/sense-selection.md's pattern
 - [ ] #2 Unit tests cover the dough/money example end-to-end producing the exact explanation shape
-- [ ] #3 sense_source is added to inference/main.py's AnalyzeResponse Pydantic model (FastAPI's response_model otherwise drops it) and is wordnet/wiktionary for whichever tier produced the winning senses; when no tier produced a confident pair it is llm_fallback with an empty explanation; null when sense selection didn't run (is_pun false or null)
+- [ ] #3 sense_source (added to AnalyzeResponse by TASK-16) is wordnet/wiktionary for whichever tier produced the winning senses; when no tier produced a confident pair it stays llm_fallback with an empty explanation; null when sense selection didn't run (is_pun false or null)
 <!-- AC:END -->
 
 ## Definition of Done
