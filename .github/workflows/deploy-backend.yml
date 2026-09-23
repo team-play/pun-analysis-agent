@@ -1,17 +1,112 @@
-# Placeholder workflow for the Genkit backend Cloud Run service.
+name: Deploy Backend
+
+# Pull requests only build the image, so a broken Dockerfile fails the PR
+# instead of the deploy. Pushes to main (or a manual run on main) also run
+# the backend tests, push the image to Artifact Registry, deploy it to Cloud
+# Run and smoke-test /health. The Cloud Run setup (runtime service account,
+# Gemini key secret, image repo) is documented in docs/local-setup.md.
 #
-# This will build the Docker image in `backend/` and deploy it to Cloud Run
-# once the service has a real, working Dockerfile and build step to deploy.
-# No deploy logic yet — filled in in a follow-up pass.
+# The root package.json / lockfile / workspace paths are included because the
+# image is built from them; a frontend-only dependency bump therefore also
+# redeploys an unchanged backend. Accepted: rare, and it costs one cold start.
 
 on:
   push:
     branches: [main]
     paths:
       - "backend/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/deploy-backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Deploys run one at a time, in push order, so an older commit can't finish
+# last and end up serving.
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: pun-agent
+  REGION: us-east1
+  SERVICE: pun-agent-backend
+  # Only main is ever deployed, even for a manual run on another branch.
+  DEPLOY: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
 
 jobs:
-  placeholder:
+  # test.yml already covers pull requests; this gates the deploy itself.
+  test:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - run: echo "No deploy logic yet — see the comment at the top of this file."
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter backend
+      - run: pnpm --filter backend test
+
+  build-and-deploy:
+    name: Build image (and deploy on main)
+    needs: test
+    # Runs when the test job passed, or was skipped on a pull request.
+    if: ${{ !failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: echo "IMAGE=${REGION}-docker.pkg.dev/${PROJECT_ID}/pun-agent/backend" >> "$GITHUB_ENV"
+      - uses: docker/setup-buildx-action@v4
+
+      - if: env.DEPLOY == 'true'
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - if: env.DEPLOY == 'true'
+        uses: google-github-actions/setup-gcloud@v3
+      - if: env.DEPLOY == 'true'
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: ${{ env.DEPLOY == 'true' }}
+          tags: ${{ env.IMAGE }}:${{ github.sha }}
+          # Scoped so a future Inference image build doesn't overwrite this cache.
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
+
+      - if: env.DEPLOY == 'true'
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.IMAGE }}:${{ github.sha }}
+          # Read at startup by the runtime service account; the key never passes through CI.
+          secrets: GEMINI_API_KEY=gemini-api-key-runtime:latest
+          # One instance, scaled to zero when idle: enough for the demo, and it
+          # caps compute if the public URL is flooded (see TASK-13's notes).
+          flags: >-
+            --service-account=pun-agent-runtime@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+            --allow-unauthenticated
+            --min-instances=0
+            --max-instances=1
+
+      - if: env.DEPLOY == 'true'
+        name: Smoke-test /health on the deployed service
+        run: curl --fail --silent --show-error "${{ steps.deploy.outputs.url }}/health"
