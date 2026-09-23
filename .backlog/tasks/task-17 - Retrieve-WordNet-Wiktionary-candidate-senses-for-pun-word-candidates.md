@@ -1,10 +1,11 @@
 ---
 id: TASK-17
 title: Retrieve WordNet/Wiktionary candidate senses for pun-word candidates
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - Andi J. Castillo-Mauricio
 created_date: '2026-09-20 10:04'
-updated_date: '2026-09-22 10:37'
+updated_date: '2026-09-23 01:20'
 labels:
   - wsd
 milestone: m-6
