@@ -12,16 +12,27 @@ const CUT_OFF_MESSAGE =
 	"The reply was cut off before it finished. Please try again.";
 
 /**
+ * Whether `error` is the user's stop. Judged by the error itself, not by
+ * `abortSignal.aborted`: a real failure can land just as the user presses
+ * stop, and it must still be reported. assistant-ui cancels with its own
+ * AbortError, fetch rejects with that reason (or a DOMException AbortError),
+ * and assistant-ui shows a cancelled reply for any error of that name. The
+ * name is read without `instanceof Error`, which a DOMException fails
+ * outside browsers (e.g. jsdom).
+ */
+const isAbort = (error: unknown) =>
+	typeof error === "object" &&
+	error !== null &&
+	"name" in error &&
+	error.name === "AbortError";
+
+/**
  * Throws `userMessage` in place of `cause`, logging `cause` for developers.
  * An abort (the user pressed stop) is rethrown untouched: assistant-ui
  * recognizes it and shows a cancelled reply, not an error.
  */
-function failWith(
-	userMessage: string,
-	cause: unknown,
-	abortSignal: AbortSignal,
-): never {
-	if (abortSignal.aborted) throw cause;
+function failWith(userMessage: string, cause: unknown): never {
+	if (isAbort(cause)) throw cause;
 	console.error(cause);
 	throw new Error(userMessage, { cause });
 }
@@ -47,16 +58,16 @@ export const createLiveChatModelAdapter = (
 				})),
 			}),
 			signal: abortSignal,
-		}).catch((error: unknown) =>
-			failWith(NO_REPLY_MESSAGE, error, abortSignal),
-		);
+		}).catch((error: unknown) => failWith(NO_REPLY_MESSAGE, error));
 
 		if (!response.ok || !response.body) {
-			const body = await response.text().catch(() => "<unreadable body>");
+			const body = await response.text().catch((error: unknown) => {
+				if (isAbort(error)) throw error; // stopped while reading the body
+				return "<unreadable body>";
+			});
 			failWith(
 				NO_REPLY_MESSAGE,
 				new Error(`/api/chat returned ${response.status}: ${body}`),
-				abortSignal,
 			);
 		}
 
@@ -72,8 +83,12 @@ export const createLiveChatModelAdapter = (
 				yield { content: [{ type: "text", text }] };
 			}
 		} catch (error) {
-			if (error instanceof FlowErrorEvent) throw error;
-			failWith(CUT_OFF_MESSAGE, error, abortSignal);
+			if (error instanceof FlowErrorEvent) {
+				// Shown as-is, but its status only reaches developers through here.
+				console.error(`/api/chat error event (${error.status}):`, error);
+				throw error;
+			}
+			failWith(CUT_OFF_MESSAGE, error);
 		}
 	},
 });

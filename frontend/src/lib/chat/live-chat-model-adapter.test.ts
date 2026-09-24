@@ -197,6 +197,17 @@ describe("createLiveChatModelAdapter", () => {
 			expect(error.message).toBe(RECORDED_ERROR_MESSAGE);
 		});
 
+		it("logs an error event's status for developers, since the message shown drops it", async () => {
+			mockFetch(new Response(recordedErrorStream));
+
+			const error = await failureOf(run([message("user", "hi")]));
+
+			expect(logError).toHaveBeenCalledWith(
+				expect.stringContaining("INVALID_ARGUMENT"),
+				error,
+			);
+		});
+
 		it("yields the text streamed so far, then fails, when an error event follows chunks", async () => {
 			mockFetch(
 				new Response(
@@ -271,6 +282,74 @@ describe("createLiveChatModelAdapter", () => {
 
 			expect(error.name).toBe("AbortError");
 			expect(logError).not.toHaveBeenCalled();
+		});
+
+		it("rethrows an abort untouched when the user stops mid-reply", async () => {
+			const controller = new AbortController();
+			let reads = 0;
+			const stoppedMidReply = new ReadableStream<Uint8Array>({
+				pull(stream) {
+					if (reads++ === 0) {
+						stream.enqueue(utf8('data: {"message":"Why did"}\n\n'));
+					} else {
+						controller.abort();
+						stream.error(controller.signal.reason);
+					}
+				},
+			});
+			mockFetch(new Response(stoppedMidReply));
+			const gen = run([message("user", "hi")], controller.signal);
+
+			expect(textOf((await gen.next()).value)).toBe("Why did");
+			await expect(gen.next()).rejects.toMatchObject({ name: "AbortError" });
+			expect(logError).not.toHaveBeenCalled();
+		});
+
+		it("rethrows an abort untouched when the user stops while a non-2xx body is read", async () => {
+			const controller = new AbortController();
+			const stoppedWhileReading = new ReadableStream<Uint8Array>({
+				pull(stream) {
+					controller.abort();
+					stream.error(controller.signal.reason);
+				},
+			});
+			mockFetch(new Response(stoppedWhileReading, { status: 500 }));
+
+			const error = await failureOf(
+				run([message("user", "hi")], controller.signal),
+			);
+
+			expect(error.name).toBe("AbortError");
+			expect(logError).not.toHaveBeenCalled();
+		});
+
+		it("rethrows an AbortError untouched even when it isn't the signal's reason", async () => {
+			const controller = new AbortController();
+			controller.abort("user pressed stop");
+			// Some fetch implementations reject with a fresh AbortError instead.
+			const abortError = new DOMException("aborted", "AbortError");
+			vi.stubGlobal("fetch", vi.fn().mockRejectedValue(abortError));
+
+			const error = await failureOf(
+				run([message("user", "hi")], controller.signal),
+			);
+
+			expect(error).toBe(abortError);
+			expect(logError).not.toHaveBeenCalled();
+		});
+
+		it("still shows the user-facing message for a real error that races the user's stop", async () => {
+			const controller = new AbortController();
+			controller.abort();
+			const offline = new TypeError("Failed to fetch");
+			vi.stubGlobal("fetch", vi.fn().mockRejectedValue(offline));
+
+			const error = await failureOf(
+				run([message("user", "hi")], controller.signal),
+			);
+
+			expect(error.message).toBe(NO_REPLY);
+			expect(logError).toHaveBeenCalledWith(offline);
 		});
 	});
 });

@@ -18,17 +18,24 @@ const ERROR_PREFIX = "error: ";
  * Backend's own `error:` event: the reply failed upstream. Its message is
  * user-facing by contract (docs/contracts.md's "Failed replies"), unlike
  * every other error this parser throws, which describe a broken stream.
- * The event's `status` is diagnostic only, so it isn't carried.
+ * The event's `status` is diagnostic only, so it's kept apart from the
+ * message, for logging.
  */
 export class FlowErrorEvent extends Error {
 	override name = "FlowErrorEvent";
+	readonly status: unknown;
+
+	constructor(message: string, status: unknown) {
+		super(message);
+		this.status = status;
+	}
 }
 
 const parseEvent = (raw: string): GenkitFlowEvent => {
 	if (raw.startsWith(ERROR_PREFIX)) {
 		const { error } = JSON.parse(raw.slice(ERROR_PREFIX.length));
 		if (typeof error?.message === "string" && error.message) {
-			throw new FlowErrorEvent(error.message);
+			throw new FlowErrorEvent(error.message, error.status);
 		}
 	}
 	if (raw.startsWith(DATA_PREFIX)) {

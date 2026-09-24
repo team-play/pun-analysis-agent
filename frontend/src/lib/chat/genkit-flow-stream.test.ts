@@ -55,12 +55,13 @@ describe("parseGenkitFlowStream", () => {
 		);
 	});
 
-	it("throws a Backend error event as a FlowErrorEvent carrying its message, without the status", async () => {
+	it("throws a Backend error event as a FlowErrorEvent: the message as-is, the status kept apart", async () => {
 		const body = byteStreamOf([utf8(recordedErrorStream)]);
 		const error = await collect(body).catch((e: unknown) => e);
 		expect(error).toBeInstanceOf(FlowErrorEvent);
 		expect(error).toMatchObject({
 			message: "Something went wrong. Please try again.",
+			status: "INVALID_ARGUMENT",
 		});
 	});
 
