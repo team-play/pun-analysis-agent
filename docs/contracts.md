@@ -27,6 +27,16 @@ POST /api/chat
 → streamed response (Genkit flow stream format)
 ```
 
+The body is Genkit's flow-stream format served as `text/plain`, **not** Server-Sent Events: `error:` isn't an SSE field, so `EventSource` or an SSE library would silently drop failures. Parse it by splitting on the blank line (`\n\n`) that ends each event and switching on its `data: ` / `error: ` prefix. JSON payloads are single-line, since `JSON.stringify` escapes any newline inside them:
+
+```
+data: {"message": string}\n\n                      zero or more (Phase 1; see Phase 2 below) — each is the next piece of the reply, not the reply so far
+data: {"result": string}\n\n                       exactly one, last — the complete reply
+error: {"error": {"status": string, "message": string}}\n\n   instead of `result`, if the reply fails
+```
+
+A body that ends without either a `result` or an `error:` event was cut off, and Frontend treats it as a failure. An event missing its closing `\n\n` counts as not received, as in SSE.
+
 The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool calls — see [`engineering-practices.md`](engineering-practices.md)). Phase 2 (once the `analyze_pun` tool exists) adds `toolRequest`/`toolResponse` chunks to that same stream, per Genkit's own flow-streaming format — Backend forwards these unmodified, it doesn't re-wrap them:
 
 ```
