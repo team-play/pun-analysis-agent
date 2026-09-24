@@ -5,6 +5,7 @@ import {
 	recordedPhase1Stream,
 } from "./fixtures/recorded-genkit-streams";
 import {
+	FlowErrorEvent,
 	type GenkitFlowEvent,
 	parseGenkitFlowStream,
 } from "./genkit-flow-stream";
@@ -54,11 +55,23 @@ describe("parseGenkitFlowStream", () => {
 		);
 	});
 
-	it("throws the Backend's error status and message on an error event", async () => {
+	it("throws a Backend error event as a FlowErrorEvent: the message as-is, the status kept apart", async () => {
 		const body = byteStreamOf([utf8(recordedErrorStream)]);
-		await expect(collect(body)).rejects.toThrow(
-			/^INVALID_ARGUMENT: .*API key not valid/,
-		);
+		const error = await collect(body).catch((e: unknown) => e);
+		expect(error).toBeInstanceOf(FlowErrorEvent);
+		expect(error).toMatchObject({
+			message: "Something went wrong. Please try again.",
+			status: "INVALID_ARGUMENT",
+		});
+	});
+
+	it("treats an error event without a message as malformed, not as a FlowErrorEvent", async () => {
+		const body = byteStreamOf([
+			utf8('error: {"error":{"status":"INTERNAL"}}\n\n'),
+		]);
+		const error = await collect(body).catch((e: unknown) => e);
+		expect(error).toBeInstanceOf(Error);
+		expect(error).not.toBeInstanceOf(FlowErrorEvent);
 	});
 
 	it("throws if the body ends before a result event (reply was cut off)", async () => {

@@ -2,8 +2,40 @@ import type {
 	ChatModelAdapter,
 	ChatModelRunOptions,
 } from "@assistant-ui/react";
-import { parseGenkitFlowStream } from "./genkit-flow-stream";
+import { FlowErrorEvent, parseGenkitFlowStream } from "./genkit-flow-stream";
 import { getMessageText } from "./message-text";
+
+// What the chat's error box shows. Whatever actually went wrong goes to the
+// console instead, since it's written for developers (e.g. "Failed to fetch").
+const NO_REPLY_MESSAGE = "Couldn't get a reply. Please try again.";
+const CUT_OFF_MESSAGE =
+	"The reply was cut off before it finished. Please try again.";
+
+/**
+ * Whether `error` is the user's stop. Judged by the error itself, not by
+ * `abortSignal.aborted`: a real failure can land just as the user presses
+ * stop, and it must still be reported. assistant-ui cancels with its own
+ * AbortError, fetch rejects with that reason (or a DOMException AbortError),
+ * and assistant-ui shows a cancelled reply for any error of that name. The
+ * name is read without `instanceof Error`, which a DOMException fails
+ * outside browsers (e.g. jsdom).
+ */
+const isAbort = (error: unknown) =>
+	typeof error === "object" &&
+	error !== null &&
+	"name" in error &&
+	error.name === "AbortError";
+
+/**
+ * Throws `userMessage` in place of `cause`, logging `cause` for developers.
+ * An abort (the user pressed stop) is rethrown untouched: assistant-ui
+ * recognizes it and shows a cancelled reply, not an error.
+ */
+function failWith(userMessage: string, cause: unknown): never {
+	if (isAbort(cause)) throw cause;
+	console.error(cause);
+	throw new Error(userMessage, { cause });
+}
 
 /**
  * The real ChatModelAdapter: sends the conversation to Backend's
@@ -15,6 +47,7 @@ export const createLiveChatModelAdapter = (
 	chatUrl: string,
 ): ChatModelAdapter => ({
 	async *run({ messages, abortSignal }: ChatModelRunOptions) {
+		// Failing before a response arrives (offline, Backend down, non-2xx).
 		const response = await fetch(chatUrl, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -25,20 +58,37 @@ export const createLiveChatModelAdapter = (
 				})),
 			}),
 			signal: abortSignal,
-		});
+		}).catch((error: unknown) => failWith(NO_REPLY_MESSAGE, error));
 
 		if (!response.ok || !response.body) {
-			throw new Error(
-				`/api/chat returned ${response.status}: ${await response.text()}`,
+			const body = await response.text().catch((error: unknown) => {
+				if (isAbort(error)) throw error; // stopped while reading the body
+				return "<unreadable body>";
+			});
+			failWith(
+				NO_REPLY_MESSAGE,
+				new Error(`/api/chat returned ${response.status}: ${body}`),
 			);
 		}
 
-		// Each `message` is only the newest piece of the reply, but every
-		// yield replaces what assistant-ui shows — so yield the running total.
+		// Failing mid-reply: Backend's own error event is already user-facing;
+		// anything else (dropped connection, garbled or missing events) means
+		// the reply was cut off.
 		let text = "";
-		for await (const event of parseGenkitFlowStream(response.body)) {
-			text = "result" in event ? event.result : text + event.message;
-			yield { content: [{ type: "text", text }] };
+		try {
+			for await (const event of parseGenkitFlowStream(response.body)) {
+				// Each `message` is only the newest piece of the reply, but every
+				// yield replaces what assistant-ui shows — so yield the running total.
+				text = "result" in event ? event.result : text + event.message;
+				yield { content: [{ type: "text", text }] };
+			}
+		} catch (error) {
+			if (error instanceof FlowErrorEvent) {
+				// Shown as-is, but its status only reaches developers through here.
+				console.error(`/api/chat error event (${error.status}):`, error);
+				throw error;
+			}
+			failWith(CUT_OFF_MESSAGE, error);
 		}
 	},
 });

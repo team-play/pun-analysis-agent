@@ -14,10 +14,29 @@ const EVENT_DELIMITER = "\n\n";
 const DATA_PREFIX = "data: ";
 const ERROR_PREFIX = "error: ";
 
+/**
+ * Backend's own `error:` event: the reply failed upstream. Its message is
+ * user-facing by contract (docs/contracts.md's "Failed replies"), unlike
+ * every other error this parser throws, which describe a broken stream.
+ * The event's `status` is diagnostic only, so it's kept apart from the
+ * message, for logging.
+ */
+export class FlowErrorEvent extends Error {
+	override name = "FlowErrorEvent";
+	readonly status: unknown;
+
+	constructor(message: string, status: unknown) {
+		super(message);
+		this.status = status;
+	}
+}
+
 const parseEvent = (raw: string): GenkitFlowEvent => {
 	if (raw.startsWith(ERROR_PREFIX)) {
 		const { error } = JSON.parse(raw.slice(ERROR_PREFIX.length));
-		throw new Error(`${error.status}: ${error.message}`);
+		if (typeof error?.message === "string" && error.message) {
+			throw new FlowErrorEvent(error.message, error.status);
+		}
 	}
 	if (raw.startsWith(DATA_PREFIX)) {
 		const event = JSON.parse(raw.slice(DATA_PREFIX.length));
@@ -31,8 +50,9 @@ const parseEvent = (raw: string): GenkitFlowEvent => {
  * reads don't line up with event boundaries, so any partial event is kept
  * in `buffer` until the read that completes it; `{ stream: true }` likewise
  * makes the decoder hold back a multi-byte character (e.g. "ñ") split across
- * reads instead of garbling it. Throws on an `error:` event, and if the body ends before `result`
- * (i.e. the reply was cut off rather than finished).
+ * reads instead of garbling it. Throws a FlowErrorEvent on Backend's
+ * `error:` event, and a plain Error for a broken stream: an unrecognized
+ * event, or a body that ends before `result` (cut off rather than finished).
  */
 export async function* parseGenkitFlowStream(
 	body: ReadableStream<Uint8Array>,
