@@ -20,7 +20,7 @@ Check for each of these, in order, and note what's missing:
 | Tool | Check |
 |---|---|
 | git | `git --version` |
-| Node.js | `node --version` (need `>=22`, per the `engines` field in the root [`package.json`](../package.json)) |
+| Node.js | `node --version` (need `>=24`, per the `engines` field in the root [`package.json`](../package.json)) |
 | pnpm | `pnpm --version` |
 | uv | `uv --version` |
 
