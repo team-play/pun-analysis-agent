@@ -4,7 +4,7 @@ title: 'Frontend: parse and render analyze_pun tool-call events'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-22 10:37'
+updated_date: '2026-09-24 01:38'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -37,3 +37,9 @@ Extends the Phase 1 ChatModelAdapter to also parse tool-call stream events per t
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Open contract question found in PR #27's architectural review (2026-09-23), recorded here rather than solved in TASK-8: docs/contracts.md's Phase 2 paragraph shows tool chunks as bare {"content": [...]} and says Backend 'doesn't re-wrap them', but backend/src/routes/chat.ts wraps every chunk as data: {"message": <chunk>}. So in Phase 2, tool chunks would arrive as data: {"message": {"content": [{"toolRequest": ...}]}}, and if the Phase 2 flow forwards Genkit's generate chunks instead of chunk.text, text chunks become objects too. Today's adapter (live-chat-model-adapter.ts: text + event.message) and GenkitFlowEvent's string type would then render '[object Object]' rather than fail loudly. Before implementing: agree the Phase 2 envelope and text-chunk shape with TASK-9 (Backend), update contracts.md's Phase 2 paragraph (contracts.md now marks message: string as Phase 1 only), and widen GenkitFlowEvent to match. Needs the architectural review in DoD #2.
+<!-- SECTION:NOTES:END -->
