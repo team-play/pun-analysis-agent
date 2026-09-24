@@ -22,7 +22,10 @@ export const getChatModelAdapter = (): ChatModelAdapter => {
 						"base URL (e.g. http://localhost:8080) — see frontend/.env.example.",
 				);
 			}
-			return createLiveChatModelAdapter(new URL("/api/chat", backendUrl).href);
+			// A relative path resolves against the base's last "/", so give the
+			// base one: then any path prefix (e.g. https://host/staging) is kept.
+			const base = backendUrl.endsWith("/") ? backendUrl : `${backendUrl}/`;
+			return createLiveChatModelAdapter(new URL("api/chat", base).href);
 		}
 		default:
 			throw new Error(

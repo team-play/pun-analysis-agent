@@ -17,9 +17,14 @@ const runOnce = async () => {
 };
 
 describe("getChatModelAdapter", () => {
-	it.each(["http://localhost:8080", "http://localhost:8080/"])(
-		"live mode posts to /api/chat on VITE_BACKEND_URL=%s",
-		async (backendUrl) => {
+	it.each([
+		["http://localhost:8080", "http://localhost:8080/api/chat"],
+		["http://localhost:8080/", "http://localhost:8080/api/chat"],
+		["https://host/staging-v2", "https://host/staging-v2/api/chat"],
+		["https://host/staging-v2/", "https://host/staging-v2/api/chat"],
+	])(
+		"live mode with VITE_BACKEND_URL=%s posts to %s",
+		async (backendUrl, chatUrl) => {
 			vi.stubEnv("VITE_CHAT_ADAPTER", "live");
 			vi.stubEnv("VITE_BACKEND_URL", backendUrl);
 			const fetchMock = vi
@@ -29,10 +34,7 @@ describe("getChatModelAdapter", () => {
 
 			await runOnce();
 
-			expect(fetchMock).toHaveBeenCalledWith(
-				"http://localhost:8080/api/chat",
-				expect.anything(),
-			);
+			expect(fetchMock).toHaveBeenCalledWith(chatUrl, expect.anything());
 		},
 	);
 
