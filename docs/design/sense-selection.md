@@ -35,10 +35,10 @@ flowchart TD
     D0 -- "yes" --> T1["Tier 1 — embedding-Lesk scoring vs. context"]
     D0 -- "no (0-1 senses)" --> T2["Tier 2 — Wiktionary definitions"]
     T2 --> T1
-    T1 --> D1{"confident top-2 sense margin?"}
+    T1 --> D1{"top-2 senses close and under different hypernyms?"}
     D1 -- "yes" --> OK1(["sense_source: wordnet | wiktionary"])
     D1 -- "no" --> T3["Tier 3 — hand off to Backend's Gemini"]
-    T3 --> OK2(["sense_source: llm_fallback — Gemini supplies the senses (lower confidence)"])
+    T3 --> OK2(["sense_source: llm_fallback — Gemini supplies the senses"])
 
     classDef tier fill:#e8f0fe,stroke:#4a6fa5,color:#1a1a1a;
     classDef decision fill:#fff6da,stroke:#c9971f,color:#1a1a1a;
