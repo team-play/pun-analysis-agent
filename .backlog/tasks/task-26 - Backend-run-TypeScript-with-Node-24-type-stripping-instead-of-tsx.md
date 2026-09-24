@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-23 13:46'
-updated_date: '2026-09-23 13:59'
+updated_date: '2026-09-24 02:19'
 labels:
   - backend
   - tooling
@@ -57,4 +57,6 @@ Adversarial review: no blockers; both should-fixes applied. Open: verify-setup.m
 
 Lockfile regenerated from scratch (its own commit): pnpm restores the lockfile from node_modules/.pnpm/lock.yaml, so node_modules had to be removed too. tsx and esbuild are gone (984 -> 955 packages); in-range bumps: hono 4.13.8, biome 2.5.14 (biome.json $schema bumped), jsdom 30.1.1, @types/node 24.13.6, cn 0.3.3. allowBuilds esbuild entry removed. Lint, 13/13 backend, 18/18 frontend, both builds, mermaid pass.
 verify-setup.mjs now fails when the running Node major is below engines.node (checked both ways: passes on 24.21; with engines temporarily at >=99 it reports "Node 24.21.0 is older than engines.node").
+
+PR #35 review: went back to an explicit glob, `node --test "tests/**/*.test.ts"`, so the script shows where tests live and default discovery can't later pick up a co-located src/*.test.ts plus its dist/ copy. Double quotes (not single) so cmd.exe strips them and Node still gets the glob on native Windows. Verified on Node 24.21: 13/13; narrowing to tests/routes runs 5, confirming Node applies the glob; a non-matching glob exits 0 with zero tests, which is why the quoting matters.
 <!-- SECTION:NOTES:END -->
