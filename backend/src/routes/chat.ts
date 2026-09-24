@@ -2,7 +2,7 @@ import { GenkitError, type StatusName } from "genkit";
 import { logger } from "genkit/logging";
 import type { Context } from "hono";
 import { stream as honoStream } from "hono/streaming";
-import { chatInputSchema, type createChatFlow } from "../flows/chat.js";
+import { chatInputSchema, type createChatFlow } from "../flows/chat.ts";
 
 type ChatFlow = ReturnType<typeof createChatFlow>;
 

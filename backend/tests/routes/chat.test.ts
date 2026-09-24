@@ -3,8 +3,8 @@ import { afterEach, beforeEach, type Mock, mock, test } from "node:test";
 import { GenkitError, genkit, type StatusName } from "genkit";
 import { logger } from "genkit/logging";
 import { Hono } from "hono";
-import { createChatHandler } from "../../src/routes/chat.js";
-import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.js";
+import { createChatHandler } from "../../src/routes/chat.ts";
+import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.ts";
 
 // Registered once per genkit/testing's mockModel/reset() idiom — see
 // tests/flows/chat.test.ts for why.

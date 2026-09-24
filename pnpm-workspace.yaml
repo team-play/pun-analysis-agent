@@ -6,7 +6,6 @@ allowBuilds:
   # something our code calls directly — its postinstall/build step isn't
   # needed for the published package to work as a dependency, so left
   # disallowed rather than running untrusted install scripts on trust alone.
-  esbuild: true
   protobufjs: false
 ignoredOptionalDependencies:
   # An optional dependency of @genkit-ai/core that pulls in firebase-admin,

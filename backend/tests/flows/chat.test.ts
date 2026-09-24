@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 import { genkit } from "genkit";
-import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.js";
+import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.ts";
 
 /**
  * A throwaway Genkit instance with no googleAI plugin, so this file never

@@ -8,8 +8,8 @@ import { genkit } from "genkit";
 import { logger } from "genkit/logging";
 import type { MockRespond } from "genkit/testing";
 import { Hono } from "hono";
-import { createChatHandler } from "../../src/routes/chat.js";
-import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.js";
+import { createChatHandler } from "../../src/routes/chat.ts";
+import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.ts";
 
 /**
  * `src/routes/chat.ts` hand-replicates Genkit's flow-stream wire format
