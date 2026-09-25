@@ -36,13 +36,13 @@ X-Firebase-AppCheck: <Firebase App Check token>
 → streamed response (Genkit flow stream format)
 ```
 
-Every request must carry a Firebase App Check token for the `pun-agent` project in the `X-Firebase-AppCheck` header. It attests that the request comes from our Firebase-hosted app, so the public Cloud Run URL can't be used to spend the team's Gemini quota directly. Frontend gets tokens from the Firebase JS SDK (reCAPTCHA Enterprise in production, a registered debug token under `pnpm dev`; see [`local-setup.md`](local-setup.md)). Backend checks the header before anything else runs and answers a missing or invalid token with:
+Every request must carry a Firebase App Check token for the `pun-agent` project in the `X-Firebase-AppCheck` header. It attests that the request comes from our Firebase-hosted app, so the public Cloud Run URL can't be used to spend the team's Gemini quota directly. Frontend gets tokens from the Firebase JS SDK (reCAPTCHA Enterprise in production, a registered debug token under `pnpm dev`; see [`local-setup.md`](local-setup.md)). Backend checks the header before the request reaches the flow (only CORS runs earlier) and answers a missing or invalid token with:
 
 ```
 401 {"error": "Unauthorized"}
 ```
 
-The response is the same whatever was wrong with the token (missing, malformed, expired, issued for another project), so callers learn nothing from it; Backend logs the actual reason. `APP_CHECK=off` turns the check off for local Backend development only (see [`local-setup.md`](local-setup.md)).
+The response is the same whatever was wrong with the token (missing, malformed, expired, issued for another project), so callers learn nothing from it; Backend logs the actual reason. A valid token proves the request came from a web app registered in the `pun-agent` Firebase project, not which one, and it can be reused until it expires (1 hour). `APP_CHECK=off` turns the check off for local Backend development only (see [`local-setup.md`](local-setup.md)).
 
 The body is Genkit's flow-stream format served as `text/plain`, **not** Server-Sent Events: `error:` isn't an SSE field, so `EventSource` or an SSE library would silently drop failures. Parse it by splitting on the blank line (`\n\n`) that ends each event and switching on its `data: ` / `error: ` prefix. JSON payloads are single-line, since `JSON.stringify` escapes any newline inside them:
 
