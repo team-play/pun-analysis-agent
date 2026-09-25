@@ -14,7 +14,7 @@ We're building a conversational agent that detects and explains puns in text. Th
 |---|---|---|
 | Conversational model | Gemini (Google AI Studio) | Genuinely free tier with real daily quotas — no credit card, doesn't run out mid-semester like trial credits do |
 | Inference hosting | Google Cloud Run (Docker), Python + `uv` + FastAPI + ruff | Always Free tier (2M requests/mo); much faster cold start than Render's free tier; `uv` for fast, reproducible dependency management, `ruff` for lint/format |
-| Backend orchestration | Google Cloud Run (Node) + [Hono](https://hono.dev/) + pnpm + Biome, Genkit added once the `analyze_pun` flow exists | Hono is a lightweight, TS-first web framework (chosen over Express for a more modern API and better exposure to current JS service patterns); Genkit is Google's equivalent of the Vercel AI SDK — unified model API, tool-calling, streaming flows — deploys to Cloud Run with one command |
+| Backend orchestration | Google Cloud Run (Node) + [Hono](https://hono.dev/) + pnpm + Biome, Genkit for the Gemini calls (since the Phase 1 proxy, TASK-7) | Hono is a lightweight, TS-first web framework (chosen over Express for a more modern API and better exposure to current JS service patterns); Genkit is Google's equivalent of the Vercel AI SDK — unified model API, tool-calling, streaming flows — deploys to Cloud Run with one command |
 | Frontend | Vite + React, pnpm + Biome, on Firebase Hosting | Free tier, CDN-backed, git-integrated static hosting for the React chat UI; Vite for fast local dev, Biome for one consistent lint/format tool across both Node packages |
 | Data / Eval | Python + `uv` + [marimo](https://marimo.io/) notebooks | Reactive, git-diffable notebooks for dataset curation and evaluation write-ups |
 
@@ -123,5 +123,7 @@ The only hard dependencies across domains:
 1. **Day one:** agree the `/analyze` request/response schema (Inference ↔ Backend, Data/Eval)
 2. **Before Frontend wires up its streaming display:** agree the `/api/chat` streaming shape (Backend ↔ Frontend)
 3. **Before Frontend builds tool-call rendering:** agree the shape of `tool-call` events within the `/api/chat` Genkit stream (Backend ↔ Frontend) — this is Phase 2 of the progressive-enhancement plan in [`engineering-practices.md`](engineering-practices.md); Phase 1's plain-text stream shape from sync point 2 doesn't need it.
+
+Deploying adds configuration links on top of those contracts, each documented in [`local-setup.md`](local-setup.md): the frontend build needs the backend's Cloud Run URL (`VITE_BACKEND_URL`), the backend's CORS allowlist names the frontend's origin (`backend/src/config.ts`), and from Phase 2 the backend needs Inference's URL (`INFERENCE_URL`).
 
 Everything else — model choice, dataset selection, UI styling — is independently swappable within a domain without breaking another.

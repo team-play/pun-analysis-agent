@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { test } from "node:test";
+import { afterEach, beforeEach, mock, test } from "node:test";
 import { expressHandler } from "@genkit-ai/express";
 import express from "express";
 import { genkit } from "genkit";
+import { logger } from "genkit/logging";
 import type { MockRespond } from "genkit/testing";
 import { Hono } from "hono";
-import { createChatHandler } from "../../src/routes/chat.js";
-import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.js";
+import { createChatHandler } from "../../src/routes/chat.ts";
+import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.ts";
 
 /**
  * `src/routes/chat.ts` hand-replicates Genkit's flow-stream wire format
@@ -19,10 +20,17 @@ import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.js";
  * That hand-replication can silently drift on a future Genkit upgrade, so
  * this file pins it: it runs the *real* `@genkit-ai/express` handler
  * (a devDependency, used only here) against the exact same flow/mock model,
- * and asserts our Hono handler's streamed bytes are identical. If Genkit's
- * wire format ever changes, this test — not a production incident — is
- * what catches it.
+ * and asserts our Hono handler's streamed bytes are identical. Error events
+ * are the one deliberate exception: ours swap in a user-facing message and
+ * drop `details` (see src/routes/chat.ts), so for those only the framing,
+ * the keys and the status have to match. If Genkit's wire format
+ * ever changes, this test — not a production incident — is what catches it.
  */
+
+// Both handlers log flow failures; stubbed so the error-path tests don't
+// print full stack traces.
+beforeEach(() => mock.method(logger, "error", () => {}));
+afterEach(() => mock.restoreAll());
 
 const input = { messages: [{ role: "user", content: "Tell me a pun" }] };
 
@@ -89,11 +97,23 @@ test("Hono handler's success-path bytes match the real @genkit-ai/express handle
 	assert.equal(honoBody, genkitBody);
 });
 
-test("Hono handler's error-path bytes match the real @genkit-ai/express handler's", async () => {
+const parseErrorEvent = (body: string) => {
+	assert.match(body, /^error: .*\n\n$/s);
+	return JSON.parse(body.slice("error: ".length)).error;
+};
+
+// Only a plain Error can be compared here. @genkit-ai/express's exports map
+// lists "default" before "import", so even this ESM test loads its CommonJS
+// build, whose GenkitError is a different class from ours: it reports every
+// GenkitError as INTERNAL. That dropped `details` and preserved statuses hold
+// for real GenkitErrors is pinned in chat.test.ts instead.
+test("Hono handler's error event for a non-Genkit failure keeps Genkit's keys and status", async () => {
 	const { honoBody, genkitBody } = await compareWireBytes(() => {
 		throw new Error("Simulated model failure");
 	});
+	const ours = parseErrorEvent(honoBody);
+	const genkits = parseErrorEvent(genkitBody);
 
-	assert.equal(honoBody, genkitBody);
-	assert.match(honoBody, /^error: /);
+	assert.deepEqual(Object.keys(ours).sort(), Object.keys(genkits).sort());
+	assert.equal(ours.status, genkits.status);
 });

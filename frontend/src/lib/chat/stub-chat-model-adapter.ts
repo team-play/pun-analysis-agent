@@ -4,6 +4,7 @@ import type {
 	ThreadMessage,
 } from "@assistant-ui/react";
 import { phase1TextFixture, phase2ToolCallFixture } from "./fixtures";
+import { getMessageText } from "./message-text";
 
 const STEP_DELAY_MS = 15;
 
@@ -13,12 +14,8 @@ const TOOL_CALL_TRIGGER = "pun";
 const ERROR_TRIGGER = "error";
 
 const lastUserText = (messages: readonly ThreadMessage[]): string => {
-	const lastUser = [...messages].reverse().find((m) => m.role === "user");
-	if (!lastUser) return "";
-	return lastUser.content
-		.filter((part) => part.type === "text")
-		.map((part) => part.text)
-		.join(" ");
+	const lastUser = messages.findLast((m) => m.role === "user");
+	return lastUser ? getMessageText(lastUser) : "";
 };
 
 const delay = (ms: number, abortSignal: AbortSignal): Promise<void> =>

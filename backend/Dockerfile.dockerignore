@@ -1,0 +1,10 @@
+# backend/Dockerfile's build context is the repo root. Send nothing except what
+# the Dockerfile copies, so local files like backend/.env.local (the Gemini key)
+# can't end up in the image, and unrelated changes don't bust the build cache.
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!backend/package.json
+!backend/tsconfig.json
+!backend/src/

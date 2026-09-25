@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { config } from "./config.js";
-import { createChatFlow } from "./flows/chat.js";
-import { ai, chatModel } from "./genkit.js";
-import { createChatHandler } from "./routes/chat.js";
+import { config } from "./config.ts";
+import { createChatFlow } from "./flows/chat.ts";
+import { ai, chatModel } from "./genkit.ts";
+import { createChatHandler } from "./routes/chat.ts";
 
 export const app = new Hono();
 
