@@ -1,11 +1,11 @@
 ---
 id: TASK-13
 title: Deploy backend to Cloud Run via CI
-status: In Progress
+status: Done
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:40'
-updated_date: '2026-09-23 13:29'
+updated_date: '2026-09-25 02:01'
 due_date: '2026-09-21'
 labels: []
 milestone: m-2
@@ -26,17 +26,17 @@ deploy-backend.yml is currently a placeholder, identical in structure to deploy-
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Pushing to main with a change under backend/** builds the container and deploys it to Cloud Run
+- [x] #1 Pushing to main with a change under backend/** builds the container and deploys it to Cloud Run
 - [x] #2 The Cloud Billing account / card-on-file requirement from docs/project-spec.md's stack notes is satisfied for the shared GCP project (or confirmed already satisfied)
-- [ ] #3 The deployed Cloud Run URL responds on whatever backend/ currently exposes (e.g. /health), even before TASK-7's /api/chat route lands
-- [ ] #4 The Gemini API key lives in Secret Manager (secret gemini-api-key-runtime in pun-agent) and reaches the service only via Cloud Run's --set-secrets as GEMINI_API_KEY, never via GitHub; GCP deploy credentials stay in GitHub Secrets (GCP_SA_KEY); both are documented in docs/local-setup.md
+- [x] #3 The deployed Cloud Run URL responds on whatever backend/ currently exposes (e.g. /health), even before TASK-7's /api/chat route lands
+- [x] #4 The Gemini API key lives in Secret Manager (secret gemini-api-key-runtime in pun-agent) and reaches the service only via Cloud Run's --set-secrets as GEMINI_API_KEY, never via GitHub; GCP deploy credentials stay in GitHub Secrets (GCP_SA_KEY); both are documented in docs/local-setup.md
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
-- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -72,4 +72,12 @@ Cleanup policy applied (2026-09-23): keep-5-most-recent (Keep) + delete-older-th
 Reviews (code review high + architectural review; no blockers). Fixed: workflow_dispatch could deploy any branch (now main only); no concurrency (now serialized per ref); no permissions block (contents: read); no test gate before deploy (test job, deploy needs it); IMAGE/SA duplicated project and region (now derived); gha cache unscoped (scope=backend, so TASK-14's image won't clobber it); npm-installing pnpm would break on a +sha512 packageManager suffix (now stripped; kept npm over Corepack because Node stops bundling Corepack from v25); added --frozen-lockfile to pnpm deploy. Checked and NOT a problem: 'legacy deploy may re-resolve versions' (npm has hono 4.13.8, the deployed tree has the locked 4.13.7). Stale allowBuilds '@firebase/util' entry removed; backend/package.json's conflicting packageManager (pnpm@10.18.2) removed. Accepted: root package.json/lockfile in the paths filter redeploys on frontend-only dependency bumps (documented in the workflow).
 
 Follow-ups: (a) the pnpm 12 deploy output contains ~91MB of unreferenced package copies under node_modules/.pnpm/@ and .pnpm/@<scope> (separate files, not hardlinks; enable-global-virtual-store=false doesn't prevent them). Check the real image size in Artifact Registry after the first push; if the waste is there, remove those dirs in the build stage (the architectural review verified the server still works without them). (b) TASK-8 AC #2 needs deploy-frontend.yml to build with VITE_CHAT_ADAPTER=live and VITE_BACKEND_URL=https://pun-agent-backend-203365930808.us-east1.run.app (project number 203365930808); nobody owns that edit yet. (c) TASK-14 (Inference deploy) should get its own runtime SA rather than reuse pun-agent-runtime (which can read the Gemini key), and Phase 2 must set INFERENCE_URL in this workflow's deploy env or analyze_pun falls back to 'undetermined'. (d) Optional: add https://pun-agent.firebaseapp.com (Firebase Hosting's second domain) to backend CORS defaults.
+
+Post-merge verification (2026-09-24): the first real deploy was run 36046598515 (push to main, #35, 6c933b1): test job passed, image built and pushed as backend:6c933b1, deployed as revision pun-agent-backend-00001-fdf, /health smoke test passed (AC #1, #3). The earlier #28 push run 36046277141 ran the old placeholder workflow from its own commit, so it deployed nothing. gcloud run services describe: runs as pun-agent-runtime, GEMINI_API_KEY from secretKeyRef gemini-api-key-runtime:latest, maxScale 1 (AC #4; documented in docs/local-setup.md 'Backend deploy'). Live checks: GET /health 200; CORS preflight from https://pun-agent.web.app returns a matching allow-origin; a real POST /api/chat streamed message chunks then a result event. Follow-up (a): the pushed image is ~92.7 MB compressed; the ~91 MB of unreferenced .pnpm copies is still unmeasured inside it. Follow-up (b) done on the TASK-8 branch; (d) done there too (firebaseapp.com added to CORS defaults, with a test). DoD #1/#2: code and architectural reviews recorded in the notes above; DoD #3: docs follow-up commit shipped in #32.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Backend deploys to Cloud Run from CI: Dockerfile, least-privilege runtime SA, Gemini key via Secret Manager, deploy-backend.yml (PRs build only; main tests, builds, pushes, deploys, smoke-tests /health). Verified by the first real deploy (run 36046598515), gcloud's service description, and live /health, CORS and /api/chat checks.
+<!-- SECTION:FINAL_SUMMARY:END -->
