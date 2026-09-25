@@ -4,6 +4,7 @@ title: 'Decide whether to supplement the food/animal baseline with PR #8''s data
 status: To Do
 assignee: []
 created_date: '2026-09-20 11:05'
+updated_date: '2026-09-25 18:35'
 labels:
   - dataset
 milestone: m-6
@@ -29,3 +30,9 @@ TASK-2.2 covers verifying the food/animal rows already inside semeval2017_task7_
 - [ ] #2 If supplement: the decision states how the two datasets are combined (e.g. concatenated as-is, deduped, reweighted) and which downstream tasks (TASK-16, TASK-2.3, TASK-2.4) consume the combined set
 - [ ] #3 If drop: the decision states what happens to PR #8 and eval/datasets/sentences_animal.csv / sentences_food.csv (e.g. PR closed, files removed, or kept unreferenced)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Update 2026-09-25 (Livia and Prateek): the PR #8 data stays in the repo (eval/datasets/sentences_animal.csv, sentences_food.csv) but no action is taken on it for now -- neither folded in as supplementary data nor dropped. Revisit when animal work starts or class-balance/word-skew concerns become relevant.
+<!-- SECTION:NOTES:END -->
