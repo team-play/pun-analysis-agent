@@ -90,7 +90,7 @@ pnpm dev
 pnpm test
 ```
 
-The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. `/api/chat` requires a Firebase App Check token, exactly as in production (see [`contracts.md`](contracts.md)), so a request from the frontend's `live` mode needs its debug token (see "Frontend" below). To call it without one, e.g. with `curl`, set `APP_CHECK=off` in `backend/.env.local`; the server warns at startup while it's off. Only the exact value `off` disables the check, so a deployed service with no setting is always protected. `pnpm test` never needs `GEMINI_API_KEY` set — it runs against a Genkit test-double model instead (see [`engineering-practices.md`](engineering-practices.md)'s "Backend in isolation" section). Sanity-check the dev server with:
+The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. `/api/chat` requires a Firebase App Check token, exactly as in production (see [`contracts.md`](contracts.md)), so a request from the frontend's `live` mode needs its debug token (see "Frontend" below). To call it without one, e.g. with `curl`, set `APP_CHECK=off` in `backend/.env.local`; the server warns at startup while it's off. Only the exact value `off` disables the check, so a deployed service with no setting is always protected, and on Cloud Run (detected by the `K_SERVICE` variable it always sets) `APP_CHECK=off` makes the server refuse to start, so a revision configured that way never serves traffic. `pnpm test` never needs `GEMINI_API_KEY` set — it runs against a Genkit test-double model instead (see [`engineering-practices.md`](engineering-practices.md)'s "Backend in isolation" section). Sanity-check the dev server with:
 
 ```bash
 curl localhost:8080/health

@@ -7,6 +7,17 @@ const DEFAULT_ALLOWED_ORIGINS = [
 	"https://pun-agent.firebaseapp.com",
 ];
 
+const appCheckOff = process.env.APP_CHECK === "off";
+// Cloud Run sets K_SERVICE in every container; nothing sets it locally. So
+// the opt-out below can't reach production: a revision configured with it
+// fails to start, and Cloud Run keeps serving the previous one.
+if (appCheckOff && process.env.K_SERVICE) {
+	throw new Error(
+		`APP_CHECK=off is for local development only, but this is Cloud Run ` +
+			`(K_SERVICE=${process.env.K_SERVICE}). Remove APP_CHECK from the service.`,
+	);
+}
+
 const parsedAllowedOrigins = process.env.CORS_ORIGIN?.split(",")
 	.map((origin) => origin.trim())
 	.filter(Boolean);
@@ -25,5 +36,5 @@ export const config = {
 	firebaseProjectId: "pun-agent",
 	// Fail-closed: only the exact value "off" (for local dev without a
 	// registered debug token, see docs/local-setup.md) turns App Check off.
-	appCheckEnforced: process.env.APP_CHECK !== "off",
+	appCheckEnforced: !appCheckOff,
 };
