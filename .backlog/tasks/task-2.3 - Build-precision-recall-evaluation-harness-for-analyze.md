@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - Livia
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-23 15:40'
+updated_date: '2026-09-25 18:48'
 labels:
   - dataset
   - evaluation
@@ -31,7 +31,7 @@ Milestone-3.md assigns Data/Eval 'precision/recall on detection' as an ongoing r
 - [ ] #1 Harness calls /analyze for each dataset row via TASK-9's injectable client pattern and records is_pun/pun_type predictions
 - [x] #2 Harness reports precision/recall for is_pun detection, and separately for pun_type classification restricted to true-positive pun rows
 - [x] #3 Harness is runnable via a documented command in eval/README.md
-- [ ] #4 Undetermined predictions (is_pun: null, per docs/contracts.md) are counted and reported separately as coverage, never silently scored as non-puns
+- [x] #4 Undetermined predictions (is_pun: null, per docs/contracts.md) are counted and reported separately as coverage, never silently scored as non-puns
 <!-- AC:END -->
 
 ## Definition of Done
@@ -49,4 +49,6 @@ Addressed an adversarial code review before finalizing: extracted slice_report a
 Addressed yaitorr's PR #23 code review: (1) validate_response() now also rejects is_pun=true responses with a missing/null pun_type (previously only checked the reverse direction), matching load_dataset()'s existing bidirectional enforcement and TASK-2.3's own description; added test_validate_response_rejects_pun_without_type as a regression test, reproducing the reviewer's exact repro case. (2) eval/reports/task-2.3-harness-validation.md and eval/README.md's repro commands switched from PowerShell-only (Push-Location/Pop-Location) to plain bash, matching docs/local-setup.md convention. (3) CI wiring gap was fixed directly on this branch by yaitorr (test-eval job added to .github/workflows/test.yml). (4) inference/main.py's AnalyzeResponse missing sense_source is a pre-existing inference/-side gap, not introduced by this PR; needs its own follow-up once a live run against TASK-16's classifier is attempted. 22/22 tests passing, ruff clean.
 
 Open decisions for Eval (raised by the 2026-09-23 /analyze contract change, for Prateek): (1) compute is_pun precision/recall over determined rows only and report coverage separately, or count undetermined as a miss? (2) an HTTP/transport error from /analyze is a failed run, not an undetermined prediction; the harness calls /analyze directly, so it must not copy Backend's 'error becomes undetermined' mapping even though AC #1 follows TASK-9's client pattern. Note: the harness merged from main currently raises EvaluationError on is_pun: null (validate_response in eval/evaluate_dataset.py), so an undetermined /analyze result fails the run today; AC #4 needs that validation relaxed alongside the coverage reporting.
+
+Open decisions resolved in PR #31 (2026-09-25, option C): (1) validate_response accepts the undetermined result (is_pun and confidence null together, with null pun_type/sense_source, words_involved [] and explanation ''), and each slice scores is_pun/pun_type over determined rows only, reports undetermined_rows and detection_coverage (determined / successful rows) beside them, and adds is_pun_end_to_end with undetermined scored as not-a-pun. (2) Transport errors stay request_errors; the old coverage field is renamed response_rate so it isn't confused with detection_coverage. Fixture run unchanged (4,030/4,030, 0 errors, F1 1.0, 0 undetermined). 28 tests, each new scoring/validation branch mutation-checked; ruff clean.
 <!-- SECTION:NOTES:END -->

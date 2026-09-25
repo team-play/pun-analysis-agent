@@ -25,7 +25,14 @@ License: SemEval-2017 Task 7 data is distributed by the task organizers for rese
 
 ## Precision/recall evaluation harness
 
-`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run. The analyzer is an injectable callable (a live HTTP call or a fixture), so it can run against a real Inference deployment or a deterministic fixture without changing the scoring logic.
+`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run.
+
+An undetermined response (`is_pun: null`, Inference couldn't judge the text) is a valid answer, not a request failure. Each slice reports it three ways:
+- `is_pun` and `pun_type` are scored over determined rows only, measuring the detector's quality when it does answer.
+- `undetermined_rows` and `detection_coverage` (determined rows / successful rows) show how often it answered at all. Always read coverage next to `is_pun`, since answering undetermined whenever unsure would otherwise inflate precision/recall.
+- `is_pun_end_to_end` scores undetermined as "not a pun", which is what a chat user sees.
+
+`response_rate` is the separate share of rows whose request succeeded; transport failures (HTTP errors, timeouts, malformed JSON) are failed requests, never undetermined predictions. The analyzer is an injectable callable (a live HTTP call or a fixture), so it can run against a real Inference deployment or a deterministic fixture without changing the scoring logic.
 
 Run against a live Inference instance:
 

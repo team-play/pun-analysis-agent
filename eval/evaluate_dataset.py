@@ -100,16 +100,16 @@ def validate_response(response: Any) -> dict[str, Any]:
     if missing_fields:
         raise EvaluationError(f"response is missing fields: {sorted(missing_fields)}")
     is_pun = response.get("is_pun")
-    if not isinstance(is_pun, bool):
-        raise EvaluationError(f"response is_pun must be a boolean, got {is_pun!r}")
+    if is_pun is not None and not isinstance(is_pun, bool):
+        raise EvaluationError(f"response is_pun must be a boolean or null, got {is_pun!r}")
     pun_type = response.get("pun_type")
     if pun_type is not None and (
         not isinstance(pun_type, str) or pun_type not in ALLOWED_PUN_TYPES
     ):
         raise EvaluationError(f"response has invalid pun_type: {pun_type!r}")
-    if not response["is_pun"] and pun_type is not None:
-        raise EvaluationError("response must use pun_type=null when is_pun is false")
-    if response["is_pun"] and pun_type is None:
+    if not is_pun and pun_type is not None:
+        raise EvaluationError("response must use pun_type=null unless is_pun is true")
+    if is_pun and pun_type is None:
         raise EvaluationError("response must set pun_type when is_pun is true")
     words_involved = response.get("words_involved")
     if not isinstance(words_involved, list) or not all(
@@ -119,7 +119,10 @@ def validate_response(response: Any) -> dict[str, Any]:
     if not isinstance(response.get("explanation"), str):
         raise EvaluationError("response explanation must be a string")
     confidence = response.get("confidence")
-    if (
+    if is_pun is None:
+        if confidence is not None:
+            raise EvaluationError("response must use confidence=null when is_pun is null")
+    elif (
         isinstance(confidence, bool)
         or not isinstance(confidence, (int, float))
         or not 0 <= confidence <= 1
@@ -128,8 +131,12 @@ def validate_response(response: Any) -> dict[str, Any]:
     sense_source = response.get("sense_source")
     if sense_source is not None and sense_source not in ALLOWED_SENSE_SOURCES:
         raise EvaluationError(f"response has invalid sense_source: {sense_source!r}")
-    if not response["is_pun"] and sense_source is not None:
-        raise EvaluationError("response must use sense_source=null when is_pun is false")
+    if not is_pun and sense_source is not None:
+        raise EvaluationError("response must use sense_source=null unless is_pun is true")
+    if is_pun is None and (words_involved or response["explanation"]):
+        raise EvaluationError(
+            "response must use words_involved=[] and explanation='' when is_pun is null"
+        )
     return response
 
 
@@ -209,22 +216,38 @@ def _slice_report(outcomes: list[tuple[DatasetRow, dict[str, Any] | None]]) -> d
 
     A prediction of None means the analyzer call for that row failed; those rows
     count toward `rows` and `request_errors` but are excluded from the metrics.
+
+    An undetermined prediction (is_pun: null) is a valid answer, not a failure.
+    `is_pun` and `pun_type` are scored over determined rows only, with
+    `detection_coverage` reporting how many rows were determined, so a detector
+    can't look better by answering undetermined more often. `is_pun_end_to_end`
+    scores undetermined as "not a pun" instead, which is what a chat user sees.
     """
 
-    selected_rows = [row for row, prediction in outcomes if prediction is not None]
-    selected_predictions = [prediction for _, prediction in outcomes if prediction is not None]
+    answered = [(row, prediction) for row, prediction in outcomes if prediction is not None]
+    determined = [
+        (row, prediction) for row, prediction in answered if prediction["is_pun"] is not None
+    ]
+    determined_rows = [row for row, _ in determined]
+    determined_predictions = [prediction for _, prediction in determined]
     row_count = len(outcomes)
-    successful_count = len(selected_rows)
+    answered_count = len(answered)
     return {
         "rows": row_count,
-        "successful_rows": successful_count,
-        "request_errors": row_count - successful_count,
-        "coverage": successful_count / row_count if row_count else 0.0,
+        "successful_rows": answered_count,
+        "request_errors": row_count - answered_count,
+        "response_rate": answered_count / row_count if row_count else 0.0,
+        "undetermined_rows": answered_count - len(determined),
+        "detection_coverage": len(determined) / answered_count if answered_count else 0.0,
         "is_pun": _binary_metrics(
-            (row.is_pun for row in selected_rows),
-            (prediction["is_pun"] for prediction in selected_predictions),
+            (row.is_pun for row in determined_rows),
+            (prediction["is_pun"] for prediction in determined_predictions),
         ),
-        "pun_type": _type_metrics(selected_rows, selected_predictions),
+        "is_pun_end_to_end": _binary_metrics(
+            (row.is_pun for row, _ in answered),
+            (prediction["is_pun"] is True for _, prediction in answered),
+        ),
+        "pun_type": _type_metrics(determined_rows, determined_predictions),
     }
 
 
