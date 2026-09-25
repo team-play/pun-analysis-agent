@@ -31,9 +31,18 @@ POST /analyze
 
 ```
 POST /api/chat
+X-Firebase-AppCheck: <Firebase App Check token>
 { "messages": [{ "role": string, "content": string }] }
 → streamed response (Genkit flow stream format)
 ```
+
+Every request must carry a Firebase App Check token for the `pun-agent` project in the `X-Firebase-AppCheck` header. It attests that the request comes from our Firebase-hosted app, so the public Cloud Run URL can't be used to spend the team's Gemini quota directly. Frontend gets tokens from the Firebase JS SDK (reCAPTCHA Enterprise in production, a registered debug token under `pnpm dev`; see [`local-setup.md`](local-setup.md)). Backend checks the header before anything else runs and answers a missing or invalid token with:
+
+```
+401 {"error": "Unauthorized"}
+```
+
+The response is the same whatever was wrong with the token (missing, malformed, expired, issued for another project), so callers learn nothing from it; Backend logs the actual reason. `APP_CHECK=off` turns the check off for local Backend development only (see [`local-setup.md`](local-setup.md)).
 
 The body is Genkit's flow-stream format served as `text/plain`, **not** Server-Sent Events: `error:` isn't an SSE field, so `EventSource` or an SSE library would silently drop failures. Parse it by splitting on the blank line (`\n\n`) that ends each event and switching on its `data: ` / `error: ` prefix. JSON payloads are single-line, since `JSON.stringify` escapes any newline inside them:
 
@@ -66,4 +75,4 @@ A reply that fails after streaming has started (the `200` is already sent, so th
 error: { "error": { "status": string, "message": string } }
 ```
 
-`message` is a user-facing sentence that Frontend can display as-is: Backend never forwards an upstream error's own message or details, and logs those server-side instead. `status` is Genkit's status code, kept for diagnostics (e.g. `UNAVAILABLE` or `DEADLINE_EXCEEDED` when the model is overloaded or slow, `RESOURCE_EXHAUSTED` when quota runs out, `INTERNAL` for anything unexpected); Frontend shouldn't branch on specific values. In Phase 2, a turn that fails after a `toolRequest` chunk ends with this event and no matching `toolResponse`, so Frontend has to settle that pending tool call itself. A request rejected before streaming starts (e.g. a body that doesn't match the shape above) gets a non-2xx JSON response instead, and a client that disconnects mid-reply gets no error event.
+`message` is a user-facing sentence that Frontend can display as-is: Backend never forwards an upstream error's own message or details, and logs those server-side instead. `status` is Genkit's status code, kept for diagnostics (e.g. `UNAVAILABLE` or `DEADLINE_EXCEEDED` when the model is overloaded or slow, `RESOURCE_EXHAUSTED` when quota runs out, `INTERNAL` for anything unexpected); Frontend shouldn't branch on specific values. In Phase 2, a turn that fails after a `toolRequest` chunk ends with this event and no matching `toolResponse`, so Frontend has to settle that pending tool call itself. A request rejected before streaming starts (a missing or invalid App Check token, or a body that doesn't match the shape above) gets a non-2xx JSON response instead, and a client that disconnects mid-reply gets no error event.
