@@ -23,11 +23,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Vite inlines these at build time. They live here rather than in
       # frontend/.env.production so only the deployed site talks to the real
-      # Backend; local builds and CI tests stay on the stub.
+      # Backend; local builds and CI tests stay on the stub. The URL follows
+      # deploy-backend.yml's SERVICE, REGION and PROJECT_ID (as its project
+      # number, 203365930808); update it if those change.
       - run: pnpm --filter frontend run build
         env:
           VITE_CHAT_ADAPTER: live
           VITE_BACKEND_URL: https://pun-agent-backend-203365930808.us-east1.run.app
+      # An unset VITE_CHAT_ADAPTER silently builds the stub, so fail the deploy
+      # if the Backend URL didn't make it into the bundle.
+      - run: grep -rqF pun-agent-backend-203365930808.us-east1.run.app frontend/dist/assets
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

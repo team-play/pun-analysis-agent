@@ -18,15 +18,16 @@ test("CORS allows the Frontend dev origin (localhost:5173)", async () => {
 	);
 });
 
-test("CORS allows the deployed Firebase Hosting origin", async () => {
-	const res = await app.request("/health", {
-		headers: { Origin: "https://pun-agent.web.app" },
+// Firebase Hosting serves the same site on both domains.
+for (const origin of [
+	"https://pun-agent.web.app",
+	"https://pun-agent.firebaseapp.com",
+]) {
+	test(`CORS allows the deployed Firebase Hosting origin ${origin}`, async () => {
+		const res = await app.request("/health", { headers: { Origin: origin } });
+		assert.equal(res.headers.get("access-control-allow-origin"), origin);
 	});
-	assert.equal(
-		res.headers.get("access-control-allow-origin"),
-		"https://pun-agent.web.app",
-	);
-});
+}
 
 test("CORS omits the allow-origin header for an unlisted origin", async () => {
 	const res = await app.request("/health", {
