@@ -2,7 +2,7 @@
 id: TASK-2.1
 title: Fix eval dataset schema and document provenance
 status: Done
-assignee: []
+assignee: [Livia]
 created_date: '2026-09-20 10:04'
 updated_date: '2026-09-20 10:15'
 labels:

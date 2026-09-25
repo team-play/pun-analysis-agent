@@ -20,7 +20,7 @@ Check for each of these, in order, and note what's missing:
 | Tool | Check |
 |---|---|
 | git | `git --version` |
-| Node.js | `node --version` (need `>=22`, per the `engines` field in the root [`package.json`](../package.json)) |
+| Node.js | `node --version` (need `>=24`, per the `engines` field in the root [`package.json`](../package.json)). An older Node counts as missing: the backend runs its TypeScript directly on Node, so anything older fails with `ERR_UNKNOWN_FILE_EXTENSION ".ts"` |
 | pnpm | `pnpm --version` |
 | uv | `uv --version` |
 
@@ -38,15 +38,18 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 **Windows/WSL2 or native Linux (apt):**
 ```bash
-sudo apt update && sudo apt install -y git nodejs npm
+sudo apt update && sudo apt install -y git curl
+# Ubuntu's own nodejs package is too old; NodeSource's repo provides Node 24 (npm included)
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+sudo apt install -y nodejs
 npm install -g pnpm
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 **Windows native PowerShell:**
 ```powershell
-winget install Git.Git OpenJS.NodeJS
-corepack enable pnpm
+winget install Git.Git OpenJS.NodeJS.LTS
+npm install -g pnpm
 irm https://astral.sh/uv/install.ps1 | iex
 ```
 If the `irm ... | iex` command is blocked, it's PowerShell's execution policy — the user will need to relax it for the current process (`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`) or install `uv` via `winget install astral-sh.uv` instead.

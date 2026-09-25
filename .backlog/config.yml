@@ -14,3 +14,7 @@ bypass_git_hooks: false
 check_active_branches: true
 active_branch_days: 30
 task_prefix: "task"
+definition_of_done:
+  - "Code review (test coverage + human-readable code) done per AGENTS.md's Code review section"
+  - "Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target"
+  - "Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed"

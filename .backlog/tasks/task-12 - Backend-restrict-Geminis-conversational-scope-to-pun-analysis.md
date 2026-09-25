@@ -4,7 +4,7 @@ title: 'Backend: restrict Gemini''s conversational scope to pun analysis'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-17 23:41'
+updated_date: '2026-09-22 10:37'
 due_date: '2026-09-21'
 labels: []
 milestone: m-5
@@ -30,3 +30,10 @@ Transitional slice ahead of full evaluation: today's Phase 1/2 proxy lets Gemini
 - [ ] #3 On-topic pun requests still flow through analyze_pun exactly as before — the restriction doesn't change tool-calling behavior
 - [ ] #4 Behavior is covered by a Backend test asserting the system instruction is present/applied, run against a Genkit test double per docs/engineering-practices.md's isolation rule
 <!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+<!-- DOD:END -->

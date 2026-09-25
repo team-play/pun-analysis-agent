@@ -38,3 +38,21 @@ Columns follow the `semeval2017_task7_puns.csv` convention above, plus one extra
 | `category` | `animal` \| `food` — matches the file, since each file is domain-pure. |
 | `text` | The sentence. |
 | `pun_target` | The word the pun is built around (e.g. `otter`, `dough`). No SemEval equivalent; named `pun_target` rather than `word` to leave room for multi-word spans, though every value here is currently a single word. |
+
+## Precision/recall evaluation harness
+
+`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run. The analyzer is an injectable callable (a live HTTP call or a fixture), so it can run against a real Inference deployment or a deterministic fixture without changing the scoring logic.
+
+Run against a live Inference instance:
+
+```bash
+uv run python evaluate_dataset.py --endpoint http://127.0.0.1:8000/analyze
+```
+
+Run against gold-label fixtures to sanity-check the evaluator itself (no HTTP calls):
+
+```bash
+uv run python evaluate_dataset.py --fixture
+```
+
+Both report a `food_baseline` slice (`category` in `food`/`animal/food`) and an `all_categories` slice. Use `--dataset` to point at a different CSV and `--output` to also write the JSON result to a file. See [`reports/task-2.3-harness-validation.md`](reports/task-2.3-harness-validation.md) for a recorded fixture-mode self-validation run against the full dataset; a live run against a real `/analyze` classifier is blocked on TASK-16.
