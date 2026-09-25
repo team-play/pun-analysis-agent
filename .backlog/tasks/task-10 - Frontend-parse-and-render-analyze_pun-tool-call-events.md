@@ -4,7 +4,7 @@ title: 'Frontend: parse and render analyze_pun tool-call events'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-24 01:49'
+updated_date: '2026-09-25 18:27'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -21,6 +21,8 @@ ordinal: 11000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Extends the Phase 1 ChatModelAdapter to also parse tool-call stream events per the finalized shape in docs/contracts.md (sync point 3 per docs/project-spec.md, closed) and docs/design/frontend-design.md's 'Tool-call visibility' section. A pun explanation needs to read as clearly distinct from plain chat text.
+
+Error scope: failures of /api/chat itself (network, non-2xx, quota and other Backend error events, cut-off streams, user stop) already show user-facing text via TASK-24; this task only covers how those failures settle an in-flight analyze_pun call. Inference failures and timeouts never reach Frontend as errors: Backend returns the undetermined result instead (TASK-9 AC #4), rendered per AC #6.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -31,6 +33,8 @@ Extends the Phase 1 ChatModelAdapter to also parse tool-call stream events per t
 - [ ] #4 ChatModelAdapter mints a toolCallId on each analyze_pun toolRequest chunk and attaches the next toolResponse chunk's output to that same call, per docs/contracts.md's correlation rule, producing assistant-ui's {type: 'tool-call', toolCallId, toolName, args, result} part shape
 - [ ] #5 An llm_fallback result (empty explanation) renders as senses supplied by Gemini at lower confidence, backed by a stub fixture
 - [ ] #6 An undetermined result (is_pun: null) renders as 'Inference couldn't analyze this' with no confidence shown, checked with an explicit is_pun === null test (a truthiness check would show it as 'not a pun'), backed by a stub fixture; tool results are typed with a shared AnalyzeResult type (is_pun: boolean | null, confidence: number | null) so the compiler catches unhandled nulls
+- [ ] #7 A turn that ends after an analyze_pun toolRequest but before its toolResponse never leaves the call running: a Backend error event, dropped connection or missing result settles it as failed ('couldn't finish'), and a user stop settles it as cancelled; TASK-24's error box and wording are unchanged. Unit-tested with fixture streams that end right after a toolRequest, and each case checked in the running UI
+- [ ] #8 A slow analyze_pun stays visibly running with no Frontend timeout of its own; the wait is bounded by Backend's Inference timeout (TASK-9 AC #5, recorded in docs/contracts.md)
 <!-- AC:END -->
 
 ## Definition of Done
