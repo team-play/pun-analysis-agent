@@ -115,7 +115,7 @@ Opens the dev server at `http://localhost:5173`. `pnpm test` runs Vitest + React
 VITE_CHAT_ADAPTER=live VITE_BACKEND_URL=http://localhost:8080 pnpm dev
 ```
 
-The frontend must stay on `http://localhost:5173`: that's the dev origin Backend's CORS allowlist accepts by default (`CORS_ORIGIN` in `backend/` overrides it).
+The frontend must stay on `http://localhost:5173`: that's the dev origin Backend's CORS allowlist accepts by default (alongside the two deployed Firebase Hosting domains, `pun-agent.web.app` and `pun-agent.firebaseapp.com`) (`CORS_ORIGIN` in `backend/` overrides it).
 
 ## Eval (`eval/`)
 
