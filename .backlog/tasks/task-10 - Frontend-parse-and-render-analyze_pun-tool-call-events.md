@@ -4,7 +4,7 @@ title: 'Frontend: parse and render analyze_pun tool-call events'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-24 01:49'
+updated_date: '2026-09-25 02:24'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -44,4 +44,6 @@ Extends the Phase 1 ChatModelAdapter to also parse tool-call stream events per t
 Open contract question found in PR #27's architectural review (2026-09-23), recorded here rather than solved in TASK-8: docs/contracts.md's Phase 2 paragraph shows tool chunks as bare {"content": [...]} and says Backend 'doesn't re-wrap them', but backend/src/routes/chat.ts wraps every chunk as data: {"message": <chunk>}. So in Phase 2, tool chunks would arrive as data: {"message": {"content": [{"toolRequest": ...}]}}, and if the Phase 2 flow forwards Genkit's generate chunks instead of chunk.text, text chunks become objects too. Today's adapter (live-chat-model-adapter.ts: text + event.message) and GenkitFlowEvent's string type would then render '[object Object]' rather than fail loudly. Before implementing: agree the Phase 2 envelope and text-chunk shape with TASK-9 (Backend), update contracts.md's Phase 2 paragraph (contracts.md now marks message: string as Phase 1 only), and widen GenkitFlowEvent to match. Needs the architectural review in DoD #2.
 
 Also from PR #27 review (2026-09-23): frontend/src/lib/chat/message-text.ts's getMessageText keeps only text parts, and live-chat-model-adapter.ts applies it to every message in history on each turn. Once assistant messages carry analyze_pun tool-call parts, resending history this way silently strips the tool call and its result, so Gemini loses that context on the next turn. Revisit this mapping together with the Phase 2 envelope above.
+
+Deploy-order risk (2026-09-24, from TASK-8's architectural review): since TASK-8, the deployed site runs the Phase 1 live adapter, and deploy-backend.yml ships every backend/** push to main. So once TASK-9 merges, the live site receives the Phase 2 stream before this task updates the adapter; with the envelope question above, tool or text chunks could render as '[object Object]'. Decided with @yaisiel.torres: accepted, not a TASK-9 criterion or an engineering-practices exception, because TASK-9 and TASK-10 are expected to land back to back. Keep the gap short: pick this up right after TASK-9, and check the deployed site after TASK-9's backend deploy.
 <!-- SECTION:NOTES:END -->
