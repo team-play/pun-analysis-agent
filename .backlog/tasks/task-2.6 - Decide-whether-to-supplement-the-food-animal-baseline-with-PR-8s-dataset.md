@@ -1,10 +1,10 @@
 ---
 id: TASK-2.6
 title: 'Decide whether to supplement the food/animal baseline with PR #8''s dataset'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-20 11:05'
-updated_date: '2026-09-25 18:38'
+updated_date: '2026-09-25 18:39'
 labels:
   - dataset
 milestone: m-6
@@ -37,3 +37,9 @@ TASK-2.2 covers verifying the food/animal rows already inside semeval2017_task7_
 <!-- SECTION:NOTES:BEGIN -->
 Update 2026-09-25 (Livia and Prateek): the PR #8 data stays in the repo (eval/datasets/sentences_animal.csv, sentences_food.csv) but no action is taken on it for now -- neither folded in as supplementary data nor dropped. Revisit when animal work starts or class-balance/word-skew concerns become relevant.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Livia and Prateek chose to defer: PR #8's datasets (eval/datasets/sentences_animal.csv, sentences_food.csv) stay in the repo untouched, neither folded in nor dropped. Revisit when animal work starts or the class-balance and word-skew concerns become relevant. SemEval was assessed as fine for classification and remains the classifier's data source.
+<!-- SECTION:FINAL_SUMMARY:END -->
