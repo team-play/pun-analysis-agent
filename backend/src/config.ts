@@ -18,4 +18,10 @@ export const config = {
 		parsedAllowedOrigins && parsedAllowedOrigins.length > 0
 			? parsedAllowedOrigins
 			: DEFAULT_ALLOWED_ORIGINS,
+	// The Firebase project App Check tokens must be issued for, the same one
+	// deploy-backend.yml deploys to and Firebase Hosting serves Frontend from.
+	firebaseProjectId: "pun-agent",
+	// Fail-closed: only the exact value "off" (for local dev without a
+	// registered debug token, see docs/local-setup.md) turns App Check off.
+	appCheckEnforced: process.env.APP_CHECK !== "off",
 };

@@ -2,6 +2,7 @@ packages:
   - "frontend"
   - "backend"
 allowBuilds:
+  '@firebase/util': false
   # protobufjs is a transitive dep of genkit's OpenTelemetry plumbing, not
   # something our code calls directly — its postinstall/build step isn't
   # needed for the published package to work as a dependency, so left
@@ -15,6 +16,11 @@ ignoredOptionalDependencies:
   # keeps the Cloud Run image (and every cold start) much smaller. Verified by
   # running the server from the resulting production tree (TASK-13).
   - "@genkit-ai/firebase"
+  # Optional dependencies of firebase-admin (with google-gax and gRPC behind
+  # them). The backend only uses firebase-admin/app-check, which never loads
+  # either, and firebase-admin only needs them for getFirestore()/getStorage().
+  - "@google-cloud/firestore"
+  - "@google-cloud/storage"
 overrides:
   # Pins @dotenvx/dotenvx's transitive systeminformation dependency to a
   # release old enough to clear pnpm's minimumReleaseAge supply-chain
