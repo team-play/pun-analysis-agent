@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - "frontend/**"
+      # The build env below is part of the frontend build, so changing it
+      # should redeploy too.
+      - ".github/workflows/deploy-frontend.yml"
 
 jobs:
   deploy:
@@ -18,7 +21,13 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Vite inlines these at build time. They live here rather than in
+      # frontend/.env.production so only the deployed site talks to the real
+      # Backend; local builds and CI tests stay on the stub.
       - run: pnpm --filter frontend run build
+        env:
+          VITE_CHAT_ADAPTER: live
+          VITE_BACKEND_URL: https://pun-agent-backend-203365930808.us-east1.run.app
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
