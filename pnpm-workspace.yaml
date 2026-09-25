@@ -2,6 +2,8 @@ packages:
   - "frontend"
   - "backend"
 allowBuilds:
+  # Its postinstall writes Firebase web-app config for Firebase App Hosting's
+  # auto-init. It arrives through firebase-admin, which doesn't use that.
   '@firebase/util': false
   # protobufjs is a transitive dep of genkit's OpenTelemetry plumbing, not
   # something our code calls directly — its postinstall/build step isn't
@@ -11,10 +13,12 @@ allowBuilds:
 ignoredOptionalDependencies:
   # An optional dependency of @genkit-ai/core that pulls in firebase-admin,
   # googleapis and Google Cloud telemetry exporters (~430MB of the backend's
-  # ~610MB production node_modules). The backend uses neither Firebase nor
-  # Cloud telemetry, and Genkit only loads it when present, so skipping it
-  # keeps the Cloud Run image (and every cold start) much smaller. Verified by
-  # running the server from the resulting production tree (TASK-13).
+  # ~610MB production node_modules). The backend uses neither Genkit's
+  # Firebase integration nor Cloud telemetry, and Genkit only loads it when
+  # present, so skipping it keeps the Cloud Run image (and every cold start)
+  # much smaller. Verified by running the server from the resulting
+  # production tree (TASK-13). firebase-admin itself is now a direct
+  # dependency, for App Check (TASK-25), minus the two entries below.
   - "@genkit-ai/firebase"
   # Optional dependencies of firebase-admin (with google-gax and gRPC behind
   # them). The backend only uses firebase-admin/app-check, which never loads

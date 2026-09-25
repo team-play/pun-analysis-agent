@@ -9,7 +9,10 @@ import {
 	recordedErrorStream,
 	recordedPhase1Stream,
 } from "./fixtures/recorded-genkit-streams";
-import { createLiveChatModelAdapter } from "./live-chat-model-adapter";
+import {
+	APP_CHECK_TIMEOUT_MS,
+	createLiveChatModelAdapter,
+} from "./live-chat-model-adapter";
 
 const CHAT_URL = "http://backend.test/api/chat";
 const APP_CHECK_TOKEN = "test-app-check-token";
@@ -102,7 +105,7 @@ describe("createLiveChatModelAdapter", () => {
 		});
 	});
 
-	it("sends a fresh App Check token with every request, per docs/contracts.md", async () => {
+	it("gets an App Check token for every request, per docs/contracts.md", async () => {
 		const fetchMock = mockFetch(new Response(recordedPhase1Stream));
 		const getAppCheckToken = vi
 			.fn()
@@ -207,6 +210,45 @@ describe("createLiveChatModelAdapter", () => {
 			expect(error.message).toBe(NO_REPLY);
 			expect(logError).toHaveBeenCalledWith(attestationFailed);
 			expect(fetchMock).not.toHaveBeenCalled();
+		});
+
+		it("rethrows an abort untouched when the user stops while the App Check token is still loading", async () => {
+			const fetchMock = mockFetch(new Response(recordedPhase1Stream));
+			const controller = new AbortController();
+			// e.g. an ad-blocker stopped the reCAPTCHA script loading: the SDK
+			// then never settles, so only the user's stop can end the run.
+			const gen = run(
+				[message("user", "hi")],
+				controller.signal,
+				() => new Promise<string>(() => {}),
+			);
+
+			const next = gen.next();
+			controller.abort();
+
+			await expect(next).rejects.toMatchObject({ name: "AbortError" });
+			expect(fetchMock).not.toHaveBeenCalled();
+			expect(logError).not.toHaveBeenCalled();
+		});
+
+		it("gives up with a user-facing message when the App Check token never arrives", async () => {
+			vi.useFakeTimers();
+			try {
+				const fetchMock = mockFetch(new Response(recordedPhase1Stream));
+				const gen = run(
+					[message("user", "hi")],
+					undefined,
+					() => new Promise<string>(() => {}),
+				);
+
+				const failed = failureOf(gen);
+				await vi.advanceTimersByTimeAsync(APP_CHECK_TIMEOUT_MS);
+
+				expect((await failed).message).toBe(NO_REPLY);
+				expect(fetchMock).not.toHaveBeenCalled();
+			} finally {
+				vi.useRealTimers();
+			}
 		});
 
 		it("shows a user-facing message on a non-2xx response, logging its status and body", async () => {

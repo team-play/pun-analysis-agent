@@ -15,12 +15,13 @@ app.use("*", cors({ origin: config.allowedOrigins }));
 app.get("/health", (c) => c.json({ status: "ok" }));
 
 // Registered after CORS, so a preflight (which never carries the token) is
-// answered before this runs.
+// answered before this runs. Covers all of /api/*, so a new endpoint there
+// is protected without anyone having to remember it.
 if (config.appCheckEnforced) {
-	app.use("/api/chat", appCheck(verifyAppCheckToken));
+	app.use("/api/*", appCheck(verifyAppCheckToken));
 } else {
 	logger.warn(
-		"APP_CHECK=off: /api/chat accepts requests without an App Check token. " +
+		"APP_CHECK=off: /api/* accepts requests without an App Check token. " +
 			"For local development only; never set it on a deployed service.",
 	);
 }

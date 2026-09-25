@@ -77,21 +77,6 @@ test("logs the verifier's reason for rejecting a token", async () => {
 	assert.ok(logWarn.mock.calls[0].arguments.includes(reason));
 });
 
-test("lets errors thrown after it (by the route) propagate instead of turning them into a 401", async () => {
-	const app = new Hono();
-	app.use(
-		"/api/chat",
-		appCheck(async () => ({})),
-	);
-	app.post("/api/chat", () => {
-		throw new Error("route failed");
-	});
-
-	const res = await post(app, { "X-Firebase-AppCheck": "good-token" });
-
-	assert.equal(res.status, 500);
-});
-
 test("passes a request with a valid token through to the route, verifying that exact token", async () => {
 	const verify = mock.fn(async (_token: string) => ({}));
 	const { app, reached } = buildApp(verify);

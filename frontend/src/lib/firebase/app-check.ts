@@ -1,9 +1,9 @@
-import type { AppCheck } from "firebase/app-check";
-
 // Public by design: Firebase web config and the reCAPTCHA site key ship in
 // every Firebase app's bundle. What stops misuse is App Check itself, since
 // the key only yields tokens on its allowlisted domains (pun-agent.web.app,
-// pun-agent.firebaseapp.com). See docs/local-setup.md.
+// pun-agent.firebaseapp.com). See docs/local-setup.md. Backend only accepts
+// tokens for this project (firebaseProjectId in backend/src/config.ts), so
+// change the two together.
 const FIREBASE_CONFIG = {
 	apiKey: "AIzaSyCFD-13PZQn1zET3mVtNvlVg5II2pM0fzo",
 	authDomain: "pun-agent.firebaseapp.com",
@@ -20,12 +20,13 @@ declare global {
 	var FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean | undefined;
 }
 
-const initAppCheck = async (): Promise<AppCheck> => {
+/** Starts App Check and resolves to a function returning a current token. */
+const initAppCheck = async (): Promise<() => Promise<string>> => {
 	// Imported here rather than at the top so only the live adapter loads the
 	// SDK: stub builds and tests never fetch it or reCAPTCHA.
 	const [
 		{ initializeApp },
-		{ initializeAppCheck, ReCaptchaEnterpriseProvider },
+		{ getToken, initializeAppCheck, ReCaptchaEnterpriseProvider },
 	] = await Promise.all([import("firebase/app"), import("firebase/app-check")]);
 
 	// `pnpm dev` can't pass reCAPTCHA (localhost isn't an allowlisted domain),
@@ -37,10 +38,11 @@ const initAppCheck = async (): Promise<AppCheck> => {
 			import.meta.env.VITE_APPCHECK_DEBUG_TOKEN || true;
 	}
 
-	return initializeAppCheck(initializeApp(FIREBASE_CONFIG), {
+	const appCheck = initializeAppCheck(initializeApp(FIREBASE_CONFIG), {
 		provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
 		isTokenAutoRefreshEnabled: true,
 	});
+	return async () => (await getToken(appCheck)).token;
 };
 
 /**
@@ -50,13 +52,10 @@ const initAppCheck = async (): Promise<AppCheck> => {
  * per request is cheap.
  */
 export const startAppCheck = (): (() => Promise<string>) => {
-	const appCheck = initAppCheck();
+	const started = initAppCheck();
 	// A failure here surfaces through the token getter below, on the first
 	// message; this only keeps it from also being an unhandled rejection.
-	appCheck.catch(() => {});
+	started.catch(() => {});
 
-	return async () => {
-		const { getToken } = await import("firebase/app-check");
-		return (await getToken(await appCheck)).token;
-	};
+	return async () => (await started)();
 };

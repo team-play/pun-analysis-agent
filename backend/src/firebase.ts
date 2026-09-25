@@ -2,7 +2,7 @@ import { initializeApp } from "firebase-admin/app";
 import { type AppCheck, getAppCheck } from "firebase-admin/app-check";
 import { config } from "./config.ts";
 
-let appCheck: AppCheck | undefined;
+let appCheckService: AppCheck | undefined;
 
 /**
  * The real App Check verifier: checks the token's signature against Google's
@@ -13,8 +13,8 @@ let appCheck: AppCheck | undefined;
 export const verifyAppCheckToken = (token: string) => {
 	// An explicit projectId means firebase-admin never has to look it up from
 	// credentials; verifying needs only the public keys, not a service account.
-	appCheck ??= getAppCheck(
+	appCheckService ??= getAppCheck(
 		initializeApp({ projectId: config.firebaseProjectId }),
 	);
-	return appCheck.verifyToken(token);
+	return appCheckService.verifyToken(token);
 };

@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { app } from "../src/app.ts";
+
+// These tests exercise the real app, whose /api/chat reaches live Gemini
+// unless App Check stops it. So make sure a developer's own APP_CHECK=off
+// (or GEMINI_API_KEY) can't turn a rejected request into a real call:
+// config.ts reads APP_CHECK at import, hence the import after this.
+delete process.env.APP_CHECK;
+const { app } = await import("../src/app.ts");
 
 test("GET /health returns ok", async () => {
 	const res = await app.request("/health");

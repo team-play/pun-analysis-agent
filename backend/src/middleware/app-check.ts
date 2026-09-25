@@ -32,6 +32,6 @@ export const appCheck = (verify: AppCheckVerifier) =>
 			return c.json(UNAUTHORIZED, 401);
 		}
 
-		// Outside the try, so a later handler's error isn't reported as a 401.
+		// Outside the try: only verification failures mean 401.
 		await next();
 	});
