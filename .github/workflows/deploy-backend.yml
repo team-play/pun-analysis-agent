@@ -3,8 +3,9 @@ name: Deploy Backend
 # Pull requests only build the image, so a broken Dockerfile fails the PR
 # instead of the deploy. Pushes to main (or a manual run on main) also run
 # the backend tests, push the image to Artifact Registry, deploy it to Cloud
-# Run and smoke-test /health. The Cloud Run setup (runtime service account,
-# Gemini key secret, image repo) is documented in docs/local-setup.md.
+# Run and smoke-test it (/health, and /api/chat rejecting a request with no
+# App Check token). The Cloud Run setup (runtime service account, Gemini key
+# secret, image repo) is documented in docs/local-setup.md.
 #
 # The root package.json / lockfile / workspace paths are included because the
 # image is built from them; a frontend-only dependency bump therefore also
@@ -103,3 +104,18 @@ jobs:
       - if: env.DEPLOY == 'true'
         name: Smoke-test /health on the deployed service
         run: curl --fail --silent --show-error "${{ steps.deploy.outputs.url }}/health"
+
+      # App Check must be on in production. APP_CHECK=off set on the service by
+      # hand would survive this deploy, and /health would still pass. The body
+      # is deliberately invalid: with App Check on it's a 401 before the body
+      # is read, and if it's off it's a 400, so this never reaches Gemini.
+      - if: env.DEPLOY == 'true'
+        name: Smoke-test that /api/chat requires an App Check token
+        run: |
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            -X POST -H 'Content-Type: application/json' -d '{}' \
+            "${{ steps.deploy.outputs.url }}/api/chat")
+          if [ "$status" != 401 ]; then
+            echo "::error::/api/chat without an App Check token returned $status, expected 401"
+            exit 1
+          fi

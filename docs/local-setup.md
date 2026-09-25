@@ -38,7 +38,7 @@ gcloud iam service-accounts keys create github-actions-deployer-key.json \
 
 Paste the contents into the `GCP_SA_KEY` secret, then delete the local file and revoke the old key (`gcloud iam service-accounts keys list`/`delete`) — it's a credential, not something to keep on disk or leave active once replaced.
 
-No local Firebase login is required to develop `frontend/` day-to-day; this secret only matters for the CI deploy step.
+No local Firebase login is required to develop `frontend/` day-to-day; this secret only matters for the CI deploy step. (Chatting with a real Backend locally does need the team's App Check debug token; see "Frontend" below.)
 
 ### Backend deploy (CI only)
 
@@ -48,7 +48,7 @@ One-time GCP setup it relies on (already done, see TASK-13's notes):
 
 | Resource | Where | Notes |
 |---|---|---|
-| Cloud Run service `pun-agent-backend` | `pun-agent`, `us-east1` | `https://pun-agent-backend-203365930808.us-east1.run.app`. Public (`--allow-unauthenticated`; TASK-25 adds App Check inside the app), `--min-instances=0`, `--max-instances=1` |
+| Cloud Run service `pun-agent-backend` | `pun-agent`, `us-east1` | `https://pun-agent-backend-203365930808.us-east1.run.app`. Public (`--allow-unauthenticated`), so `/api/*` checks a Firebase App Check token inside the app (TASK-25; see [`contracts.md`](contracts.md)), and the deploy smoke-tests that it does, `--min-instances=0`, `--max-instances=1` |
 | Service account `pun-agent-runtime@pun-agent.iam.gserviceaccount.com` | `pun-agent` | the identity the service runs as; can read only the secret below, no project-level roles |
 | Secret `gemini-api-key-runtime` | `pun-agent` Secret Manager | the production Gemini key, mounted as `GEMINI_API_KEY` |
 | Gemini API key `pun-agent-runtime` | `gen-lang-client-0125403786` (no billing, free tier) | restricted to the Gemini API |
@@ -117,13 +117,15 @@ Opens the dev server at `http://localhost:5173`. `pnpm test` runs Vitest + React
 VITE_CHAT_ADAPTER=live VITE_BACKEND_URL=http://localhost:8080 pnpm dev
 ```
 
-`live` mode also needs a Firebase App Check token for every request. The deployed site gets one through reCAPTCHA Enterprise, but `localhost` is deliberately not on the reCAPTCHA key's domain allowlist (anyone could serve a page from their own `localhost`), so `pnpm dev` uses an App Check **debug token** instead:
+`live` mode also needs a Firebase App Check token for every request. The deployed site gets one through reCAPTCHA Enterprise, but `localhost` is deliberately not on the reCAPTCHA key's domain allowlist (anyone could serve a page from their own `localhost`), so `pnpm dev` uses an App Check **debug token** instead. The team shares one, registered in the Firebase console (project `pun-agent`, **App Check → Apps → ⋮ → Manage debug tokens**) and kept in the team's 1Password; ask Yai Torres for it. Put it in `frontend/.env.local`:
 
-1. Start `pnpm dev` in `live` mode without `VITE_APPCHECK_DEBUG_TOKEN` set and send a message. The browser console prints `App Check debug token: <uuid>`.
-2. Register that value in the Firebase console (project `pun-agent`) under **App Check → Apps → ⋮ → Manage debug tokens**.
-3. Put it in `frontend/.env.local` as `VITE_APPCHECK_DEBUG_TOKEN=<uuid>`, so the next session reuses it.
+```bash
+VITE_APPCHECK_DEBUG_TOKEN=<the shared debug token>
+```
 
-A debug token gets real App Check tokens from anywhere, so treat it like a password: keep it in `.env.local`, and delete it in the console if it leaks. Only `pnpm dev` reads it; production builds drop that code.
+Without it, `live` mode can't get a token, so every message fails with "Couldn't get a reply" before reaching Backend (`APP_CHECK=off` on Backend doesn't help: the frontend stops first). Leaving it unset also makes the browser console print `Firebase App Check debug token: <uuid>`, a new token that works once someone with console access registers it.
+
+A debug token gets real App Check tokens from anywhere, so treat it like a password: keep it in `.env.local` and 1Password only, and if it leaks, delete it in the console and share a new one. Only `pnpm dev` reads it; production builds drop that code.
 
 The frontend must stay on `http://localhost:5173`: that's the dev origin Backend's CORS allowlist accepts by default (alongside the two deployed Firebase Hosting domains, `pun-agent.web.app` and `pun-agent.firebaseapp.com`) (`CORS_ORIGIN` in `backend/` overrides it).
 
