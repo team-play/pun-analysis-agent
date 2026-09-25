@@ -42,15 +42,26 @@ function failWith(userMessage: string, cause: unknown): never {
  * `/api/chat` (docs/contracts.md) and streams Genkit's reply back into
  * assistant-ui. Phase 1 is text-only; `analyze_pun` tool-call events are
  * TASK-10's extension of this same adapter.
+ *
+ * `getAppCheckToken` supplies the Firebase App Check token Backend requires
+ * on every request; it's injected so tests need no Firebase or reCAPTCHA.
  */
 export const createLiveChatModelAdapter = (
 	chatUrl: string,
+	getAppCheckToken: () => Promise<string>,
 ): ChatModelAdapter => ({
 	async *run({ messages, abortSignal }: ChatModelRunOptions) {
-		// Failing before a response arrives (offline, Backend down, non-2xx).
+		// Failing before a response arrives (no App Check token, offline,
+		// Backend down, non-2xx).
+		const appCheckToken = await getAppCheckToken().catch((error: unknown) =>
+			failWith(NO_REPLY_MESSAGE, error),
+		);
 		const response = await fetch(chatUrl, {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				"Content-Type": "application/json",
+				"X-Firebase-AppCheck": appCheckToken,
+			},
 			body: JSON.stringify({
 				messages: messages.map((message) => ({
 					role: message.role,

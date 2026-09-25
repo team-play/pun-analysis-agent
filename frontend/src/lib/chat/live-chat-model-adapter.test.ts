@@ -12,6 +12,7 @@ import {
 import { createLiveChatModelAdapter } from "./live-chat-model-adapter";
 
 const CHAT_URL = "http://backend.test/api/chat";
+const APP_CHECK_TOKEN = "test-app-check-token";
 /** The user-facing message in recordedErrorStream, shown as-is. */
 const RECORDED_ERROR_MESSAGE = "Something went wrong. Please try again.";
 
@@ -40,8 +41,12 @@ const runOptions = (
 	unstable_getMessage: () => messages[messages.length - 1],
 });
 
-const run = (messages: readonly ThreadMessage[], abortSignal?: AbortSignal) =>
-	createLiveChatModelAdapter(CHAT_URL).run(
+const run = (
+	messages: readonly ThreadMessage[],
+	abortSignal?: AbortSignal,
+	getAppCheckToken = async () => APP_CHECK_TOKEN,
+) =>
+	createLiveChatModelAdapter(CHAT_URL, getAppCheckToken).run(
 		runOptions(messages, abortSignal),
 	) as AsyncGenerator<ChatModelRunResult>;
 
@@ -95,6 +100,29 @@ describe("createLiveChatModelAdapter", () => {
 				{ role: "user", content: "Why?\n\nExplain it." },
 			],
 		});
+	});
+
+	it("sends a fresh App Check token with every request, per docs/contracts.md", async () => {
+		const fetchMock = mockFetch(new Response(recordedPhase1Stream));
+		const getAppCheckToken = vi
+			.fn()
+			.mockResolvedValueOnce("first-token")
+			.mockResolvedValueOnce("second-token");
+
+		await collectTexts(
+			run([message("user", "hi")], undefined, getAppCheckToken),
+		);
+		fetchMock.mockResolvedValue(new Response(recordedPhase1Stream));
+		await collectTexts(
+			run([message("user", "hi")], undefined, getAppCheckToken),
+		);
+
+		const headersOf = (call: number) =>
+			new Headers(
+				(fetchMock.mock.calls[call] as [string, RequestInit])[1].headers,
+			);
+		expect(headersOf(0).get("X-Firebase-AppCheck")).toBe("first-token");
+		expect(headersOf(1).get("X-Firebase-AppCheck")).toBe("second-token");
 	});
 
 	it("yields the accumulated reply after every chunk, ending on the result's text", async () => {
@@ -164,6 +192,21 @@ describe("createLiveChatModelAdapter", () => {
 
 			expect(error.message).toBe(NO_REPLY);
 			expect(logError).toHaveBeenCalledWith(offline);
+		});
+
+		it("shows a user-facing message without calling Backend when no App Check token can be had, logging the real cause", async () => {
+			const fetchMock = mockFetch(new Response(recordedPhase1Stream));
+			const attestationFailed = new Error("AppCheck: ReCAPTCHA error.");
+
+			const error = await failureOf(
+				run([message("user", "hi")], undefined, async () => {
+					throw attestationFailed;
+				}),
+			);
+
+			expect(error.message).toBe(NO_REPLY);
+			expect(logError).toHaveBeenCalledWith(attestationFailed);
+			expect(fetchMock).not.toHaveBeenCalled();
 		});
 
 		it("shows a user-facing message on a non-2xx response, logging its status and body", async () => {

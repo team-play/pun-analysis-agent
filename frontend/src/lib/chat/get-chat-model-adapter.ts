@@ -1,4 +1,5 @@
 import type { ChatModelAdapter } from "@assistant-ui/react";
+import { startAppCheck } from "@/lib/firebase/app-check";
 import { createLiveChatModelAdapter } from "./live-chat-model-adapter";
 import { createStubChatModelAdapter } from "./stub-chat-model-adapter";
 
@@ -25,7 +26,10 @@ export const getChatModelAdapter = (): ChatModelAdapter => {
 			// A relative path resolves against the base's last "/", so give the
 			// base one: then any path prefix (e.g. https://host/staging) is kept.
 			const base = backendUrl.endsWith("/") ? backendUrl : `${backendUrl}/`;
-			return createLiveChatModelAdapter(new URL("api/chat", base).href);
+			return createLiveChatModelAdapter(
+				new URL("api/chat", base).href,
+				startAppCheck(),
+			);
 		}
 		default:
 			throw new Error(

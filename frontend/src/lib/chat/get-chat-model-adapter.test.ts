@@ -1,9 +1,16 @@
 import type { ChatModelRunOptions } from "@assistant-ui/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { startAppCheck } from "@/lib/firebase/app-check";
 import { recordedPhase1Stream } from "./fixtures/recorded-genkit-streams";
 import { getChatModelAdapter } from "./get-chat-model-adapter";
 
+// The real module loads Firebase and reCAPTCHA over the network.
+vi.mock("@/lib/firebase/app-check", () => ({
+	startAppCheck: vi.fn(() => async () => "test-app-check-token"),
+}));
+
 afterEach(() => {
+	vi.clearAllMocks();
 	vi.unstubAllEnvs();
 	vi.unstubAllGlobals();
 });
@@ -42,5 +49,27 @@ describe("getChatModelAdapter", () => {
 		vi.stubEnv("VITE_CHAT_ADAPTER", "live");
 		vi.stubEnv("VITE_BACKEND_URL", "");
 		expect(() => getChatModelAdapter()).toThrow(/VITE_BACKEND_URL/);
+	});
+
+	it("live mode sends the App Check token with the request", async () => {
+		vi.stubEnv("VITE_CHAT_ADAPTER", "live");
+		vi.stubEnv("VITE_BACKEND_URL", "http://localhost:8080");
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValue(new Response(recordedPhase1Stream));
+		vi.stubGlobal("fetch", fetchMock);
+
+		await runOnce();
+
+		const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+		expect(new Headers(init.headers).get("X-Firebase-AppCheck")).toBe(
+			"test-app-check-token",
+		);
+	});
+
+	it("stub mode never starts App Check, so it never loads Firebase or reCAPTCHA", () => {
+		vi.stubEnv("VITE_CHAT_ADAPTER", "stub");
+		getChatModelAdapter();
+		expect(startAppCheck).not.toHaveBeenCalled();
 	});
 });
