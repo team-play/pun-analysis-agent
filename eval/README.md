@@ -39,4 +39,4 @@ Run against gold-label fixtures to sanity-check the evaluator itself (no HTTP ca
 uv run python evaluate_dataset.py --fixture
 ```
 
-Both report a `food_baseline` slice (`category` in `food`/`animal/food`) and an `all_categories` slice. Use `--dataset` to point at a different CSV and `--output` to also write the JSON result to a file. See [`reports/task-2.3-harness-validation.md`](reports/task-2.3-harness-validation.md) for a recorded fixture-mode self-validation run against the full dataset; a live run against a real `/analyze` classifier is blocked on TASK-16.
+Both report an `animal_food` slice (`category` in `food`/`animal`/`animal/food` — the food+animal baseline, per `TASK-2.2`) and an `all_categories` slice. Use `--dataset` to point at a different CSV and `--output` to also write the JSON result to a file. See [`reports/task-2.3-harness-validation.md`](reports/task-2.3-harness-validation.md) for a recorded fixture-mode self-validation run against the full dataset; a live run against a real `/analyze` classifier is blocked on TASK-16.

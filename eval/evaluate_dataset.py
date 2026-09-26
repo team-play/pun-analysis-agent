@@ -246,15 +246,17 @@ def evaluate(
         successful_rows.append(row)
         successful_predictions.append(prediction)
 
-    food_outcomes = [
-        (row, prediction) for row, prediction in outcomes if row.category in {"food", "animal/food"}
+    animal_food_outcomes = [
+        (row, prediction)
+        for row, prediction in outcomes
+        if row.category in {"food", "animal", "animal/food"}
     ]
     return {
         "dataset_rows": len(rows),
         "successful_rows": len(successful_rows),
         "request_errors": errors,
         "slices": {
-            "food_baseline": _slice_report(food_outcomes),
+            "animal_food": _slice_report(animal_food_outcomes),
             "all_categories": _slice_report(outcomes),
         },
     }
