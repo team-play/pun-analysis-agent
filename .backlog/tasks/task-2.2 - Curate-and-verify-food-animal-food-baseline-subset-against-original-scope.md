@@ -1,10 +1,11 @@
 ---
 id: TASK-2.2
 title: Curate and verify food/animal-food baseline subset against original scope
-status: To Do
-assignee: [Livia]
+status: Done
+assignee:
+  - Livia
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-25 18:35'
+updated_date: '2026-09-26 00:04'
 labels:
   - dataset
 milestone: m-6
@@ -25,7 +26,7 @@ TASK-2 originally framed animal puns as a stretch goal pending data; that's no l
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 Food and animal-food rows in the eval dataset are counted and checked against the >=30-pair minimum from TASK-2's original scope
-- [ ] #2 A decision is recorded on whether the food/animal-food subset or the full corpus is used for TASK-16's baseline classifier
+- [x] #2 A decision is recorded on whether the food/animal-food subset or the full corpus is used for TASK-16's baseline classifier
 <!-- AC:END -->
 
 ## Definition of Done
@@ -43,4 +44,12 @@ Counted eval/datasets/semeval2017_task7_puns.csv by category: food = 218 rows (1
 Not to be confused with TASK-2.6: this task is about SemEval's own category-tagged food/animal rows inside semeval2017_task7_puns.csv. TASK-2.6 is a separate decision about PR #8's independent hand-authored food/animal dataset (see eval/datasets/sentences_animal.csv / sentences_food.csv, via PR #15).
 
 Update 2026-09-25 (Livia and Prateek): SemEval data was assessed and looks OK for classification, so it stays the classifier's data source for now.
+
+Decision (Livia and Prateek, 2026-09-25): TASK-16's baseline classifier uses the food/animal subset of the SemEval data (category food, animal, animal/food), not the full corpus.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Counted the SemEval food/animal rows (247 food-baseline rows, past the >=30-pair bar) and recorded the decision that TASK-16's classifier uses the food/animal subset rather than the full corpus. The eval harness (TASK-2.3) already reports both a food_baseline slice and an all_categories slice.
+<!-- SECTION:FINAL_SUMMARY:END -->
