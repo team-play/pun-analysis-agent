@@ -4,7 +4,7 @@ title: Deploy inference to Cloud Run via CI
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:40'
-updated_date: '2026-09-22 10:37'
+updated_date: '2026-09-26 12:59'
 due_date: '2026-09-21'
 labels: []
 milestone: m-4
@@ -37,3 +37,9 @@ deploy-inference.yml is currently a placeholder, identical in structure to deplo
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+From TASK-27 (2026-09-26): the JS deploys now gate on a reusable test-js.yml (workflow_call) that test.yml also calls, and use a concurrency group plus a main-only workflow_dispatch. When the inference deploy becomes real, consider the same for Python: a reusable test-python.yml (uv sync --locked + pytest; eval's unittest job could share it) that test.yml calls and deploy-inference.yml gates on.
+<!-- SECTION:NOTES:END -->
