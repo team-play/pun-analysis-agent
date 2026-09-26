@@ -40,7 +40,7 @@ def test_get_model_is_thread_safe_against_concurrent_cold_start(monkeypatch):
 
     monkeypatch.setattr(candidates_module.spacy, "load", counting_load)
 
-    threads = [threading.Thread(target=candidates_module._get_model) for _ in range(10)]
+    threads = [threading.Thread(target=candidates_module.get_model) for _ in range(10)]
     for t in threads:
         t.start()
     for t in threads:
