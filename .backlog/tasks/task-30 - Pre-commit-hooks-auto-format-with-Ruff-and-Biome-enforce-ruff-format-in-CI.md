@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-26 19:09'
-updated_date: '2026-09-26 19:37'
+updated_date: '2026-09-26 19:47'
 labels: []
 dependencies: []
 references:
@@ -28,10 +28,10 @@ Formatting is only enforced after the fact: CI runs `biome check` for JS/TS and 
 - [x] #1 A `pnpm install` on a dev machine installs a git pre-commit hook without any extra manual step
 - [x] #2 Committing staged JS/TS/JSON/CSS runs `biome check --write` on just those files and re-stages the fixes
 - [x] #3 Committing staged Python in inference/ or eval/ runs `ruff check --fix` then `ruff format` with that package's locked Ruff and config, and re-stages the fixes
-- [ ] #4 Unstaged hunks of a partially staged file are left untouched by the hook
-- [x] #5 An unfixable lint error blocks the commit with the tool's message
-- [ ] #6 CI (lint.yml) and scripts/verify-setup.mjs fail when inference/ or eval/ is not `ruff format`-clean, and both packages currently pass
-- [x] #7 `pnpm install --frozen-lockfile --filter backend` in the backend Docker build still succeeds
+- [x] #4 An unfixable lint error blocks the commit with the tool's message
+- [ ] #5 CI (lint.yml) and scripts/verify-setup.mjs fail when inference/ or eval/ is not `ruff format`-clean, and both packages currently pass
+- [x] #6 `pnpm install --frozen-lockfile --filter backend` in the backend Docker build still succeeds
+- [x] #7 Unstaged hunks of a partially staged file are never committed, and are restored unchanged unless they sit next to lines the formatter rewrites, where they can come back shifted; this caveat is documented in docs/local-setup.md
 <!-- AC:END -->
 
 ## Definition of Done
@@ -64,4 +64,6 @@ Docker path: `pnpm install --frozen-lockfile --filter backend` without .git stil
 Code review + architectural review (subagents) done. Confirmed OK: package-relative paths and nested files under root, renames/deletes/spaces, frontend/public excluded like CI, single mutex-guarded git add for stage_fixed, && works on Windows (lefthook runs sh -c). Fixed: pnpm exec -> direct biome binary; pnpm-workspace.yaml comment accuracy; clarified lefthook.yml comments. Architectural: hook couples commits to both toolchains — per user, a missing uv now fails with an explanation; documented in local-setup.md. Deploy/perf: lefthook is a root devDep, absent from the backend runtime image (pnpm deploy --prod); CI installs set CI=true so the postinstall no-ops.
 Re-verified in an isolated repo: uv missing -> blocked with fail_text, Ruff jobs skipped; uv present -> fixed + re-staged; md-only -> Python group skipped; merge -> whole hook skipped. The implementation commit itself ran through the hook.
 Open: AC #4 only holds when unstaged hunks are not adjacent to reformatted lines (documented caveat in local-setup.md). AC #6 verified locally (ruff format --check passes in both packages; verify-setup.mjs change); still needs a CI run on the PR.
+
+AC #4 (partial staging) replaced with #7, reworded to match the documented caveat at the user's request. Evidence: throwaway-worktree tests — unstaged hunk far from reformatted lines restored exactly; adjacent one restored shifted (TAIL = 1 moved above def h); neither committed. Remaining: AC #5 needs the PR's CI run.
 <!-- SECTION:NOTES:END -->
