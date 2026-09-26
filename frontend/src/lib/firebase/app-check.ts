@@ -49,13 +49,28 @@ const initAppCheck = async (): Promise<() => Promise<string>> => {
  * Starts App Check right away, so reCAPTCHA is ready before the first
  * message, and returns a function that resolves to a current token. The
  * SDK caches tokens and refreshes them before they expire, so calling it
- * per request is cheap.
+ * per request is cheap. If starting fails, the next call tries again.
  */
 export const startAppCheck = (): (() => Promise<string>) => {
+	let started = initInBackground();
+
+	return async () => {
+		const getToken = await started.catch((error: unknown) => {
+			// Setup failed (e.g. a Firebase chunk didn't load on a flaky
+			// connection): start over on the next message rather than failing
+			// every message until a reload. Safe to repeat, since Firebase
+			// returns the existing app/App Check for the same options.
+			started = initInBackground();
+			throw error;
+		});
+		return getToken();
+	};
+};
+
+const initInBackground = () => {
 	const started = initAppCheck();
-	// A failure here surfaces through the token getter below, on the first
+	// A failure here surfaces through the token getter above, on the next
 	// message; this only keeps it from also being an unhandled rejection.
 	started.catch(() => {});
-
-	return async () => (await started)();
+	return started;
 };

@@ -63,6 +63,26 @@ describe("startAppCheck", () => {
 		await expect(startAppCheck()()).rejects.toThrow("already initialized");
 	});
 
+	it("retries a failed start on the next token request, instead of failing every message until a reload", async () => {
+		vi.mocked(initializeAppCheck).mockImplementationOnce(() => {
+			throw new Error("Failed to fetch dynamically imported module");
+		});
+		const getAppCheckToken = startAppCheck();
+
+		await expect(getAppCheckToken()).rejects.toThrow("Failed to fetch");
+		expect(await getAppCheckToken()).toBe("sdk-token");
+		expect(initializeAppCheck).toHaveBeenCalledTimes(2);
+	});
+
+	it("doesn't restart App Check when only getting a token failed", async () => {
+		vi.mocked(getToken).mockRejectedValueOnce(new Error("AppCheck: throttled"));
+		const getAppCheckToken = startAppCheck();
+
+		await expect(getAppCheckToken()).rejects.toThrow("throttled");
+		expect(await getAppCheckToken()).toBe("sdk-token");
+		expect(initializeAppCheck).toHaveBeenCalledOnce();
+	});
+
 	// Vitest runs with import.meta.env.DEV true, like `pnpm dev`.
 	it("in dev, uses the debug token from VITE_APPCHECK_DEBUG_TOKEN", async () => {
 		vi.stubEnv("VITE_APPCHECK_DEBUG_TOKEN", "registered-debug-token");
