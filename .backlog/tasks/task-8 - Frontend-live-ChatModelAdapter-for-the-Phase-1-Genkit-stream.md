@@ -1,11 +1,11 @@
 ---
 id: TASK-8
 title: 'Frontend: live ChatModelAdapter for the Phase 1 Genkit stream'
-status: In Progress
+status: Done
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-25 02:24'
+updated_date: '2026-09-26 13:44'
 due_date: '2026-09-21'
 labels: []
 milestone: m-2
@@ -28,7 +28,7 @@ Genkit isn't one of assistant-ui's built-in framework adapters, so reaching any 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 ChatModelAdapter.run() parses Genkit's plain-text stream events into assistant-ui message parts and renders tokens incrementally, not just on stream completion
-- [ ] #2 VITE_CHAT_ADAPTER=live points the UI at the deployed Phase 1 Backend and a real conversation completes end-to-end on the Firebase-hosted app
+- [x] #2 VITE_CHAT_ADAPTER=live points the UI at the deployed Phase 1 Backend and a real conversation completes end-to-end on the Firebase-hosted app
 - [x] #3 Adapter parsing logic is unit-tested against recorded fixture stream events, not a live stream, per docs/design/frontend-design.md's 'Development & testing' section
 - [x] #4 Switching between stub and live leaves all Slice 1 UI (thread list, persistence, theme) unchanged
 <!-- AC:END -->
@@ -65,4 +65,12 @@ Docs drift fixed in a separate follow-up commit: local-setup.md (live mode + VIT
 AC #2 work (2026-09-24): deploy-frontend.yml builds with VITE_CHAT_ADAPTER=live and VITE_BACKEND_URL=https://pun-agent-backend-203365930808.us-east1.run.app as step env, not frontend/.env.production (chosen with @yaisiel.torres: keeps local builds and CI tests on the stub and off Gemini quota). The workflow file joined its own paths filter, since its build env is part of the frontend build. A post-build grep fails the deploy if the URL isn't in the bundle (an unset flag silently builds the stub; checked against both a live and a stub build). Backend CORS defaults gained https://pun-agent.firebaseapp.com (Firebase's second domain; it would have broken once the site went live), test-first. Pre-merge check: the same live bundle, served by vite preview on :5173 (an allowlisted origin), got a real Gemini reply from Cloud Run, rendered correctly. Reviews: code review found no blockers; architectural review flagged that the deployed Phase 1 adapter couples backend deploys to the /api/chat stream shape (engineering-practices.md now says so; TASK-9 should get a matching AC once PR #31, which rewrites TASK-9's ACs, merges), and that the live UI widens TASK-25's exposure (noted there). Pre-existing frontend CI gaps moved to their own task. Still open: AC #2 needs a real conversation on pun-agent.web.app after this merges and deploys.
 
 Correction (2026-09-24): the deploy-order coupling is recorded in TASK-10's notes as an accepted risk (TASK-9 and TASK-10 expected back to back), not as a TASK-9 criterion or an engineering-practices.md exception; the sentence added to engineering-practices.md was removed.
+
+AC #2 verified (2026-09-26) after #37 and #38 (App Check) reached main in one push (9d17fea had no runs of its own; run 36245664862 at 50e089c deployed both). In the browser on https://pun-agent.web.app, a real conversation completed: the reply streamed from POST https://pun-agent-backend-203365930808.us-east1.run.app/api/chat (200, per the page's performance entries), with reCAPTCHA Enterprise App Check attestation loaded, and markdown rendered correctly. On https://pun-agent.firebaseapp.com, CORS and App Check passed (200). The first reply hit a Gemini free-tier 503 'high demand' (confirmed in Cloud Run logs) and showed TASK-23's 'The assistant is busy right now' message; the retry streamed a full reply that rendered correctly. The backend logs also showed tokenless curl POSTs to /api/chat rejected with 401 (App Check enforced).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Live ChatModelAdapter for the Phase 1 Genkit stream: a hand-rolled SSE parser (UTF-8-safe framing, error/truncation handling, body cancellation) and an adapter yielding cumulative text, unit-tested against recorded real streams. The deployed Firebase site builds with VITE_CHAT_ADAPTER=live against Cloud Run (step env in deploy-frontend.yml, bundle guard), and the backend CORS allows both Firebase domains. Verified with 36 adapter/app tests, a pre-merge local run of the live bundle, and real conversations on both pun-agent.web.app and pun-agent.firebaseapp.com after deploy.
+<!-- SECTION:FINAL_SUMMARY:END -->
