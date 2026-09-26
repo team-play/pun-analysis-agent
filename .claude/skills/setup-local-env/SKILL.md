@@ -11,7 +11,7 @@ The actual, tool-agnostic setup instructions live in [`docs/agent-setup.md`](../
 
 1. Read and follow `docs/agent-setup.md` end to end. It covers, in order: detecting the OS (and asking whether a Windows user is in WSL2 or native PowerShell — don't assume), checking for git/Node.js/pnpm/uv, proposing the exact install command for anything missing, installing project dependencies (`pnpm install`, `uv sync`), and validating the result.
 2. **Never install anything without explicit confirmation for that specific step** — this applies even if the user has approved a previous install in the same session.
-3. The validation step runs `node scripts/verify-setup.mjs`, which mirrors this repo's CI checks (lint, Mermaid diagram validation, `ruff`, `pytest`) plus live smoke checks of the backend and frontend dev servers, then reports a pass/fail summary.
+3. The validation step runs `node scripts/verify-setup.mjs`, which mirrors this repo's CI checks (lint, Mermaid diagram validation, `ruff check` and `ruff format --check`, `pytest`) plus live smoke checks of the backend and frontend dev servers, then reports a pass/fail summary.
 4. Report back what was installed, what was already present, and the validation result, so the user knows exactly what changed on their machine.
 
 ## Out of scope

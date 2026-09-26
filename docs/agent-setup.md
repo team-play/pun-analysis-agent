@@ -60,6 +60,7 @@ Once the tools above are present:
 
 ```bash
 # from the repo root — installs both frontend/ and backend/ (shared pnpm workspace)
+# and the git pre-commit hook (see local-setup.md's "Pre-commit hook")
 pnpm install
 
 # each Python package manages its own environment
@@ -75,7 +76,7 @@ Run the cross-platform validation script:
 node scripts/verify-setup.mjs
 ```
 
-This runs the same checks CI runs (`pnpm run lint`, `pnpm run check:mermaid`, `uv run ruff check .` in both Python packages, `uv run pytest` in `inference/`) plus a couple of live smoke checks (briefly boots the backend and frontend dev servers to confirm they actually respond). It prints a pass/fail summary per check and exits non-zero if anything failed — fix whatever it flags before considering setup done.
+This runs the same checks CI runs (`pnpm run lint`, `pnpm run check:mermaid`, `uv run ruff check .` and `uv run ruff format --check .` in both Python packages, `uv run pytest` in `inference/`) plus a couple of live smoke checks (briefly boots the backend and frontend dev servers to confirm they actually respond). It prints a pass/fail summary per check and exits non-zero if anything failed — fix whatever it flags before considering setup done.
 
 ## 6. Report back
 
