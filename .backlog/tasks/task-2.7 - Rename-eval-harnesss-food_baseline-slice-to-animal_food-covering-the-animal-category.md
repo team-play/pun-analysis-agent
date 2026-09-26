@@ -3,10 +3,10 @@ id: TASK-2.7
 title: >-
   Rename eval harness's food_baseline slice to animal_food, covering the animal
   category
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-26 12:10'
-updated_date: '2026-09-26 12:10'
+updated_date: '2026-09-26 12:14'
 labels:
   - dataset
 milestone: m-6
