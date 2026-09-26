@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-26 19:09'
-updated_date: '2026-09-26 19:47'
+updated_date: '2026-09-26 19:53'
 labels: []
 dependencies: []
 references:
@@ -29,7 +29,7 @@ Formatting is only enforced after the fact: CI runs `biome check` for JS/TS and 
 - [x] #2 Committing staged JS/TS/JSON/CSS runs `biome check --write` on just those files and re-stages the fixes
 - [x] #3 Committing staged Python in inference/ or eval/ runs `ruff check --fix` then `ruff format` with that package's locked Ruff and config, and re-stages the fixes
 - [x] #4 An unfixable lint error blocks the commit with the tool's message
-- [ ] #5 CI (lint.yml) and scripts/verify-setup.mjs fail when inference/ or eval/ is not `ruff format`-clean, and both packages currently pass
+- [x] #5 CI (lint.yml) and scripts/verify-setup.mjs fail when inference/ or eval/ is not `ruff format`-clean, and both packages currently pass
 - [x] #6 `pnpm install --frozen-lockfile --filter backend` in the backend Docker build still succeeds
 - [x] #7 Unstaged hunks of a partially staged file are never committed, and are restored unchanged unless they sit next to lines the formatter rewrites, where they can come back shifted; this caveat is documented in docs/local-setup.md
 <!-- AC:END -->
@@ -66,4 +66,6 @@ Re-verified in an isolated repo: uv missing -> blocked with fail_text, Ruff jobs
 Open: AC #4 only holds when unstaged hunks are not adjacent to reformatted lines (documented caveat in local-setup.md). AC #6 verified locally (ruff format --check passes in both packages; verify-setup.mjs change); still needs a CI run on the PR.
 
 AC #4 (partial staging) replaced with #7, reworded to match the documented caveat at the user's request. Evidence: throwaway-worktree tests — unstaged hunk far from reformatted lines restored exactly; adjacent one restored shifted (TAIL = 1 moved above def h); neither committed. Remaining: AC #5 needs the PR's CI run.
+
+AC #5: PR #43 CI (run 36267298842) ran `uv run ruff format --check .` in both Ruff jobs — "5 files already formatted" each, all 8 checks passing. Failing case is the same command that rejected inference/candidates.py locally before it was reformatted. AC #6 also confirmed on the real Dockerfile: PR #43's "Build image" job passed with lefthook in the lockfile.
 <!-- SECTION:NOTES:END -->
