@@ -4,7 +4,7 @@ title: 'Rebase and align PR #8 sentence datasets with eval/ layout and semEval s
 status: Done
 assignee: []
 created_date: '2026-09-20 11:04'
-updated_date: '2026-09-20 11:05'
+updated_date: '2026-09-26 00:08'
 labels:
   - dataset
 milestone: m-6
@@ -20,7 +20,7 @@ ordinal: 26000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-PR #8 (Livia's hand-authored animal/food sentence dataset, data/sentences_animal.csv and data/sentences_food.csv) was opened before #13 restructured eval data into eval/datasets/ and established the semeval2017_task7_puns.csv schema (id, is_pun, pun_type, source_corpus, category, text). Left as-is, #8 would land in a different directory with an incompatible, BOM-carrying schema, making it hard to compare against the SemEval-derived food/animal subset. This task tracks getting #8 into a directly comparable shape so Livia and Prateek can evaluate it — it does NOT cover the actual supplement-or-drop integration decision, which stays open and untracked.
+PR #8 (Livia's hand-authored animal/food sentence dataset, data/sentences_animal.csv and data/sentences_food.csv) was opened before #13 restructured eval data into eval/datasets/ and established the semeval2017_task7_puns.csv schema (id, is_pun, pun_type, source_corpus, category, text). Left as-is, #8 would land in a different directory with an incompatible, BOM-carrying schema, making it hard to compare against the SemEval-derived food/animal subset. This task covers only getting #8 into a directly comparable shape; whether to integrate it was tracked separately in TASK-2.6 (decided: defer).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -41,7 +41,7 @@ Cherry-picked PR #8's commit onto #13's tip (no conflicts, disjoint paths). Wrot
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Verified via a round-trip script: 500+500 rows preserved in both files, every text/pun_target/pun_type/is_pun value matches the pre-transform CSVs exactly, BOM confirmed absent from both output files (checked first 3 bytes). PR #15 diff against #13's tip is exactly the 3 expected files (eval/README.md + 2 CSVs), confirmed with git diff --stat after two upstream force-pushes to #13's branch required re-rebasing. CI on PR #15: 5/5 checks green; mergeStateStatus is BLOCKED only on required review (reviewDecision: REVIEW_REQUIRED), not on any failing check.
+Verified with a round-trip script and independently re-derived in review: 500+500 rows preserved, every text/pun_target/pun_type/is_pun value matches the original files, ids unique and sequential, no BOM, pun_type empty exactly when is_pun is False. Delivered in PR #15, which touches only the two CSVs, eval/README.md and backlog task files.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

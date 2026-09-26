@@ -4,7 +4,7 @@ title: 'Decide whether to supplement the food/animal baseline with PR #8''s data
 status: Done
 assignee: []
 created_date: '2026-09-20 11:05'
-updated_date: '2026-09-25 18:39'
+updated_date: '2026-09-26 00:08'
 labels:
   - dataset
 milestone: m-6
@@ -21,7 +21,7 @@ ordinal: 27000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-TASK-2.2 covers verifying the food/animal rows already inside semeval2017_task7_puns.csv (its own category column: 218 food, 234 animal, 29 animal/food rows). PR #8 (via TASK-2.5/PR #15) adds a second, independent hand-authored food/animal dataset (500+500 rows) now in a directly comparable schema, but sitting alongside the SemEval subset rather than merged into it. Per discussion, the realistic options are to supplement the SemEval-derived subset with this dataset, drop it, or defer the call -- not replace it, especially since combining the two could make for a more robust baseline. Nobody has made that call yet, and until it's made, TASK-16's classifier and TASK-2.3's eval harness don't know whether to train/evaluate against SemEval's food/animal subset alone or the combined set.
+TASK-2.2 covers the food/animal rows already inside semeval2017_task7_puns.csv (its own category column). PR #8 (via TASK-2.5) adds a second, independent hand-authored food/animal dataset (500+500 rows) in a directly comparable schema, sitting alongside the SemEval subset rather than merged into it. The options were to supplement the SemEval-derived subset with it, drop it, or defer the call -- not replace it. Outcome: defer (see notes).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
