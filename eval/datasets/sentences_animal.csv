@@ -1,0 +1,501 @@
+id,is_pun,pun_type,source_corpus,category,text,pun_target
+animal_1,False,,sentences_animal,animal,Sea otters wrap themselves in kelp so they do not drift away while sleeping.,otter
+animal_2,False,,sentences_animal,animal,A group of otters resting together on the water's surface is called a raft.,otter
+animal_3,False,,sentences_animal,animal,Otters use rocks as tools to crack open shellfish and crustaceans.,otter
+animal_4,False,,sentences_animal,animal,A baby otter is called a pup and stays close to its mother for months.,otter
+animal_5,False,,sentences_animal,animal,Otters often hold hands while floating so they do not separate during sleep.,otter
+animal_6,True,homophonic,sentences_animal,animal,"On the otter hand, we could just reschedule the whole meeting for next week.",otter
+animal_7,True,homophonic,sentences_animal,animal,"After thirty years together, she still calls him her significant otter.",otter
+animal_8,True,homophonic,sentences_animal,animal,"He stared out at the stars, wondering what was really out there in otter space.",otter
+animal_9,True,homophonic,sentences_animal,animal,She said losing her keys twice in one day was otterly ridiculous.,otter
+animal_10,True,homophonic,sentences_animal,animal,There was no otter way to fix the leaking pipe except calling a plumber.,otter
+animal_11,True,homophonic,sentences_animal,animal,Maybe we should grab dinner some otter time when things calm down.,otter
+animal_12,True,homophonic,sentences_animal,animal,The whole meeting devolved into otter nonsense within the first ten minutes.,otter
+animal_13,True,homophonic,sentences_animal,animal,He was otterly delighted when the package finally arrived a week early.,otter
+animal_14,True,homophonic,sentences_animal,animal,The twins finished each otter's sentences all through dinner.,otter
+animal_15,True,homophonic,sentences_animal,animal,It rained every otter day for almost two weeks straight that spring.,otter
+animal_16,True,homophonic,sentences_animal,animal,"One after the otter, the dominoes toppled across the entire kitchen table.",otter
+animal_17,True,homophonic,sentences_animal,animal,He couldn't otter a single word when he saw the surprise party.,otter
+animal_18,True,homophonic,sentences_animal,animal,The critics were otterly divided over the director's strange new film.,otter
+animal_19,True,homophonic,sentences_animal,animal,The joke landed so badly that the room went otterly quiet.,otter
+animal_20,True,homophonic,sentences_animal,animal,"By the end of the hike, they were otterly exhausted but strangely happy.",otter
+animal_21,False,,sentences_animal,animal,The bear foraged for berries along the edge of the forest.,bear
+animal_22,True,homographic,sentences_animal,animal,She wasn't sure she could bear another delay in the shipping schedule.,bear
+animal_23,False,,sentences_animal,animal,The bull grazed quietly in the pasture behind the old barn.,bull
+animal_24,True,homographic,sentences_animal,animal,He charged into the meeting like a bull in a china shop.,bull
+animal_25,False,,sentences_animal,animal,The fox slipped through the hedge just after sunset.,fox
+animal_26,True,homographic,sentences_animal,animal,She managed to outfox her opponent with a clever last-minute move.,fox
+animal_27,False,,sentences_animal,animal,"The hare darted across the meadow, chased by nothing at all.",hare
+animal_28,True,homophonic,sentences_animal,animal,He barely had time to brush his hair before the interview started.,hare
+animal_29,False,,sentences_animal,animal,The whale surfaced briefly before diving back into the deep water.,whale
+animal_30,True,homographic,sentences_animal,animal,The kids had a whale of a time at the amusement park.,whale
+animal_31,False,,sentences_animal,animal,The seal balanced a ball on its nose during the show.,seal
+animal_32,True,homographic,sentences_animal,animal,They shook hands to seal the deal before lunch.,seal
+animal_33,False,,sentences_animal,animal,The mouse scurried behind the wall the moment the light flicked on.,mouse
+animal_34,True,homographic,sentences_animal,animal,His computer mouse stopped working right before the big presentation.,mouse
+animal_35,False,,sentences_animal,animal,The ram butted heads with a rival on the rocky hillside.,ram
+animal_36,True,homographic,sentences_animal,animal,The old laptop needed more RAM before it could run the new software.,ram
+animal_37,False,,sentences_animal,animal,"A crane waded through the shallow marsh, hunting for fish.",crane
+animal_38,True,homographic,sentences_animal,animal,He had to crane his neck to see over the crowd at the concert.,crane
+animal_39,False,,sentences_animal,animal,The duck paddled calmly across the pond with her ducklings.,duck
+animal_40,True,homographic,sentences_animal,animal,He had to duck quickly to avoid the low doorway.,duck
+animal_41,False,,sentences_animal,animal,A deer grazed quietly at the edge of the clearing.,deer
+animal_42,True,homophonic,sentences_animal,animal,"Dear, have you seen my keys, she called from the hallway.",deer
+animal_43,False,,sentences_animal,animal,A fly buzzed around the kitchen all afternoon.,fly
+animal_44,True,homographic,sentences_animal,animal,They hoped to fly out before the storm grounded every flight.,fly
+animal_45,False,,sentences_animal,animal,The kitten chased a ball of yarn across the living room floor.,kitten
+animal_46,True,homographic,sentences_animal,animal,"After the flu, he felt as weak as a kitten for nearly a week.",kitten
+animal_47,False,,sentences_animal,animal,The puppy chewed happily on an old rope toy.,puppy
+animal_48,True,homographic,sentences_animal,animal,Their middle school romance was nothing more than puppy love.,puppy
+animal_49,False,,sentences_animal,animal,The lion rested in the shade during the hottest part of the day.,lion
+animal_50,True,homographic,sentences_animal,animal,The senior partner took the lion's share of the credit for the project.,lion
+animal_51,False,,sentences_animal,animal,The tiger paced along the edge of its enclosure at the zoo.,tiger
+animal_52,True,homographic,sentences_animal,animal,"Without funding, the new policy turned out to be nothing but a paper tiger.",tiger
+animal_53,False,,sentences_animal,animal,The snake slid silently beneath a pile of dry leaves.,snake
+animal_54,True,homographic,sentences_animal,animal,Turns out his so-called business partner was a total snake.,snake
+animal_55,False,,sentences_animal,animal,The toad hopped across the wet pavement after the rain.,toad
+animal_56,True,homophonic,sentences_animal,animal,Her car had to be towed after it stalled on the highway.,toad
+animal_57,False,,sentences_animal,animal,The goat climbed onto the old wooden fence post.,goat
+animal_58,True,homographic,sentences_animal,animal,Fans still argue about who deserves to be called the GOAT of the sport.,goat
+animal_59,False,,sentences_animal,animal,The sheep grazed peacefully on the hillside all morning.,sheep
+animal_60,True,homographic,sentences_animal,animal,He was always considered the black sheep of the family.,sheep
+animal_61,False,,sentences_animal,animal,The hound followed the scent trail deep into the woods.,hound
+animal_62,True,homographic,sentences_animal,animal,Reporters continued to hound the senator for a comment all week.,hound
+animal_63,False,,sentences_animal,animal,The hog rooted around in the mud near the fence line.,hog
+animal_64,True,homographic,sentences_animal,animal,He always hogs the remote whenever the family watches television.,hog
+animal_65,False,,sentences_animal,animal,The mule carried heavy packs up the narrow mountain trail.,mule
+animal_66,True,homographic,sentences_animal,animal,"Once he makes up his mind, he is stubborn as a mule.",mule
+animal_67,False,,sentences_animal,animal,"A crow perched on the fence, watching the field below.",crow
+animal_68,True,homographic,sentences_animal,animal,He couldn't stop crowing about his win at the poker table.,crow
+animal_69,False,,sentences_animal,animal,"The hawk circled high above the open field, searching for prey.",hawk
+animal_70,True,homographic,sentences_animal,animal,Vendors hawked souvenirs outside the stadium before the game.,hawk
+animal_71,False,,sentences_animal,animal,The owl hooted softly from a branch near the barn.,owl
+animal_72,True,homographic,sentences_animal,animal,"She has always been a night owl, working best after midnight.",owl
+animal_73,False,,sentences_animal,animal,"A bat swooped low over the pond, catching insects in the dark.",bat
+animal_74,True,homographic,sentences_animal,animal,"He gripped the bat tightly, waiting for the pitcher's next throw.",bat
+animal_75,False,,sentences_animal,animal,A moth fluttered around the porch light all evening.,moth
+animal_76,True,homographic,sentences_animal,animal,He was drawn to the free food table like a moth to a flame.,moth
+animal_77,False,,sentences_animal,animal,A wasp built a small nest under the porch eaves.,wasp
+animal_78,True,homographic,sentences_animal,animal,Her waspish tone made it clear she was still annoyed about the delay.,wasp
+animal_79,False,,sentences_animal,animal,The worm burrowed deeper into the soil after the rain.,worm
+animal_80,True,homographic,sentences_animal,animal,He finally managed to worm the truth out of his little brother.,worm
+animal_81,False,,sentences_animal,animal,"A slug left a slow, glistening trail across the garden path.",slug
+animal_82,True,homographic,sentences_animal,animal,The two boxers were ready to slug it out for the title.,slug
+animal_83,False,,sentences_animal,animal,The snail crept slowly along the damp garden wall.,snail
+animal_84,True,homographic,sentences_animal,animal,The renovation project was moving at an absolute snail's pace.,snail
+animal_85,False,,sentences_animal,animal,The shrimp scuttled along the sandy ocean floor.,shrimp
+animal_86,True,homographic,sentences_animal,animal,"Don't let his height fool you, that shrimp can really play basketball.",shrimp
+animal_87,False,,sentences_animal,animal,The lobster scuttled backward into a crevice in the reef.,lobster
+animal_88,True,homographic,sentences_animal,animal,"After a day at the beach, his shoulders were as red as a lobster.",lobster
+animal_89,False,,sentences_animal,animal,A gnu grazed alongside the wildebeest herd on the savanna.,gnu
+animal_90,True,homophonic,sentences_animal,animal,She bought a brand new car the moment the old one broke down.,gnu
+animal_91,False,,sentences_animal,animal,The ewe nudged her lamb gently toward the barn.,ewe
+animal_92,True,homophonic,sentences_animal,animal,"I owe it all to you, he said, raising his glass at the toast.",ewe
+animal_93,False,,sentences_animal,animal,A wild boar rooted through the underbrush near the trail.,boar
+animal_94,True,homophonic,sentences_animal,animal,The three-hour lecture on tax law was an absolute bore.,boar
+animal_95,False,,sentences_animal,animal,The wolf howled at the edge of the forest just after dusk.,wolf
+animal_96,True,homographic,sentences_animal,animal,He wolfed down his lunch in under two minutes before the meeting.,wolf
+animal_97,False,,sentences_animal,animal,A doe and her fawn wandered quietly through the meadow.,doe
+animal_98,True,homophonic,sentences_animal,animal,"He always said the bakery job paid well, mostly in doe.",doe
+animal_99,False,,sentences_animal,animal,The mare trotted gently around the paddock with her foal.,mare
+animal_100,True,homographic,sentences_animal,animal,Planning the wedding on such short notice turned into an absolute nightmare.,mare
+animal_101,False,,sentences_animal,animal,The colt wobbled on its legs just an hour after being born.,colt
+animal_102,True,homographic,sentences_animal,animal,The old Colt revolver had been in the family for three generations.,colt
+animal_103,False,,sentences_animal,animal,The calf stayed close to its mother in the pasture.,calf
+animal_104,True,homographic,sentences_animal,animal,He pulled a muscle in his calf during the last mile of the race.,calf
+animal_105,False,,sentences_animal,animal,"The kid bounded around the pen, testing its wobbly new legs.",kid
+animal_106,True,homographic,sentences_animal,animal,Stop acting like a kid and finish your homework before dinner.,kid
+animal_107,False,,sentences_animal,animal,The cub tumbled playfully with its siblings outside the den.,cub
+animal_108,True,homographic,sentences_animal,animal,He proudly wore his old Cub Scout badge to the reunion.,cub
+animal_109,False,,sentences_animal,animal,The fawn lay hidden in the tall grass until its mother returned.,fawn
+animal_110,True,homographic,sentences_animal,animal,The interns couldn't help but fawn over the visiting celebrity chef.,fawn
+animal_111,False,,sentences_animal,animal,The drake's feathers shimmered green in the morning light.,drake
+animal_112,True,homographic,sentences_animal,animal,Half the office spent the afternoon debating their favorite Drake album.,drake
+animal_113,False,,sentences_animal,animal,The gander hissed at anyone who came too close to the pond.,gander
+animal_114,True,homographic,sentences_animal,animal,Come take a gander at the new display before the store opens.,gander
+animal_115,False,,sentences_animal,animal,The tomcat prowled the alley behind the restaurant every night.,tomcat
+animal_116,True,homographic,sentences_animal,animal,"In his younger years, he used to tomcat around every weekend.",tomcat
+animal_117,False,,sentences_animal,animal,The vixen led her kits back into the den at dawn.,vixen
+animal_118,True,homographic,sentences_animal,animal,She strutted into the party looking like an absolute vixen.,vixen
+animal_119,False,,sentences_animal,animal,The hen settled onto her nest just before sunset.,hen
+animal_120,True,homographic,sentences_animal,animal,Her older sister has always been a bit of a mother hen.,hen
+animal_121,False,,sentences_animal,animal,The monkey swung effortlessly from branch to branch in the forest canopy.,monkey
+animal_122,True,homographic,sentences_animal,animal,The interns spent the whole afternoon on pure monkey business instead of filing reports.,monkey
+animal_123,False,,sentences_animal,animal,"The dog trotted along the trail, sniffing every fallen leaf.",dog
+animal_124,True,homographic,sentences_animal,animal,"After the double shift, he felt absolutely dog tired by the time he got home.",dog
+animal_125,False,,sentences_animal,animal,The cat curled up on the windowsill in a patch of afternoon sun.,cat
+animal_126,True,homographic,sentences_animal,animal,Nobody wanted to be the one to let the cat out of the bag about the surprise party.,cat
+animal_127,False,,sentences_animal,animal,A rat scurried along the subway tracks after the last train passed.,rat
+animal_128,True,homographic,sentences_animal,animal,He felt like a total rat for ratting out his own roommate to the landlord.,rat
+animal_129,False,,sentences_animal,animal,A small bird built its nest in the gutter above the porch.,bird
+animal_130,True,homographic,sentences_animal,animal,"From the rooftop, they finally got a bird's eye view of the whole parade.",bird
+animal_131,False,,sentences_animal,animal,A bug crawled slowly across the kitchen windowsill.,bug
+animal_132,True,homographic,sentences_animal,animal,The new software had a nasty bug that crashed the app every time it launched.,bug
+animal_133,False,,sentences_animal,animal,A line of ants marched steadily toward the dropped crumb of bread.,ant
+animal_134,True,homographic,sentences_animal,animal,"She had ants in her pants all through the ceremony, desperate to get outside.",ant
+animal_135,False,,sentences_animal,animal,A bee drifted lazily from flower to flower in the garden.,bee
+animal_136,True,homographic,sentences_animal,animal,"He had always been a busy bee, juggling three projects at once without complaint.",bee
+animal_137,False,,sentences_animal,animal,A frog leapt from the lily pad the moment the shadow passed overhead.,frog
+animal_138,True,homographic,sentences_animal,animal,"Excuse me, I seem to have a frog in my throat this morning.",frog
+animal_139,False,,sentences_animal,animal,The shark circled the reef slowly before disappearing into deeper water.,shark
+animal_140,True,homographic,sentences_animal,animal,Everyone at the poker table knew he was a total card shark.,shark
+animal_141,False,,sentences_animal,animal,The turtle pulled its head into its shell at the first sign of danger.,turtle
+animal_142,True,homographic,sentences_animal,animal,"The canoe turtled in the rapids, dumping both paddlers into the cold river.",turtle
+animal_143,False,,sentences_animal,animal,"The lizard basked motionless on a warm, flat rock all afternoon.",lizard
+animal_144,True,homographic,sentences_animal,animal,He spent the whole vacation as a lounge lizard by the hotel pool.,lizard
+animal_145,False,,sentences_animal,animal,The python coiled tightly around a low branch to digest its meal.,python
+animal_146,True,homographic,sentences_animal,animal,She spent the whole weekend debugging a script written entirely in Python.,python
+animal_147,False,,sentences_animal,animal,The viper struck quickly from beneath a pile of dry leaves.,viper
+animal_148,True,homographic,sentences_animal,animal,"Behind that friendly smile, his old business partner turned out to be a real viper.",viper
+animal_149,False,,sentences_animal,animal,A beetle burrowed into the rotting log beneath the porch steps.,beetle
+animal_150,True,homographic,sentences_animal,animal,The old car in the driveway was a faded yellow Beetle from the seventies.,beetle
+animal_151,False,,sentences_animal,animal,A cricket chirped steadily from somewhere in the tall grass.,cricket
+animal_152,True,homographic,sentences_animal,animal,He grew up playing cricket every summer weekend with his cousins.,cricket
+animal_153,False,,sentences_animal,animal,A spider spun its web quietly in the corner of the porch.,spider
+animal_154,True,homographic,sentences_animal,animal,The doctor pointed out a few spider veins beginning to form along her calf.,spider
+animal_155,False,,sentences_animal,animal,A flea hopped from the stray cat onto the porch cushion.,flea
+animal_156,True,homographic,sentences_animal,animal,She found the perfect lamp for a few dollars at the weekend flea market.,flea
+animal_157,False,,sentences_animal,animal,She checked her dog carefully for ticks after the hike through the woods.,tick
+animal_158,True,homographic,sentences_animal,animal,Nobody could quite figure out what made the new hire tick.,tick
+animal_159,False,,sentences_animal,animal,The farmer treated the sheep for lice before shearing season began.,louse
+animal_160,True,homographic,sentences_animal,animal,He completely loused up the presentation by forgetting his own slides.,louse
+animal_161,False,,sentences_animal,animal,"A mole tunneled through the lawn, leaving small mounds of dirt behind.",mole
+animal_162,True,homographic,sentences_animal,animal,It turned out the leak came from a mole working quietly inside the agency.,mole
+animal_163,False,,sentences_animal,animal,A gopher poked its head out of a burrow near the garden fence.,gopher
+animal_164,True,homographic,sentences_animal,animal,"The intern spent most of his first week as the office gopher, fetching coffee and files.",gopher
+animal_165,False,,sentences_animal,animal,The groundhog emerged from its burrow and sniffed the cold morning air.,groundhog
+animal_166,True,homographic,sentences_animal,animal,"The meeting felt like Groundhog Day, repeating the same arguments week after week.",groundhog
+animal_167,False,,sentences_animal,animal,A badger dug a new burrow at the edge of the wheat field.,badger
+animal_168,True,homographic,sentences_animal,animal,She kept badgering her brother until he finally admitted where he had hidden the remote.,badger
+animal_169,False,,sentences_animal,animal,The ferret slipped through a narrow gap in the fence to explore the yard.,ferret
+animal_170,True,homographic,sentences_animal,animal,It took the detective weeks to ferret out the truth behind the missing shipment.,ferret
+animal_171,False,,sentences_animal,animal,A weasel darted along the stone wall bordering the old farmhouse.,weasel
+animal_172,True,homographic,sentences_animal,animal,He tried to weasel out of paying his share of the dinner bill.,weasel
+animal_173,False,,sentences_animal,animal,A skunk wandered across the backyard just after dusk.,skunk
+animal_174,True,homographic,sentences_animal,animal,"Our team got completely skunked, losing the match without scoring a single point.",skunk
+animal_175,False,,sentences_animal,animal,A possum froze in the porch light before slowly waddling away.,possum
+animal_176,True,homographic,sentences_animal,animal,He decided to play possum and pretend to be asleep when his sister walked in.,possum
+animal_177,False,,sentences_animal,animal,The kangaroo bounded across the outback with its joey tucked in its pouch.,kangaroo
+animal_178,True,homographic,sentences_animal,animal,The whole hearing felt like a kangaroo court with the verdict already decided.,kangaroo
+animal_179,False,,sentences_animal,animal,The sloth hung motionless from a branch for most of the afternoon.,sloth
+animal_180,True,homographic,sentences_animal,animal,His sloth over the weekend meant the dishes piled up for three days straight.,sloth
+animal_181,False,,sentences_animal,animal,The beaver dragged a fresh branch toward its half-finished dam.,beaver
+animal_182,True,homographic,sentences_animal,animal,"As an eager beaver, she was always the first one in the office every morning.",beaver
+animal_183,False,,sentences_animal,animal,A squirrel buried an acorn near the base of the old oak tree.,squirrel
+animal_184,True,homographic,sentences_animal,animal,He liked to squirrel away a little cash from every paycheck just in case.,squirrel
+animal_185,False,,sentences_animal,animal,The hamster stuffed its cheeks full of sunflower seeds before scurrying to its nest.,hamster
+animal_186,True,homographic,sentences_animal,animal,"By Thursday, the whole project felt like running on a hamster wheel with no end in sight.",hamster
+animal_187,False,,sentences_animal,animal,A rabbit nibbled on clover at the edge of the garden.,rabbit
+animal_188,True,homographic,sentences_animal,animal,One simple question about the budget sent them down a rabbit hole for hours.,rabbit
+animal_189,False,,sentences_animal,animal,The pony trotted around the paddock while the children watched from the fence.,pony
+animal_190,True,homographic,sentences_animal,animal,The landlord expected them to pony up the deposit before signing the lease.,pony
+animal_191,False,,sentences_animal,animal,The donkey carried baskets of vegetables down the narrow mountain path.,donkey
+animal_192,True,homographic,sentences_animal,animal,"As usual, the new assistant ended up doing all the donkey work for the project.",donkey
+animal_193,False,,sentences_animal,animal,The camel plodded steadily across the dunes under the midday sun.,camel
+animal_194,True,homographic,sentences_animal,animal,That last request was the straw that broke the camel's back for the whole team.,camel
+animal_195,False,,sentences_animal,animal,A herd of buffalo grazed slowly across the open plain.,buffalo
+animal_196,True,homographic,sentences_animal,animal,The lawyer's rapid-fire questions were clearly meant to buffalo the nervous witness.,buffalo
+animal_197,False,,sentences_animal,animal,A shaggy yak grazed high on the mountainside above the village.,yak
+animal_198,True,homographic,sentences_animal,animal,The two of them could yak for hours about absolutely nothing important.,yak
+animal_199,False,,sentences_animal,animal,"A moose waded through the shallow lake, chewing on water plants.",moose
+animal_200,True,homophonic,sentences_animal,animal,The dessert menu featured a rich chocolate mousse that everyone wanted to try.,moose
+animal_201,False,,sentences_animal,animal,"The crocodile floated motionless near the riverbank, waiting for prey.",crocodile
+animal_202,True,homographic,sentences_animal,animal,His apology sounded like nothing more than crocodile tears to everyone in the room.,crocodile
+animal_203,False,,sentences_animal,animal,An alligator slid silently into the murky swamp water.,alligator
+animal_204,True,homophonic,sentences_animal,animal,"See you later, alligator, she called out as she hopped off the bus.",alligator
+animal_205,False,,sentences_animal,animal,"The parrot perched on its stand, preening its bright green feathers.",parrot
+animal_206,True,homographic,sentences_animal,animal,He just parroted whatever the last person in the meeting had said.,parrot
+animal_207,False,,sentences_animal,animal,"The peacock spread its tail feathers in a wide, colorful display.",peacock
+animal_208,True,homographic,sentences_animal,animal,He couldn't help but peacock around the office in his brand new suit.,peacock
+animal_209,False,,sentences_animal,animal,A pigeon pecked at crumbs scattered across the plaza.,pigeon
+animal_210,True,homographic,sentences_animal,animal,He suspected his old cellmate had become a stool pigeon for the police.,pigeon
+animal_211,False,,sentences_animal,animal,The horse trotted around the paddock while its foal followed close behind.,horse
+animal_212,True,homographic,sentences_animal,animal,The kids loved to horse around in the backyard until dinner was ready.,horse
+animal_213,False,,sentences_animal,animal,The cow grazed slowly across the open pasture at sunrise.,cow
+animal_214,True,homographic,sentences_animal,animal,"Holy cow, he shouted, staring at the size of the grocery bill.",cow
+animal_215,False,,sentences_animal,animal,A goose honked loudly as it waddled toward the pond.,goose
+animal_216,True,homographic,sentences_animal,animal,"If he keeps missing deadlines, it might just cook his goose for good.",goose
+animal_217,False,,sentences_animal,animal,A swan glided silently across the still surface of the lake.,swan
+animal_218,True,homographic,sentences_animal,animal,The retiring singer's final concert felt like a genuine swan song.,swan
+animal_219,False,,sentences_animal,animal,A dove perched quietly on the telephone wire above the street.,dove
+animal_220,True,homographic,sentences_animal,animal,He dove straight into the pool without even testing the water first.,dove
+animal_221,False,,sentences_animal,animal,"A robin hopped across the lawn, searching for worms after the rain.",robin
+animal_222,True,homographic,sentences_animal,animal,Half the class debated whether Robin was really necessary in every Batman movie.,robin
+animal_223,False,,sentences_animal,animal,The ostrich sprinted across the open plain at a surprising speed.,ostrich
+animal_224,True,homographic,sentences_animal,animal,"Ignoring the warning signs entirely, he acted like an ostrich with his head in the sand.",ostrich
+animal_225,False,,sentences_animal,animal,A quail darted through the underbrush at the edge of the field.,quail
+animal_226,True,homographic,sentences_animal,animal,He tends to quail at the first sign of any real confrontation.,quail
+animal_227,False,,sentences_animal,animal,The elephant sprayed water over its back to cool down in the heat.,elephant
+animal_228,True,homographic,sentences_animal,animal,Nobody wanted to bring up the elephant in the room during dinner.,elephant
+animal_229,False,,sentences_animal,animal,The rhino grazed calmly near the edge of the watering hole.,rhino
+animal_230,True,homographic,sentences_animal,animal,"After years in sales, he had developed a rhino-thick skin for rejection.",rhino
+animal_231,False,,sentences_animal,animal,The leopard rested silently on a low branch above the trail.,leopard
+animal_232,True,homographic,sentences_animal,animal,"Old habits die hard, since a leopard never really changes its spots.",leopard
+animal_233,False,,sentences_animal,animal,"The cheetah sprinted across the savanna, closing the gap in seconds.",cheetah
+animal_234,True,homophonic,sentences_animal,animal,"Turns out her ex was a total cheetah, seeing two people at once.",cheetah
+animal_235,False,,sentences_animal,animal,The jaguar prowled quietly through the dense rainforest undergrowth.,jaguar
+animal_236,True,homographic,sentences_animal,animal,"He finally saved up enough to buy his dream car, a sleek used Jaguar.",jaguar
+animal_237,False,,sentences_animal,animal,The cougar stalked its prey silently along the ridge at dusk.,cougar
+animal_238,True,homographic,sentences_animal,animal,Her older coworkers jokingly called her a cougar after she started dating a much younger intern.,cougar
+animal_239,False,,sentences_animal,animal,The lynx blended almost perfectly into the snowy forest underbrush.,lynx
+animal_240,True,homophonic,sentences_animal,animal,He spent the whole afternoon golfing on the newly renovated links.,lynx
+animal_241,False,,sentences_animal,animal,A porpoise surfaced briefly beside the fishing boat before diving again.,porpoise
+animal_242,True,homophonic,sentences_animal,animal,"She explained her whole plan on purpose, so nobody would be confused later.",porpoise
+animal_243,False,,sentences_animal,animal,A ray glided silently across the sandy ocean floor.,ray
+animal_244,True,homographic,sentences_animal,animal,A single ray of sunlight broke through the clouds just before the storm.,ray
+animal_245,False,,sentences_animal,animal,The jellyfish drifted slowly with the current near the shoreline.,jellyfish
+animal_246,True,homographic,sentences_animal,animal,"Faced with the angry crowd, the manager turned into a total jellyfish.",jellyfish
+animal_247,False,,sentences_animal,animal,"A barracuda darted through the reef, startling a school of smaller fish.",barracuda
+animal_248,True,homographic,sentences_animal,animal,"In every negotiation, she was known as an absolute barracuda.",barracuda
+animal_249,False,,sentences_animal,animal,The fishermen hauled in nets full of silvery herring at dawn.,herring
+animal_250,True,homographic,sentences_animal,animal,The whole accusation turned out to be nothing but a red herring.,herring
+animal_251,False,,sentences_animal,animal,A flounder lay nearly invisible against the sandy seafloor.,flounder
+animal_252,True,homographic,sentences_animal,animal,"Without a clear plan, the whole committee began to flounder within minutes.",flounder
+animal_253,False,,sentences_animal,animal,The sturgeon is prized for both its meat and its valuable roe.,sturgeon
+animal_254,True,homophonic,sentences_animal,animal,"After the accident, she was rushed straight into surgeon's care.",sturgeon
+animal_255,False,,sentences_animal,animal,A carp surfaced briefly near the edge of the pond.,carp
+animal_256,True,homographic,sentences_animal,animal,"He always finds something to carp about, no matter how the day goes.",carp
+animal_257,False,,sentences_animal,animal,A perch swam lazily among the reeds near the dock.,perch
+animal_258,True,homographic,sentences_animal,animal,The cat found a comfortable perch on top of the bookshelf.,perch
+animal_259,False,,sentences_animal,animal,A pike lurked motionless near the fallen log at the bottom of the lake.,pike
+animal_260,True,homographic,sentences_animal,animal,They had to pay a toll before merging onto the turnpike.,pike
+animal_261,False,,sentences_animal,animal,The greyhound sprinted around the track well ahead of the pack.,greyhound
+animal_262,True,homographic,sentences_animal,animal,They took the Greyhound bus overnight to save money on the trip.,greyhound
+animal_263,False,,sentences_animal,animal,The bloodhound followed the scent trail for nearly two miles.,bloodhound
+animal_264,True,homographic,sentences_animal,animal,The reporter was a real bloodhound when it came to tracking down leaked documents.,bloodhound
+animal_265,False,,sentences_animal,animal,A hyena circled the edge of the watering hole at dusk.,hyena
+animal_266,True,homographic,sentences_animal,animal,He cackled like a hyena at his own joke before anyone else even laughed.,hyena
+animal_267,False,,sentences_animal,animal,A jackal scavenged near the remains of the lion's kill.,jackal
+animal_268,True,homographic,sentences_animal,animal,"Investors called the takeover firm a jackal, circling struggling companies for profit.",jackal
+animal_269,False,,sentences_animal,animal,"A mink darted along the riverbank, hunting for fish.",mink
+animal_270,True,homographic,sentences_animal,animal,She wore an old mink coat that had belonged to her grandmother.,mink
+animal_271,False,,sentences_animal,animal,The porcupine raised its quills the moment the dog got too close.,porcupine
+animal_272,True,homographic,sentences_animal,animal,"He could be a real porcupine about feedback, bristling at the smallest criticism.",porcupine
+animal_273,False,,sentences_animal,animal,"A shrew darted through the underbrush, hunting for insects.",shrew
+animal_274,True,homographic,sentences_animal,animal,The play was a modern retelling of The Taming of the Shrew.,shrew
+animal_275,False,,sentences_animal,animal,A lemming scurried across the tundra ahead of the approaching snow.,lemming
+animal_276,True,homographic,sentences_animal,animal,"Everyone followed the new trend like lemmings, without asking a single question.",lemming
+animal_277,False,,sentences_animal,animal,The watchdog barked at every stranger who approached the gate.,watchdog
+animal_278,True,homographic,sentences_animal,animal,A federal watchdog agency was assigned to review the company's spending.,watchdog
+animal_279,False,,sentences_animal,animal,The lapdog curled up contentedly in her lap during the movie.,lapdog
+animal_280,True,homographic,sentences_animal,animal,Critics accused the committee of acting like a lapdog for the industry it was meant to regulate.,lapdog
+animal_281,False,,sentences_animal,animal,The shelter's newest arrival was a scrappy little mutt with floppy ears.,mutt
+animal_282,True,homographic,sentences_animal,animal,He grinned and admitted he was just a mutt when it came to fancy wine knowledge.,mutt
+animal_283,False,,sentences_animal,animal,"The pup tumbled clumsily across the yard, chasing its own tail.",pup
+animal_284,True,homographic,sentences_animal,animal,"He's still just a pup in this industry, but he's learning fast.",pup
+animal_285,False,,sentences_animal,animal,The runt of the litter needed a little extra help finding milk.,runt
+animal_286,True,homographic,sentences_animal,animal,"Being the runt of the family, he was used to being underestimated.",runt
+animal_287,False,,sentences_animal,animal,The goldfish circled slowly inside its small glass bowl.,goldfish
+animal_288,True,homographic,sentences_animal,animal,"By the next meeting, he had completely forgotten the plan, true to his goldfish memory.",goldfish
+animal_289,False,,sentences_animal,animal,They gathered cockles from the mudflats at low tide.,cockle
+animal_290,True,homographic,sentences_animal,animal,The old song always warmed the cockles of her heart.,cockle
+animal_291,False,,sentences_animal,animal,"A limpet clung tightly to the rock, unaffected by the crashing waves.",limpet
+animal_292,True,homographic,sentences_animal,animal,"Her little brother acted like a limpet, refusing to leave her side all day.",limpet
+animal_293,False,,sentences_animal,animal,"A swift darted low across the rooftops, catching insects in flight.",swift
+animal_294,True,homographic,sentences_animal,animal,"The new delivery service promised swift, same-day shipping on every order.",swift
+animal_295,False,,sentences_animal,animal,A purple martin swooped low over the pond at dusk.,martin
+animal_296,True,homographic,sentences_animal,animal,Martin from accounting always double-checks every invoice before it goes out.,martin
+animal_297,False,,sentences_animal,animal,"A kite circled high above the cliffs, searching the ground below.",kite
+animal_298,True,homographic,sentences_animal,animal,The kids flew a bright red kite at the park all afternoon.,kite
+animal_299,False,,sentences_animal,animal,"A harrier glided low over the marsh, hunting for small rodents.",harrier
+animal_300,True,homographic,sentences_animal,animal,"The cross-country team, known as the harriers, trained on the same trail every morning.",harrier
+animal_301,False,,sentences_animal,animal,"A merlin dove sharply, chasing a smaller bird across the field.",merlin
+animal_302,True,homographic,sentences_animal,animal,The old wizard in the story was clearly modeled after the legendary Merlin.,merlin
+animal_303,False,,sentences_animal,animal,A kingfisher perched motionless on a branch above the stream.,kingfisher
+animal_304,True,homographic,sentences_animal,animal,He ordered a Kingfisher lager to go with his curry at the restaurant.,kingfisher
+animal_305,False,,sentences_animal,animal,"A tern dove sharply into the surf, emerging with a small fish.",tern
+animal_306,True,homophonic,sentences_animal,animal,It was finally her turn to present the quarterly results to the board.,tern
+animal_307,False,,sentences_animal,animal,A gull swooped down to snatch a fry right off the boardwalk table.,gull
+animal_308,True,homographic,sentences_animal,animal,The scam was clever enough to gull even the most careful investors.,gull
+animal_309,False,,sentences_animal,animal,A blue-footed booby danced awkwardly to attract a mate.,booby
+animal_310,True,homographic,sentences_animal,animal,He set off the office booby trap he had rigged as an April Fools' joke.,booby
+animal_311,False,,sentences_animal,animal,A loon called eerily across the still lake at dusk.,loon
+animal_312,True,homographic,sentences_animal,animal,Everyone thought he was a total loon for quitting his job to sail around the world.,loon
+animal_313,False,,sentences_animal,animal,A coot paddled quietly among the reeds at the edge of the pond.,coot
+animal_314,True,homographic,sentences_animal,animal,Her grandfather was a stubborn old coot who refused any help carrying groceries.,coot
+animal_315,False,,sentences_animal,animal,An adder basked in a patch of sunlight on the warm stone path.,adder
+animal_316,True,homographic,sentences_animal,animal,The engineer explained how the binary adder combined two signals into one output.,adder
+animal_317,False,,sentences_animal,animal,The baby shook her rattle happily from the crib.,rattle
+animal_318,True,homographic,sentences_animal,animal,The unexpected question seemed to rattle the candidate during the debate.,rattle
+animal_319,False,,sentences_animal,animal,A butterfly drifted lazily from flower to flower in the garden.,butterfly
+animal_320,True,homographic,sentences_animal,animal,She had butterflies in her stomach right before walking on stage.,butterfly
+animal_321,False,,sentences_animal,animal,A caterpillar inched slowly along the underside of a leaf.,caterpillar
+animal_322,True,homographic,sentences_animal,animal,The construction site was full of massive yellow Caterpillar excavators.,caterpillar
+animal_323,False,,sentences_animal,animal,A hornet buzzed angrily around the disturbed nest under the eaves.,hornet
+animal_324,True,homographic,sentences_animal,animal,The proposal stirred up a real hornet's nest of controversy at city hall.,hornet
+animal_325,False,,sentences_animal,animal,A tiny mite was barely visible on the surface of the leaf.,mite
+animal_326,True,homographic,sentences_animal,animal,"She donated what little she had, and it was received like the widow's mite.",mite
+animal_327,False,,sentences_animal,animal,A hermit crab dragged its borrowed shell slowly across the sand.,hermit
+animal_328,True,homographic,sentences_animal,animal,"After the divorce, he became something of a hermit, rarely leaving his apartment.",hermit
+animal_329,False,,sentences_animal,animal,The gorilla beat its chest before settling back down to eat.,gorilla
+animal_330,True,homographic,sentences_animal,animal,Nobody wanted to address the 800-pound gorilla in the room during the budget meeting.,gorilla
+animal_331,False,,sentences_animal,animal,A baboon groomed a smaller member of the troop near the rocks.,baboon
+animal_332,True,homographic,sentences_animal,animal,"He acted like a total baboon at the wedding, embarrassing everyone at the table.",baboon
+animal_333,False,,sentences_animal,animal,A puma stalked silently along the ridge above the canyon.,puma
+animal_334,True,homographic,sentences_animal,animal,He proudly laced up a brand new pair of Puma sneakers for the race.,puma
+animal_335,False,,sentences_animal,animal,A Tasmanian devil let out a screeching growl as it fought over the carcass.,devil
+animal_336,True,homographic,sentences_animal,animal,"Speak of the devil, she said, just as he walked through the door.",devil
+animal_337,False,,sentences_animal,animal,The billy goat butted the fence post repeatedly out of sheer stubbornness.,billy
+animal_338,True,homographic,sentences_animal,animal,Billy from the warehouse always volunteers for the early morning shift.,billy
+animal_339,False,,sentences_animal,animal,The old tom prowled the neighborhood rooftops every single night.,tom
+animal_340,True,homographic,sentences_animal,animal,Peeping through the neighbor's window earned him a reputation as a real peeping tom.,tom
+animal_341,False,,sentences_animal,animal,The jenny brayed loudly whenever a stranger approached the pen.,jenny
+animal_342,True,homographic,sentences_animal,animal,Jenny from HR always remembers everyone's birthday without fail.,jenny
+animal_343,False,,sentences_animal,animal,The jack pulled the wagon steadily up the narrow mountain trail.,jack
+animal_344,True,homographic,sentences_animal,animal,He kept a tire jack in the trunk in case of a flat.,jack
+animal_345,False,,sentences_animal,animal,The shepherd led the flock down from the hills before the storm hit.,shepherd
+animal_346,True,homographic,sentences_animal,animal,The new manager tried to shepherd the team through a difficult transition.,shepherd
+animal_347,False,,sentences_animal,animal,"The pointer froze mid-stride, nose aimed straight at the hidden pheasant.",pointer
+animal_348,True,homographic,sentences_animal,animal,She used a laser pointer to highlight the chart during her presentation.,pointer
+animal_349,False,,sentences_animal,animal,"The setter crouched low, locking onto the scent of nearby birds.",setter
+animal_350,True,homographic,sentences_animal,animal,The volleyball team's setter delivered a perfect pass right to the net.,setter
+animal_351,False,,sentences_animal,animal,The bulldog snored loudly on the porch in the afternoon heat.,bulldog
+animal_352,True,homographic,sentences_animal,animal,"He approached every negotiation with real bulldog tenacity, refusing to back down.",bulldog
+animal_353,False,,sentences_animal,animal,A falcon dove at incredible speed toward its unsuspecting prey.,falcon
+animal_354,True,homographic,sentences_animal,animal,The stadium erupted when the Falcons scored in the final seconds.,falcon
+animal_355,False,,sentences_animal,animal,A pair of teal paddled quietly near the reeds at the edge of the marsh.,teal
+animal_356,True,homographic,sentences_animal,animal,She repainted the bathroom a soft shade of teal over the weekend.,teal
+animal_357,False,,sentences_animal,animal,The ox pulled the heavy plow steadily across the muddy field.,ox
+animal_358,True,homographic,sentences_animal,animal,He was strong as an ox but clumsy as could be around anything breakable.,ox
+animal_359,False,,sentences_animal,animal,A pack rat had filled the old cabin's walls with collected trinkets.,pack rat
+animal_360,True,homographic,sentences_animal,animal,"Her grandfather was a total pack rat, unable to throw anything away.",pack rat
+animal_361,False,,sentences_animal,animal,A bookworm had chewed a small tunnel through the old paperback's spine.,bookworm
+animal_362,True,homographic,sentences_animal,animal,"As a lifelong bookworm, she finished nearly a hundred novels every year.",bookworm
+animal_363,False,,sentences_animal,animal,The nature documentary followed a single animal across an entire migration season.,animal
+animal_364,True,homographic,sentences_animal,animal,"He was an absolute animal on the field, refusing to let up until the final whistle.",animal
+animal_365,False,,sentences_animal,animal,The old workhorse pulled the plow from sunrise until well past noon.,workhorse
+animal_366,True,homographic,sentences_animal,animal,That aging server has been the workhorse of our entire system for a decade.,workhorse
+animal_367,False,,sentences_animal,animal,The guinea pig squeaked excitedly whenever it heard the fridge door open.,guinea pig
+animal_368,True,homographic,sentences_animal,animal,The interns joked about being guinea pigs for the company's new onboarding process.,guinea pig
+animal_369,False,,sentences_animal,animal,"The kitten watched intently, then pounced in exactly the same spot as its mother.",copycat
+animal_370,True,homographic,sentences_animal,animal,"Her little brother was such a copycat, ordering the exact same meal every time.",copycat
+animal_371,False,,sentences_animal,animal,He grilled a hot dog and topped it with mustard and relish.,hot dog
+animal_372,True,homographic,sentences_animal,animal,"The skier couldn't resist showing off, hot-dogging his way down the final slope.",hot dog
+animal_373,False,,sentences_animal,animal,"In ancient rituals, a single goat was symbolically sent away carrying the community's sins.",scapegoat
+animal_374,True,homographic,sentences_animal,animal,The intern ended up as the scapegoat for a mistake he never actually made.,scapegoat
+animal_375,False,,sentences_animal,animal,The dark horse in the third race surged ahead in the final stretch.,dark horse
+animal_376,True,homographic,sentences_animal,animal,Nobody expected the quiet newcomer to become the dark horse candidate of the election.,dark horse
+animal_377,False,,sentences_animal,animal,The old warhorse stood calmly even as cannons fired nearby during the reenactment.,warhorse
+animal_378,True,homographic,sentences_animal,animal,That old battle-tested laptop has been a reliable warhorse for years.,warhorse
+animal_379,False,,sentences_animal,animal,She hung the damp towels over the wooden clotheshorse in the laundry room.,clotheshorse
+animal_380,True,homographic,sentences_animal,animal,"Her sister was a total clotheshorse, always dressed like she stepped out of a magazine.",clotheshorse
+animal_381,False,,sentences_animal,animal,The toddler bounced happily on his wooden hobbyhorse in the living room.,hobbyhorse
+animal_382,True,homographic,sentences_animal,animal,Tax reform was always his favorite hobbyhorse at every family dinner.,hobbyhorse
+animal_383,False,,sentences_animal,animal,The lab rat navigated the maze quickly after a few days of practice.,lab rat
+animal_384,True,homographic,sentences_animal,animal,"He joked that he felt like a lab rat, testing every new feature before launch.",lab rat
+animal_385,False,,sentences_animal,animal,A group of rats squeezed through the maze during the psychology experiment.,rat race
+animal_386,True,homographic,sentences_animal,animal,She finally decided to leave the corporate rat race and start her own small farm.,rat race
+animal_387,False,,sentences_animal,animal,A rat scurried along the baseboards of the old gym's locker room.,gym rat
+animal_388,True,homographic,sentences_animal,animal,"As a total gym rat, he never missed a single morning workout.",gym rat
+animal_389,False,,sentences_animal,animal,A wild hog rooted through the ditch alongside the country road.,road hog
+animal_390,True,homographic,sentences_animal,animal,"The driver in front of them was a total road hog, refusing to let anyone pass.",road hog
+animal_391,False,,sentences_animal,animal,The pack mule carried heavy supplies steadily up the winding trail.,pack mule
+animal_392,True,homographic,sentences_animal,animal,"As the newest hire, he ended up as the office pack mule for every tedious task.",pack mule
+animal_393,False,,sentences_animal,animal,The pony performed the same simple trick over and over at the fair.,one-trick pony
+animal_394,True,homographic,sentences_animal,animal,Critics dismissed the band as a one-trick pony after their second album flopped.,one-trick pony
+animal_395,False,,sentences_animal,animal,An early bird was already singing outside long before sunrise.,early bird
+animal_396,True,homographic,sentences_animal,animal,She always grabbed the early bird discount by booking her flights months in advance.,early bird
+animal_397,False,,sentences_animal,animal,"A jailbird perched on the windowsill, pecking at crumbs left on the ledge.",jailbird
+animal_398,True,homographic,sentences_animal,animal,The old jailbird swore he was a changed man after his release.,jailbird
+animal_399,False,,sentences_animal,animal,"A flock of snowbirds passed overhead, heading south for the winter.",snowbird
+animal_400,True,homographic,sentences_animal,animal,"Her grandparents were snowbirds, spending every winter in Florida instead of the cold.",snowbird
+animal_401,False,,sentences_animal,animal,A blackbird sang from the fence post just after sunrise.,blackbird
+animal_402,True,homographic,sentences_animal,animal,The museum's newest exhibit featured a retired Blackbird spy plane.,blackbird
+animal_403,False,,sentences_animal,animal,A mockingbird imitated three different birdsongs within a single minute.,mockingbird
+animal_404,True,homographic,sentences_animal,animal,"He was the office mockingbird, repeating whatever opinion he'd heard last.",mockingbird
+animal_405,False,,sentences_animal,animal,A songbird trilled cheerfully from the top of the old oak tree.,songbird
+animal_406,True,homographic,sentences_animal,animal,The critics called her the songbird of her generation after the album's release.,songbird
+animal_407,False,,sentences_animal,animal,A silver fox trotted silently across the frozen field at dusk.,silver fox
+animal_408,True,homographic,sentences_animal,animal,"Her new boss was a total silver fox, still sharp and charming at sixty.",silver fox
+animal_409,False,,sentences_animal,animal,A fox trotted lazily along the tree line at the edge of the farm.,foxtrot
+animal_410,True,homographic,sentences_animal,animal,They spent the whole evening learning to foxtrot before the wedding.,foxtrot
+animal_411,False,,sentences_animal,animal,A wolf pack moved silently through the snow-covered forest at dusk.,wolf pack
+animal_412,True,homographic,sentences_animal,animal,The rival firm's lawyers descended on the negotiation like a wolf pack.,wolf pack
+animal_413,False,,sentences_animal,animal,"A lone wolf wandered far from its pack, searching for new territory.",lone wolf
+animal_414,True,homographic,sentences_animal,animal,He always preferred working as a lone wolf rather than joining a big team.,lone wolf
+animal_415,False,,sentences_animal,animal,The top dog in the litter always claimed the best spot by the fire.,top dog
+animal_416,True,homographic,sentences_animal,animal,"After the merger, nobody was quite sure who the new top dog would be.",top dog
+animal_417,False,,sentences_animal,animal,An old sea dog mended his nets on the dock every morning at dawn.,sea dog
+animal_418,True,homographic,sentences_animal,animal,"The retired captain was a real sea dog, full of stories from decades at sea.",sea dog
+animal_419,False,,sentences_animal,animal,The stray dog's matted hair was finally brushed clean by the shelter staff.,hair of the dog
+animal_420,True,homographic,sentences_animal,animal,He swore a little hair of the dog would fix his rough morning after the party.,hair of the dog
+animal_421,False,,sentences_animal,animal,The dog sprawled out on the porch through the hottest part of the afternoon.,dog days
+animal_422,True,homographic,sentences_animal,animal,"By the dog days of August, everyone in the office was ready for vacation.",dog days
+animal_423,False,,sentences_animal,animal,"An eagle circled high above the canyon, scanning for prey.",eagle
+animal_424,True,homographic,sentences_animal,animal,He sank a long putt on the final hole for a rare eagle.,eagle
+animal_425,False,,sentences_animal,animal,A vulture circled patiently above the carcass on the plain.,vulture
+animal_426,True,homographic,sentences_animal,animal,Investors circled the struggling company like vultures the moment it filed for bankruptcy.,vulture
+animal_427,False,,sentences_animal,animal,A seagull swooped down and stole a fry right off the table.,seagull
+animal_428,True,homographic,sentences_animal,animal,The new manager's seagull style of leadership left the team feeling swooped on and abandoned.,seagull
+animal_429,False,,sentences_animal,animal,An albatross glided for miles over the open ocean without a single wingbeat.,albatross
+animal_430,True,homographic,sentences_animal,animal,The failed investment became a real albatross around the company's neck.,albatross
+animal_431,False,,sentences_animal,animal,A canary sang cheerfully from its cage by the kitchen window.,canary
+animal_432,True,homographic,sentences_animal,animal,Rising insurance costs were seen as the canary in the coal mine for the whole industry.,canary
+animal_433,False,,sentences_animal,animal,A bright red cardinal perched on the snow-covered branch outside the window.,cardinal
+animal_434,True,homographic,sentences_animal,animal,Honesty was considered a cardinal rule in their small family business.,cardinal
+animal_435,False,,sentences_animal,animal,A blue jay screeched loudly from the top of the fence.,jay
+animal_436,True,homographic,sentences_animal,animal,He got a ticket for jaywalking right in front of a police officer.,jay
+animal_437,False,,sentences_animal,animal,A magpie snatched a shiny coin left on the picnic table.,magpie
+animal_438,True,homographic,sentences_animal,animal,"She was a total magpie about vintage jewelry, collecting anything that sparkled.",magpie
+animal_439,False,,sentences_animal,animal,A raven perched silently on the old stone wall at dusk.,raven
+animal_440,True,homographic,sentences_animal,animal,"The actress was famous for her long, raven-black hair.",raven
+animal_441,False,,sentences_animal,animal,A lark sang high above the meadow at first light.,lark
+animal_442,True,homographic,sentences_animal,animal,"They only agreed to the road trip for a lark, with no real plan at all.",lark
+animal_443,False,,sentences_animal,animal,"A thrush hopped along the garden path, searching for worms.",thrush
+animal_444,True,homographic,sentences_animal,animal,The doctor diagnosed the baby with a mild case of oral thrush.,thrush
+animal_445,False,,sentences_animal,animal,"A buzzard circled slowly over the dry, open prairie.",buzzard
+animal_446,True,homographic,sentences_animal,animal,Her uncle was a grumpy old buzzard who complained about everything at dinner.,buzzard
+animal_447,False,,sentences_animal,animal,A chameleon slowly shifted color to blend into the leafy branch.,chameleon
+animal_448,True,homographic,sentences_animal,animal,"He was a social chameleon, adapting his personality to fit whatever room he walked into.",chameleon
+animal_449,False,,sentences_animal,animal,A tortoise moved slowly across the sandy path toward the shade.,tortoise
+animal_450,True,homographic,sentences_animal,animal,"Like the tortoise in the old fable, she won by simply refusing to give up.",tortoise
+animal_451,False,,sentences_animal,animal,A monitor lizard basked motionless on the warm riverbank.,monitor
+animal_452,True,homographic,sentences_animal,animal,She adjusted the brightness on her computer monitor before the long shift began.,monitor
+animal_453,False,,sentences_animal,animal,A grasshopper leapt across the tall grass with every step through the field.,grasshopper
+animal_454,True,homographic,sentences_animal,animal,"Patience, grasshopper, the old master said, echoing the classic television line.",grasshopper
+animal_455,False,,sentences_animal,animal,"A swarm of locusts descended on the field, stripping it bare within hours.",locust
+animal_456,True,homographic,sentences_animal,animal,"Looking back, he called those wasted months the locust years of his career.",locust
+animal_457,False,,sentences_animal,animal,A cockroach scurried under the fridge the moment the kitchen light came on.,cockroach
+animal_458,True,homographic,sentences_animal,animal,"No matter how many times they fired him, he kept coming back like a cockroach.",cockroach
+animal_459,False,,sentences_animal,animal,An earwig scuttled out from beneath the damp flowerpot.,earwig
+animal_460,True,homographic,sentences_animal,animal,She caught her neighbor earwigging on the conversation through the thin apartment wall.,earwig
+animal_461,False,,sentences_animal,animal,A mayfly hovered briefly over the surface of the stream before vanishing.,mayfly
+animal_462,True,homographic,sentences_animal,animal,"The startup's success was as brief as a mayfly, gone within a single season.",mayfly
+animal_463,False,,sentences_animal,animal,A gnat buzzed persistently around their heads during the evening hike.,gnat
+animal_464,True,homographic,sentences_animal,animal,He was straining at a gnat while completely ignoring the much bigger problem.,gnat
+animal_465,False,,sentences_animal,animal,A walrus hauled itself onto the ice floe to rest in the sun.,walrus
+animal_466,True,homographic,sentences_animal,animal,Her grandfather sported an impressive walrus mustache for most of his life.,walrus
+animal_467,False,,sentences_animal,animal,An octopus squeezed effortlessly through a gap barely wider than its beak.,octopus
+animal_468,True,homographic,sentences_animal,animal,"The sprawling agency operated like an octopus, with departments reaching into everything.",octopus
+animal_469,False,,sentences_animal,animal,A sea urchin clung to the rocks just below the tide line.,urchin
+animal_470,True,homographic,sentences_animal,animal,The street urchin in the old novel survived by his wits alone.,urchin
+animal_471,False,,sentences_animal,animal,The reef's coral glowed faintly under the diver's flashlight.,coral
+animal_472,True,homographic,sentences_animal,animal,She repainted the nursery a soft shade of coral before the baby arrived.,coral
+animal_473,False,,sentences_animal,animal,An eel slipped silently between the rocks at the bottom of the river.,eel
+animal_474,True,homographic,sentences_animal,animal,"The suspect was as slippery as an eel, wriggling out of every question.",eel
+animal_475,False,,sentences_animal,animal,A catfish lurked near the muddy bottom of the slow-moving river.,catfish
+animal_476,True,homographic,sentences_animal,animal,She realized too late that the online profile had catfished her completely.,catfish
+animal_477,False,,sentences_animal,animal,A school of minnows darted away the moment a shadow passed overhead.,minnow
+animal_478,True,homographic,sentences_animal,animal,The small startup was just a minnow compared to the industry's biggest players.,minnow
+animal_479,False,,sentences_animal,animal,A school of piranha stripped the carcass clean within minutes.,piranha
+animal_480,True,homographic,sentences_animal,animal,The tabloid reporters descended on the scandal like a school of piranha.,piranha
+animal_481,False,,sentences_animal,animal,The fishermen hauled in a heavy net full of mackerel at dawn.,mackerel
+animal_482,True,homographic,sentences_animal,animal,"Holy mackerel, he shouted, staring at the size of the winning check.",mackerel
+animal_483,False,,sentences_animal,animal,"A red snapper darted beneath the pier, chasing smaller fish.",snapper
+animal_484,True,homographic,sentences_animal,animal,The tabloid's chief snapper waited outside the courthouse for hours to get the photo.,snapper
+animal_485,False,,sentences_animal,animal,A fluffy yellow chick pecked at the feed scattered across the coop floor.,chick
+animal_486,True,homographic,sentences_animal,animal,He proudly showed everyone a photo of his new chick from the dating app.,chick
+animal_487,False,,sentences_animal,animal,The rooster crowed loudly just as the sun crested the hill.,rooster
+animal_488,True,homographic,sentences_animal,animal,"As the office's self-appointed rooster, he insisted on running every single meeting.",rooster
+animal_489,False,,sentences_animal,animal,The nanny goat nudged her kid gently toward the shade of the barn.,nanny
+animal_490,True,homographic,sentences_animal,animal,They hired a nanny to help watch the twins during the busy summer months.,nanny
+animal_491,False,,sentences_animal,animal,The stallion reared up before galloping across the open field.,stallion
+animal_492,True,homographic,sentences_animal,animal,"He strutted into the reunion, still convinced he was quite the stallion.",stallion
+animal_493,False,,sentences_animal,animal,The steer grazed calmly alongside the rest of the herd.,steer
+animal_494,True,homographic,sentences_animal,animal,She tried to steer the conversation away from the awkward subject entirely.,steer
+animal_495,False,,sentences_animal,animal,A sea sponge clung motionless to the coral just below the surface.,sponge
+animal_496,True,homographic,sentences_animal,animal,"Ever since the layoff, he had been sponging off his brother's couch and pantry.",sponge
+animal_497,False,,sentences_animal,animal,Barnacles had crusted thickly along the bottom of the old ship's hull.,barnacle
+animal_498,True,homographic,sentences_animal,animal,"Her clingy roommate had become a real barnacle, impossible to shake off.",barnacle
+animal_499,False,,sentences_animal,animal,A leech attached itself to his ankle during the swim across the pond.,leech
+animal_500,True,homographic,sentences_animal,animal,His deadbeat cousin had been leeching off the family's generosity for years.,leech
