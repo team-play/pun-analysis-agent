@@ -23,6 +23,8 @@ Put local secrets in `.env` / `.env.local` files inside the relevant package fol
 
 [`deploy-frontend.yml`](../.github/workflows/deploy-frontend.yml) builds `frontend/` and deploys it to Firebase Hosting (`pun-agent.web.app`) on every push to `main` that touches `frontend/**`, the root `package.json`/`pnpm-lock.yaml`/`pnpm-workspace.yaml`, or the workflow itself (or a manual run on `main`), via [`FirebaseExtended/action-hosting-deploy`](https://github.com/FirebaseExtended/action-hosting-deploy). Its build step sets `VITE_CHAT_ADAPTER=live` and `VITE_BACKEND_URL` to the Cloud Run URL below, so the deployed site talks to the real Backend; those vars live only in the workflow, so local builds and CI tests stay on the stub. It first runs the frontend tests through the same [`test-js.yml`](../.github/workflows/test-js.yml) that `test.yml` uses, and deploys only if they pass; deploys run one at a time, and a newer push replaces a run still waiting. The target Firebase project ID (`pun-agent`) is committed in [`frontend/.firebaserc`](../frontend/.firebaserc) — not a secret, since a project ID isn't sensitive.
 
+The Firebase web config and the reCAPTCHA Enterprise site key used for App Check are committed in [`frontend/src/lib/firebase/app-check.ts`](../frontend/src/lib/firebase/app-check.ts). They're public by design and ship in the bundle. The key was created in the Google Cloud console (Security → reCAPTCHA) as a score-based website key for `pun-agent.web.app` and `pun-agent.firebaseapp.com` only, and registered for the web app under Firebase's App Check → Apps. Serving the site from another domain means adding it to that key, and to Backend's CORS allowlist.
+
 The one secret it needs is already set, at the **organization** level (the org's Settings → Secrets and variables → Actions, not the repo's), and is visible to this repo:
 
 - `GCP_SA_KEY` — the JSON key for `github-actions-deployer@pun-agent.iam.gserviceaccount.com`, the shared deploy service account for the whole `pun-agent` GCP project. It holds `roles/firebasehosting.admin` (this workflow) plus `roles/run.admin`, `roles/artifactregistry.writer` and a project-level `roles/iam.serviceAccountUser` (the Cloud Run deploys) — reused across all three deploy workflows rather than minting a separate key per target. The project-level `serviceAccountUser` and the long-lived JSON key (rather than Workload Identity Federation) are deliberate simplifications for a course project; see TASK-13's notes.
@@ -36,7 +38,7 @@ gcloud iam service-accounts keys create github-actions-deployer-key.json \
 
 Paste the contents into the `GCP_SA_KEY` secret, then delete the local file and revoke the old key (`gcloud iam service-accounts keys list`/`delete`) — it's a credential, not something to keep on disk or leave active once replaced.
 
-No local Firebase login is required to develop `frontend/` day-to-day; this secret only matters for the CI deploy step.
+No local Firebase login is required to develop `frontend/` day-to-day; this secret only matters for the CI deploy step. (Chatting with a real Backend locally does need the team's App Check debug token; see "Frontend" below.)
 
 ### Backend deploy (CI only)
 
@@ -46,7 +48,7 @@ One-time GCP setup it relies on (already done, see TASK-13's notes):
 
 | Resource | Where | Notes |
 |---|---|---|
-| Cloud Run service `pun-agent-backend` | `pun-agent`, `us-east1` | `https://pun-agent-backend-203365930808.us-east1.run.app`. Public (`--allow-unauthenticated`; TASK-25 adds App Check inside the app), `--min-instances=0`, `--max-instances=1` |
+| Cloud Run service `pun-agent-backend` | `pun-agent`, `us-east1` | `https://pun-agent-backend-203365930808.us-east1.run.app`. Public (`--allow-unauthenticated`), so `/api/*` checks a Firebase App Check token inside the app (TASK-25; see [`contracts.md`](contracts.md)), and the deploy smoke-tests that it does, `--min-instances=0`, `--max-instances=1` |
 | Service account `pun-agent-runtime@pun-agent.iam.gserviceaccount.com` | `pun-agent` | the identity the service runs as; can read only the secret below, no project-level roles |
 | Secret `gemini-api-key-runtime` | `pun-agent` Secret Manager | the production Gemini key, mounted as `GEMINI_API_KEY` |
 | Gemini API key `pun-agent-runtime` | `gen-lang-client-0125403786` (no billing, free tier) | restricted to the Gemini API |
@@ -88,7 +90,7 @@ pnpm dev
 pnpm test
 ```
 
-The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. `pnpm test` never needs `GEMINI_API_KEY` set — it runs against a Genkit test-double model instead (see [`engineering-practices.md`](engineering-practices.md)'s "Backend in isolation" section). Sanity-check the dev server with:
+The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. `/api/chat` requires a Firebase App Check token, exactly as in production (see [`contracts.md`](contracts.md)), so a request from the frontend's `live` mode needs its debug token (see "Frontend" below). To call it without one, e.g. with `curl`, set `APP_CHECK=off` in `backend/.env.local`; the server warns at startup while it's off. Only the exact value `off` disables the check, so a deployed service with no setting is always protected, and on Cloud Run (detected by the `K_SERVICE` variable it always sets) `APP_CHECK=off` makes the server refuse to start, so a revision configured that way never serves traffic. `pnpm test` never needs `GEMINI_API_KEY` set — it runs against a Genkit test-double model instead (see [`engineering-practices.md`](engineering-practices.md)'s "Backend in isolation" section). Sanity-check the dev server with:
 
 ```bash
 curl localhost:8080/health
@@ -114,6 +116,16 @@ Opens the dev server at `http://localhost:5173`. `pnpm test` runs Vitest + React
 ```bash
 VITE_CHAT_ADAPTER=live VITE_BACKEND_URL=http://localhost:8080 pnpm dev
 ```
+
+`live` mode also needs a Firebase App Check token for every request. The deployed site gets one through reCAPTCHA Enterprise, but `localhost` is deliberately not on the reCAPTCHA key's domain allowlist (anyone could serve a page from their own `localhost`), so `pnpm dev` uses an App Check **debug token** instead. The team shares one, registered in the Firebase console (project `pun-agent`, **App Check → Apps → ⋮ → Manage debug tokens**) and kept in the team's 1Password; ask Yai Torres for it. Put it in `frontend/.env.local`:
+
+```bash
+VITE_APPCHECK_DEBUG_TOKEN=<the shared debug token>
+```
+
+Without it, `live` mode can't get a token, so every message fails with "Couldn't get a reply" before reaching Backend (`APP_CHECK=off` on Backend doesn't help: the frontend stops first). If it's unset, the SDK generates a new token instead, which works once someone with console access registers it.
+
+A debug token gets real App Check tokens from anywhere, so treat it like a password: keep it in `.env.local` and 1Password only, and if it leaks, delete it in the console and share a new one. The SDK prints it to the browser console as `Firebase App Check debug token: <uuid>` on every `pnpm dev` load in `live` mode, whether it's the shared one or a new one, so close devtools before screen sharing, and rotate it if it shows up anywhere. Only `pnpm dev` reads it; production builds drop that code.
 
 The frontend must stay on `http://localhost:5173`: that's the dev origin Backend's CORS allowlist accepts by default (alongside the two deployed Firebase Hosting domains, `pun-agent.web.app` and `pun-agent.firebaseapp.com`) (`CORS_ORIGIN` in `backend/` overrides it).
 

@@ -38,19 +38,62 @@ function failWith(userMessage: string, cause: unknown): never {
 }
 
 /**
+ * How long to wait for an App Check token. Normally it's cached, but a
+ * blocked reCAPTCHA script (e.g. by an ad-blocker) leaves the SDK waiting
+ * forever, and assistant-ui keeps the reply "running" until run() settles.
+ */
+export const APP_CHECK_TIMEOUT_MS = 10_000;
+
+/**
+ * Waits for the App Check token, but stops waiting if the user presses stop
+ * (rejecting with the signal's AbortError, so the reply shows as cancelled)
+ * or after APP_CHECK_TIMEOUT_MS. Once the token has settled, its own outcome
+ * stands, just as fetch errors are judged by the error itself (see isAbort).
+ */
+const waitForAppCheckToken = (
+	token: Promise<string>,
+	abortSignal: AbortSignal,
+) =>
+	new Promise<string>((resolve, reject) => {
+		const onAbort = () => reject(abortSignal.reason);
+		abortSignal.addEventListener("abort", onAbort, { once: true });
+		const timer = setTimeout(
+			() =>
+				reject(new Error(`No App Check token after ${APP_CHECK_TIMEOUT_MS}ms`)),
+			APP_CHECK_TIMEOUT_MS,
+		);
+		token.then(resolve, reject).finally(() => {
+			clearTimeout(timer);
+			abortSignal.removeEventListener("abort", onAbort);
+		});
+	});
+
+/**
  * The real ChatModelAdapter: sends the conversation to Backend's
  * `/api/chat` (docs/contracts.md) and streams Genkit's reply back into
  * assistant-ui. Phase 1 is text-only; `analyze_pun` tool-call events are
  * TASK-10's extension of this same adapter.
+ *
+ * `getAppCheckToken` supplies the Firebase App Check token Backend requires
+ * on every request; it's injected so tests need no Firebase or reCAPTCHA.
  */
 export const createLiveChatModelAdapter = (
 	chatUrl: string,
+	getAppCheckToken: () => Promise<string>,
 ): ChatModelAdapter => ({
 	async *run({ messages, abortSignal }: ChatModelRunOptions) {
-		// Failing before a response arrives (offline, Backend down, non-2xx).
+		// Failing before a response arrives (no App Check token, offline,
+		// Backend down, non-2xx).
+		const appCheckToken = await waitForAppCheckToken(
+			getAppCheckToken(),
+			abortSignal,
+		).catch((error: unknown) => failWith(NO_REPLY_MESSAGE, error));
 		const response = await fetch(chatUrl, {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				"Content-Type": "application/json",
+				"X-Firebase-AppCheck": appCheckToken,
+			},
 			body: JSON.stringify({
 				messages: messages.map((message) => ({
 					role: message.role,
