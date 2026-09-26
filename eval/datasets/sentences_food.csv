@@ -1,0 +1,501 @@
+id,is_pun,pun_type,source_corpus,category,text,pun_target
+food_1,False,,sentences_food,food,The baker kneaded the dough for twenty minutes before letting it rest overnight.,dough
+food_2,True,homographic,sentences_food,food,He never worries about rent since his bakery brings in serious dough every month.,dough
+food_3,False,,sentences_food,food,"The cheese platter included a sharp cheddar, a soft brie, and a smoky gouda.",cheese
+food_4,True,homographic,sentences_food,food,"The mayor grinned for the cameras, clearly the big cheese of the whole campaign.",cheese
+food_5,False,,sentences_food,food,She fried the bacon slowly so the strips would turn crisp without burning.,bacon
+food_6,True,homographic,sentences_food,food,"After the layoffs, only one manager managed to bring home the bacon that month.",bacon
+food_7,False,,sentences_food,food,"The bakery's sourdough bread had a thick crust and a soft, tangy center.",bread
+food_8,True,homographic,sentences_food,food,"As the sole breadwinner, she felt the pressure of supporting the whole family.",bread
+food_9,False,,sentences_food,food,The beekeeper harvested honey from the hive just before the first frost.,honey
+food_10,True,homographic,sentences_food,food,"Honey, could you grab the mail on your way in, he called from the kitchen.",honey
+food_11,False,,sentences_food,food,The recipe called for a cup of sugar and a teaspoon of vanilla extract.,sugar
+food_12,True,homographic,sentences_food,food,Grandma always called her grandchildren sugar whenever they visited on Sundays.,sugar
+food_13,False,,sentences_food,food,She spread a thick layer of strawberry jam over the warm toast.,jam
+food_14,True,homographic,sentences_food,food,Traffic was jammed for miles after the accident on the interstate this morning.,jam
+food_15,False,,sentences_food,food,The farmer harvested rows of sweet corn just before the summer fair.,corn
+food_16,True,homographic,sentences_food,food,The comedian's jokes were so corny that half the audience just groaned.,corn
+food_17,False,,sentences_food,food,She cracked two eggs into the bowl and whisked them until smooth.,egg
+food_18,True,homographic,sentences_food,food,His friends egged him on until he finally agreed to sing karaoke.,egg
+food_19,False,,sentences_food,food,The deli sliced the ham thin for the sandwiches ordered at lunch.,ham
+food_20,True,homographic,sentences_food,food,The actor hammed it up so much that the director had to cut the scene.,ham
+food_21,False,,sentences_food,food,They roasted a whole turkey for six hours before the holiday dinner.,turkey
+food_22,True,homographic,sentences_food,food,The heist went so badly that the crew called it a total turkey of a plan.,turkey
+food_23,False,,sentences_food,food,The farmer let the chickens out to peck around the yard each morning.,chicken
+food_24,True,homographic,sentences_food,food,He chickened out of the roller coaster the moment he saw the first drop.,chicken
+food_25,False,,sentences_food,food,The pig rolled happily in the mud behind the old red barn.,pig
+food_26,True,homographic,sentences_food,food,Stop being such a pig and save some fries for the rest of us.,pig
+food_27,False,,sentences_food,food,The fishermen pulled up a dozen crabs tangled in the wire trap.,crab
+food_28,True,homographic,sentences_food,food,He was so crabby this morning that nobody dared speak to him before coffee.,crab
+food_29,False,,sentences_food,food,They dug for clams along the shoreline at low tide.,clam
+food_30,True,homographic,sentences_food,food,She told him to clam up before he said something he would regret.,clam
+food_31,False,,sentences_food,food,The chef shucked the oysters and served them on a bed of ice.,oyster
+food_32,True,homographic,sentences_food,food,"With her new promotion, she felt like the world was finally her oyster.",oyster
+food_33,False,,sentences_food,food,He peeled the potatoes and diced them for the Sunday stew.,potato
+food_34,True,homographic,sentences_food,food,"He spent the whole weekend as a couch potato, binge-watching old sitcoms.",potato
+food_35,False,,sentences_food,food,The farmer planted three rows of green beans along the back fence.,bean
+food_36,True,homographic,sentences_food,food,"After the lottery win, he was suddenly full of beans and big plans.",bean
+food_37,False,,sentences_food,food,The squirrel buried the nut beneath the roots of the old oak tree.,nut
+food_38,True,homographic,sentences_food,food,Her brother is completely nuts about vintage motorcycles and old radios.,nut
+food_39,False,,sentences_food,food,She buttered the toast and set it beside the scrambled eggs.,toast
+food_40,True,homographic,sentences_food,food,"If the manager finds out about the missing funds, you are toast.",toast
+food_41,False,,sentences_food,food,The bakery sold warm dinner rolls fresh out of the oven each evening.,roll
+food_42,True,homographic,sentences_food,food,"After three straight wins, the whole team felt like they were on a roll.",roll
+food_43,False,,sentences_food,food,She rolled out the pie crust until it was thin and even.,crust
+food_44,True,homographic,sentences_food,food,Only the upper crust of society was invited to the gallery opening.,crust
+food_45,False,,sentences_food,food,"The orchard's peaches were ripe, juicy, and ready to be picked.",peach
+food_46,True,homographic,sentences_food,food,Everything about the vacation went peachy from the moment they landed.,peach
+food_47,False,,sentences_food,food,She squeezed a fresh lemon over the grilled fish before serving it.,lemon
+food_48,True,homographic,sentences_food,food,The used car turned out to be a total lemon within a week.,lemon
+food_49,False,,sentences_food,food,He picked a handful of cherries straight from the backyard tree.,cherry
+food_50,True,homographic,sentences_food,food,Winning the award was just the cherry on top of an already great year.,cherry
+food_51,False,,sentences_food,food,The monkey peeled the banana and ate it in three quick bites.,banana
+food_52,True,homographic,sentences_food,food,The whole office went bananas when they announced the surprise holiday bonus.,banana
+food_53,False,,sentences_food,food,She packed an apple and a sandwich for her son's lunch.,apple
+food_54,True,homographic,sentences_food,food,Their youngest daughter is truly the apple of her grandfather's eye.,apple
+food_55,False,,sentences_food,food,The chef whipped the cream until soft peaks began to form.,cream
+food_56,True,homographic,sentences_food,food,The finalists were the cream of the crop after months of tryouts.,cream
+food_57,False,,sentences_food,food,He sliced the pickle and added it to the sandwich.,pickle
+food_58,True,homographic,sentences_food,food,Forgetting the tickets at home left them in quite a pickle at the airport.,pickle
+food_59,False,,sentences_food,food,The butcher trimmed the beef before grinding it for burgers.,beef
+food_60,True,homographic,sentences_food,food,She had a real beef with how the meeting was scheduled without her.,beef
+food_61,False,,sentences_food,food,They caught three fish before the sun even rose over the lake.,fish
+food_62,True,homographic,sentences_food,food,Something about his explanation seemed fishy from the very start.,fish
+food_63,False,,sentences_food,food,"She tossed the salad with olive oil, lemon juice, and fresh herbs.",salad
+food_64,True,homographic,sentences_food,food,His answer to the question was pure word salad and made no sense.,salad
+food_65,False,,sentences_food,food,The kids decorated sugar cookies with frosting and sprinkles.,cookie
+food_66,True,homographic,sentences_food,food,"Despite the setback, she remained a tough cookie and refused to give up.",cookie
+food_67,False,,sentences_food,food,The bakery's lemon tart had a buttery crust and a tangy filling.,tart
+food_68,True,homographic,sentences_food,food,His tart reply left the whole room a little stunned.,tart
+food_69,False,,sentences_food,food,She whisked the pancake batter until it was smooth and lump-free.,batter
+food_70,True,homographic,sentences_food,food,The rookie batter struck out twice before finally connecting in the ninth.,batter
+food_71,False,,sentences_food,food,He drizzled a light vinaigrette dressing over the mixed greens.,dressing
+food_72,True,homographic,sentences_food,food,She was still dressing when the doorbell rang unexpectedly early.,dressing
+food_73,False,,sentences_food,food,The broth simmered for hours before the noodles were added.,noodle
+food_74,True,homographic,sentences_food,food,Use your noodle for a second before you sign anything you haven't read.,noodle
+food_75,False,,sentences_food,food,She frosted the birthday cake with layers of chocolate ganache.,cake
+food_76,True,homographic,sentences_food,food,"Compared to finals week, this exam was going to be a piece of cake.",cake
+food_77,False,,sentences_food,food,The pie cooled on the windowsill after coming out of the oven.,pie
+food_78,True,homographic,sentences_food,food,His promise of a big promotion turned out to be pie in the sky.,pie
+food_79,False,,sentences_food,food,She poured warm gravy over the mashed potatoes and turkey.,gravy
+food_80,True,homographic,sentences_food,food,"Once the loan was paid off, every extra dollar felt like gravy.",gravy
+food_81,False,,sentences_food,food,The chef added a pinch of spice to balance the sweetness.,spice
+food_82,True,homographic,sentences_food,food,A weekend road trip really helped spice things up during a dull summer.,spice
+food_83,False,,sentences_food,food,He seasoned the soup with a bit more salt before serving.,salt
+food_84,True,homographic,sentences_food,food,"Given his track record, I would take his promises with a grain of salt.",salt
+food_85,False,,sentences_food,food,She ground fresh black pepper over the pasta before plating it.,pepper
+food_86,True,homographic,sentences_food,food,The reporters peppered the senator with questions after the announcement.,pepper
+food_87,False,,sentences_food,food,The simmering tomato sauce filled the kitchen with a rich aroma.,sauce
+food_88,True,homographic,sentences_food,food,He walked into the interview with more sauce than the job actually called for.,sauce
+food_89,False,,sentences_food,food,The beef stew simmered on low heat for most of the afternoon.,stew
+food_90,True,homographic,sentences_food,food,She let the bad news stew in her mind long after the call ended.,stew
+food_91,False,,sentences_food,food,He ladled the hot vegetable soup into two wide bowls.,soup
+food_92,True,homographic,sentences_food,food,"Once the deadline slipped again, the whole project was really in the soup.",soup
+food_93,False,,sentences_food,food,He spread a thin layer of mustard on the pretzel.,mustard
+food_94,True,homographic,sentences_food,food,The rookie pitcher just could not cut the mustard against the league's best hitters.,mustard
+food_95,False,,sentences_food,food,She added a spoonful of relish to the hot dog.,relish
+food_96,True,homographic,sentences_food,food,He seemed to relish every single minute of the championship game.,relish
+food_97,False,,sentences_food,food,She squeezed fresh orange juice for breakfast every morning.,juice
+food_98,True,homographic,sentences_food,food,The new coach brought a lot of juice and energy to a tired old team.,juice
+food_99,False,,sentences_food,food,The farmer roasted butternut squash with olive oil and thyme.,squash
+food_100,True,homographic,sentences_food,food,The committee moved quickly to squash any rumors about the merger.,squash
+food_101,False,,sentences_food,food,She added chopped dates to the batter for extra sweetness.,date
+food_102,True,homographic,sentences_food,food,He was too nervous to even ask her out on a first date.,date
+food_103,False,,sentences_food,food,The tree in the courtyard produced sweet purple figs every August.,fig
+food_104,True,homographic,sentences_food,food,"Honestly, after everything that happened, he did not give a fig about the outcome.",fig
+food_105,False,,sentences_food,food,The angler reeled in a largemouth bass just before sunset.,bass
+food_106,True,homographic,sentences_food,food,The singer's voice dropped into a deep bass during the final chorus.,bass
+food_107,False,,sentences_food,food,She sliced the kiwi and arranged it on the fruit tart.,kiwi
+food_108,True,homographic,sentences_food,food,The tour guide joked that even the local kiwi birds seemed camera-shy.,kiwi
+food_109,False,,sentences_food,food,"He rubbed the roast with rosemary, sage, and a bit of garlic.",sage
+food_110,True,homographic,sentences_food,food,The old professor was regarded as something of a sage among the students.,sage
+food_111,False,,sentences_food,food,She dropped a bay leaf into the simmering broth.,bay
+food_112,True,homographic,sentences_food,food,New security cameras finally kept the late-night vandals at bay.,bay
+food_113,False,,sentences_food,food,"He topped his waffle with syrup, berries, and whipped cream.",waffle
+food_114,True,homographic,sentences_food,food,The senator kept waffling on the issue instead of giving a straight answer.,waffle
+food_115,False,,sentences_food,food,She brushed the crumbs off the counter after slicing the cake.,crumb
+food_116,True,homographic,sentences_food,food,"Not even a crumb of evidence, the detective muttered, closing the empty file.",crumb
+food_117,False,,sentences_food,food,She removed the pit from the peach before slicing it.,pit
+food_118,True,homographic,sentences_food,food,The rumor left him with a knot in the pit of his stomach all through dinner.,pit
+food_119,False,,sentences_food,food,She shelled the peas straight from the pod into a bowl.,pod
+food_120,True,homographic,sentences_food,food,"The new hires moved through onboarding like peas in a pod, inseparable from day one.",pod
+food_121,False,,sentences_food,food,She baked an apple crumble with a buttery oat topping.,crumble
+food_122,True,homographic,sentences_food,food,"Under the pressure of the final question, his composure began to crumble.",crumble
+food_123,False,,sentences_food,food,The baker brushed a sweet glaze over the warm donuts.,glaze
+food_124,True,homographic,sentences_food,food,"By the third hour of the lecture, most students had a glazed look in their eyes.",glaze
+food_125,False,,sentences_food,food,She grated lemon zest over the finished pasta dish.,zest
+food_126,True,homographic,sentences_food,food,"He approached every new project with real zest, even the boring ones.",zest
+food_127,False,,sentences_food,food,He threaded the chicken and peppers onto a metal skewer.,skewer
+food_128,True,homographic,sentences_food,food,The satirist loved nothing more than to skewer politicians in his weekly column.,skewer
+food_129,False,,sentences_food,food,She basted the turkey every thirty minutes to keep it moist.,baste
+food_130,True,homographic,sentences_food,food,Grandma still bastes her quilts by hand instead of using a sewing machine.,baste
+food_131,False,,sentences_food,food,He whisked the eggs and milk together for the omelet.,whisk
+food_132,True,homographic,sentences_food,food,The magician seemed to whisk the coin away before anyone even blinked.,whisk
+food_133,False,,sentences_food,food,She diced the onions finely before adding them to the pan.,dice
+food_134,True,homographic,sentences_food,food,He decided to just roll the dice and take the riskier job offer.,dice
+food_135,False,,sentences_food,food,The butcher minced the beef for the meatballs.,mince
+food_136,True,homographic,sentences_food,food,She never minces words when giving feedback on a rough draft.,mince
+food_137,False,,sentences_food,food,He spread butter evenly across the warm toast.,spread
+food_138,True,homographic,sentences_food,food,The rumor managed to spread through the office before lunch was even over.,spread
+food_139,False,,sentences_food,food,She sliced the fresh loaf of bread for sandwiches.,loaf
+food_140,True,homographic,sentences_food,food,"Instead of studying, he decided to loaf around the house all weekend.",loaf
+food_141,False,,sentences_food,food,She cored the apple before slicing it into wedges.,core
+food_142,True,homographic,sentences_food,food,Honesty is one of the core values the company says it stands for.,core
+food_143,False,,sentences_food,food,He removed the seeds from the pepper before chopping it.,seed
+food_144,True,homographic,sentences_food,food,"As the tournament's top seed, she was expected to reach the final easily.",seed
+food_145,False,,sentences_food,food,She let the tea brew for five minutes before pouring it.,brew
+food_146,True,homographic,sentences_food,food,Something was clearly brewing between the two rival companies all year.,brew
+food_147,False,,sentences_food,food,She sifted the flour before adding it to the mixing bowl.,flour
+food_148,True,homophonic,sentences_food,food,The baker joked that her garden grows flowers while her kitchen only grows flour.,flour
+food_149,False,,sentences_food,food,She sprinkled fresh thyme over the roasted vegetables.,thyme
+food_150,True,homophonic,sentences_food,food,"He said he would fix the fence eventually, given enough thyme.",thyme
+food_151,False,,sentences_food,food,The chef steamed the mussels in white wine and garlic.,mussel
+food_152,True,homophonic,sentences_food,food,"The strongman joked that his favorite seafood was, unsurprisingly, mussels.",mussel
+food_153,False,,sentences_food,food,The butcher trimmed the fat from the meat before wrapping it.,meat
+food_154,True,homophonic,sentences_food,food,They agreed to meet at the same restaurant to discuss the merger.,meat
+food_155,False,,sentences_food,food,She roasted the beets with olive oil and rosemary.,beet
+food_156,True,homophonic,sentences_food,food,The drummer kept perfect beat through the entire three-hour set.,beet
+food_157,False,,sentences_food,food,He grilled the steak to a perfect medium-rare.,steak
+food_158,True,homophonic,sentences_food,food,The gambler decided to stake everything on one final hand of cards.,steak
+food_159,False,,sentences_food,food,She simmered a pot of chili with beans and ground beef.,chili
+food_160,True,homophonic,sentences_food,food,It got so chilly overnight that the pipes nearly froze.,chili
+food_161,False,,sentences_food,food,The scone was studded with dried currants.,currant
+food_162,True,homophonic,sentences_food,food,The current pulled the swimmers further from shore than they expected.,currant
+food_163,False,,sentences_food,food,He poured two glasses of red wine with dinner.,wine
+food_164,True,homophonic,sentences_food,food,The toddler began to whine the moment his nap was interrupted.,wine
+food_165,False,,sentences_food,food,She chopped the leek finely for the potato soup.,leek
+food_166,True,homophonic,sentences_food,food,There was a leak in the roof that soaked the attic during the storm.,leek
+food_167,False,,sentences_food,food,The yolk stayed perfectly runny in the poached egg.,yolk
+food_168,True,homophonic,sentences_food,food,He told the same old joke at every family dinner without fail.,yolk
+food_169,False,,sentences_food,food,The chef pan-seared a fillet of sole with lemon butter.,sole
+food_170,True,homophonic,sentences_food,food,She poured her whole soul into the painting for months.,sole
+food_171,False,,sentences_food,food,She sliced a ripe pear for the cheese board.,pear
+food_172,True,homophonic,sentences_food,food,The two old friends made an unlikely pair at the reunion.,pear
+food_173,False,,sentences_food,food,They picked wild berries along the forest trail.,berry
+food_174,True,homophonic,sentences_food,food,The dog decided to bury the bone in the backyard again.,berry
+food_175,False,,sentences_food,food,He poured milk over a bowl of cereal for breakfast.,cereal
+food_176,True,homophonic,sentences_food,food,The show became a serial hit after its surprising second season.,cereal
+food_177,False,,sentences_food,food,The chef garnished the sushi with a spoonful of roe.,roe
+food_178,True,homophonic,sentences_food,food,They had to row the small boat back before the storm hit.,roe
+food_179,False,,sentences_food,food,She shelled the peas straight into a saucepan.,peas
+food_180,True,homophonic,sentences_food,food,"Peas be quiet, the librarian whispered with a small smile.",peas
+food_181,False,,sentences_food,food,She squeezed lime over the grilled shrimp tacos.,lime
+food_182,True,homophonic,sentences_food,food,The hikers were warned to check for ticks and possible Lyme disease after the trail.,lime
+food_183,False,,sentences_food,food,He peeled an orange and split it into segments.,orange
+food_184,True,homophonic,sentences_food,food,Orange you glad the meeting finally got moved to Friday?,orange
+food_185,False,,sentences_food,food,She chopped celery for the soup's mirepoix base.,celery
+food_186,True,homophonic,sentences_food,food,He joked that his celery was barely enough to cover rent this month.,celery
+food_187,False,,sentences_food,food,She washed the lettuce and tore it into the salad bowl.,lettuce
+food_188,True,homophonic,sentences_food,food,"Lettuce begin the ceremony, the officiant said with a small grin.",lettuce
+food_189,False,,sentences_food,food,He added a handful of olives to the antipasto platter.,olive
+food_190,True,homophonic,sentences_food,food,"Olive you, he mouthed silently across the crowded room.",olive
+food_191,False,,sentences_food,food,She sliced the honeydew melon into thin wedges.,honeydew
+food_192,True,homophonic,sentences_food,food,"Before he left for work, she reminded him of the honeydew list on the fridge.",honeydew
+food_193,False,,sentences_food,food,She added a handful of raisins to the oatmeal cookies.,raisin
+food_194,True,homophonic,sentences_food,food,He could not think of a single good raisin to skip the meeting.,raisin
+food_195,False,,sentences_food,food,She picked a ripe plum from the tree in the yard.,plum
+food_196,True,homophonic,sentences_food,food,The plumber checked every plumb line before sealing the new pipes.,plum
+food_197,False,,sentences_food,food,"She grew basil, mint, and other fresh herbs on the windowsill.",herb
+food_198,True,homophonic,sentences_food,food,Herb from accounting always brings fresh basil from his own garden.,herb
+food_199,False,,sentences_food,food,She peeled and chopped the carrot for the stew.,carrot
+food_200,True,homophonic,sentences_food,food,"The jeweler weighed the ring carefully, checking its exact carat count.",carrot
+food_201,False,,sentences_food,food,She kept a jar of homemade chicken stock in the freezer for soups.,stock
+food_202,True,homographic,sentences_food,food,"After the merger rumors, everyone in the office was talking about the company's stock.",stock
+food_203,False,,sentences_food,food,She peeled the potatoes before dropping them into the pot.,peel
+food_204,True,homographic,sentences_food,food,He had to peel out of the driveway the second he heard the news.,peel
+food_205,False,,sentences_food,food,She strained the pulp from the juice before serving it cold.,pulp
+food_206,True,homographic,sentences_food,food,"By the end of the boxing match, his opponent had been beaten to a pulp.",pulp
+food_207,False,,sentences_food,food,He soaked the oats overnight for a quicker breakfast in the morning.,oat
+food_208,True,homographic,sentences_food,food,"After the big win, the whole team was clearly feeling their oats.",oat
+food_209,False,,sentences_food,food,The brewery imported special hops for their new seasonal ale.,hops
+food_210,True,homographic,sentences_food,food,The rabbit hops across the yard every morning before breakfast.,hops
+food_211,False,,sentences_food,food,She spread a thin layer of icing over the cooled cupcakes.,icing
+food_212,True,homographic,sentences_food,food,Getting the corner office was just the icing on an already great promotion.,icing
+food_213,False,,sentences_food,food,The pie had a warm cherry filling beneath its golden crust.,filling
+food_214,True,homographic,sentences_food,food,The dentist said she needed a filling after the routine checkup.,filling
+food_215,False,,sentences_food,food,He added a generous topping of whipped cream to the sundae.,topping
+food_216,True,homographic,sentences_food,food,The reviewer called the new restaurant absolutely topping in every way.,topping
+food_217,False,,sentences_food,food,The chef added a sprig of parsley as a garnish before plating.,garnish
+food_218,True,homographic,sentences_food,food,The court ordered his wages garnished until the debt was fully paid.,garnish
+food_219,False,,sentences_food,food,She splashed a bit of vinegar over the fish and chips.,vinegar
+food_220,True,homographic,sentences_food,food,"Even after losing, the rookie still played with plenty of vinegar.",vinegar
+food_221,False,,sentences_food,food,He squeezed ketchup over his fries before taking a bite.,ketchup
+food_222,True,homophonic,sentences_food,food,She promised to ketchup with old friends once the semester finally ended.,ketchup
+food_223,False,,sentences_food,food,The shop sold thick slabs of chocolate fudge at the counter.,fudge
+food_224,True,homographic,sentences_food,food,He had to fudge the numbers slightly to make the budget look balanced.,fudge
+food_225,False,,sentences_food,food,The kids sorted their Halloween candy into neat little piles.,candy
+food_226,True,homographic,sentences_food,food,He tried to candy his way out of the argument with a few sweet compliments.,candy
+food_227,False,,sentences_food,food,She grew fresh mint in a small pot on the windowsill.,mint
+food_228,True,homographic,sentences_food,food,The old comic books were kept in mint condition inside plastic sleeves.,mint
+food_229,False,,sentences_food,food,He chewed a piece of gum while waiting for the bus.,gum
+food_230,True,homographic,sentences_food,food,One missing part managed to gum up the entire assembly line.,gum
+food_231,False,,sentences_food,food,She broke off a piece of peanut brittle for dessert.,brittle
+food_232,True,homographic,sentences_food,food,"After the long illness, his health felt brittle for months afterward.",brittle
+food_233,False,,sentences_food,food,She sliced the melon into thin wedges for the fruit salad.,melon
+food_234,True,homographic,sentences_food,food,Use your melon for a second and think before you answer.,melon
+food_235,False,,sentences_food,food,They carved the gourd into a small decorative bowl.,gourd
+food_236,True,homographic,sentences_food,food,He was completely out of his gourd trying to finish the marathon on no sleep.,gourd
+food_237,False,,sentences_food,food,They carved a pumpkin for the porch just before Halloween.,pumpkin
+food_238,True,homographic,sentences_food,food,"Good morning, pumpkin, she said, ruffling her son's hair.",pumpkin
+food_239,False,,sentences_food,food,She served warm biscuits alongside the fried chicken.,biscuit
+food_240,True,homographic,sentences_food,food,His last-minute goal really took the biscuit for play of the season.,biscuit
+food_241,False,,sentences_food,food,He dipped the warm pretzel in mustard before taking a bite.,pretzel
+food_242,True,homographic,sentences_food,food,"By the end of the yoga class, her legs were twisted like a pretzel.",pretzel
+food_243,False,,sentences_food,food,The pub served a rotating selection of local craft ale.,ale
+food_244,True,homophonic,sentences_food,food,A nasty cold left him feeling more than a little ale this week.,ale
+food_245,False,,sentences_food,food,She spread a spoonful of raspberry preserve over her toast.,preserve
+food_246,True,homographic,sentences_food,food,The new law was designed to preserve the old growth forest for future generations.,preserve
+food_247,False,,sentences_food,food,He spread grape jelly over the peanut butter sandwich.,jelly
+food_248,True,homographic,sentences_food,food,Watching the horror movie left her legs feeling like jelly.,jelly
+food_249,False,,sentences_food,food,She filled the kettle and set it on the stove to boil.,kettle
+food_250,True,homographic,sentences_food,food,Calling him messy was a bit of the pot calling the kettle black.,kettle
+food_251,False,,sentences_food,food,She chopped the onion finely for the soup base.,onion
+food_252,True,homographic,sentences_food,food,He really knows his onions when it comes to vintage cars.,onion
+food_253,False,,sentences_food,food,She shredded cabbage for the coleslaw.,cabbage
+food_254,True,homographic,sentences_food,food,He had saved enough cabbage to finally buy the new truck.,cabbage
+food_255,False,,sentences_food,food,She baked a rhubarb pie with a lattice crust.,rhubarb
+food_256,True,homographic,sentences_food,food,The coaches got into a real rhubarb over the referee's call.,rhubarb
+food_257,False,,sentences_food,food,The grapevine climbed steadily up the wooden trellis.,grapevine
+food_258,True,homographic,sentences_food,food,She heard through the grapevine that the office was moving downtown.,grapevine
+food_259,False,,sentences_food,food,"She sliced the pineapple into thick, juicy rings.",pineapple
+food_260,True,homographic,sentences_food,food,The old soldier joked that he still remembered ducking from a pineapple or two.,pineapple
+food_261,False,,sentences_food,food,He cracked open the coconut and drained the water inside.,coconut
+food_262,True,homographic,sentences_food,food,Use your coconut for a second before making a decision like that.,coconut
+food_263,False,,sentences_food,food,The combine harvested acres of golden wheat before the storm.,wheat
+food_264,True,homographic,sentences_food,food,The editor tried to separate the wheat from the chaff in the pile of submissions.,wheat
+food_265,False,,sentences_food,food,She baked a batch of blueberry muffins for breakfast.,muffin
+food_266,True,homographic,sentences_food,food,"After the holidays, he joked about hiding his new muffin top under looser shirts.",muffin
+food_267,False,,sentences_food,food,She boiled the spaghetti until it was perfectly al dente.,spaghetti
+food_268,True,homographic,sentences_food,food,The old function was such a mess of spaghetti code that nobody wanted to touch it.,spaghetti
+food_269,False,,sentences_food,food,She baked a tray of macaroni and cheese for the potluck.,macaroni
+food_270,True,homographic,sentences_food,food,"The portrait showed a fashionable macaroni from the eighteenth century, feather in his cap.",macaroni
+food_271,False,,sentences_food,food,She poured a glass of milk to go with the cookies.,milk
+food_272,True,homographic,sentences_food,food,There's no use crying over spilled milk at this point.,milk
+food_273,False,,sentences_food,food,He spread butter over the warm dinner roll.,butter
+food_274,True,homographic,sentences_food,food,She tried to butter up her boss before asking for the day off.,butter
+food_275,False,,sentences_food,food,The shop sold a sharp aged cheddar imported from England.,cheddar
+food_276,True,homographic,sentences_food,food,He finally had enough cheddar saved up for a down payment.,cheddar
+food_277,False,,sentences_food,food,The cheesemaker drained the whey before pressing the curds.,whey
+food_278,True,homophonic,sentences_food,food,There's no whey he's going to finish that whole project by Friday.,whey
+food_279,False,,sentences_food,food,The butcher trimmed the pork before wrapping it for the customer.,pork
+food_280,True,homographic,sentences_food,food,Critics called the new budget bloated with pork barrel spending.,pork
+food_281,False,,sentences_food,food,The lamb grazed close to its mother in the pasture.,lamb
+food_282,True,homographic,sentences_food,food,Grandma always called her youngest grandchild her sweet little lamb.,lamb
+food_283,False,,sentences_food,food,He sliced the salami thin for the antipasto platter.,salami
+food_284,True,homographic,sentences_food,food,"The negotiators used salami tactics, chipping away at the deal piece by piece.",salami
+food_285,False,,sentences_food,food,The fisherman hauled in a heavy catch of cod at dawn.,cod
+food_286,True,homographic,sentences_food,food,His argument was really just a bit of cod philosophy dressed up to sound smart.,cod
+food_287,False,,sentences_food,food,The angler released the trout gently back into the stream.,trout
+food_288,True,homographic,sentences_food,food,"After the surgery, she joked about her new, slightly puffier trout pout.",trout
+food_289,False,,sentences_food,food,The tin of sardines was packed in olive oil.,sardine
+food_290,True,homographic,sentences_food,food,"By rush hour, the subway car was packed like sardines.",sardine
+food_291,False,,sentences_food,food,The chef seared the scallops in butter for just two minutes.,scallop
+food_292,True,homographic,sentences_food,food,The tailor added a delicate scalloped edge to the hem of the dress.,scallop
+food_293,False,,sentences_food,food,She handed out pieces of toffee wrapped in wax paper.,toffee
+food_294,True,homographic,sentences_food,food,He always came across as a bit toffee-nosed at family gatherings.,toffee
+food_295,False,,sentences_food,food,They roasted marshmallows over the campfire until golden brown.,marshmallow
+food_296,True,homographic,sentences_food,food,"Despite his tough exterior, he was a total marshmallow whenever his kids were around.",marshmallow
+food_297,False,,sentences_food,food,She stirred the pudding constantly so it wouldn't scorch.,pudding
+food_298,True,homographic,sentences_food,food,"The proof of the plan's success would be in the pudding, as they say.",pudding
+food_299,False,,sentences_food,food,She cut the brownies into neat little squares once they cooled.,brownie
+food_300,True,homographic,sentences_food,food,He earned some serious brownie points for remembering her birthday.,brownie
+food_301,False,,sentences_food,food,She piped swirls of frosting onto each cupcake.,cupcake
+food_302,True,homographic,sentences_food,food,"Thanks, cupcake, he said, giving his little sister a quick hug.",cupcake
+food_303,False,,sentences_food,food,He grabbed a glazed donut on his way out the door.,donut
+food_304,True,homographic,sentences_food,food,The rookie scored a total donut in his first game of the season.,donut
+food_305,False,,sentences_food,food,She brewed a fresh pot of coffee before the meeting.,coffee
+food_306,True,homographic,sentences_food,food,It's time to wake up and smell the coffee about this failing plan.,coffee
+food_307,False,,sentences_food,food,She steeped the tea for exactly four minutes before pouring.,tea
+food_308,True,homographic,sentences_food,food,Gossip like that just isn't really her cup of tea.,tea
+food_309,False,,sentences_food,food,He poured a cold beer into a frosted mug.,beer
+food_310,True,homographic,sentences_food,food,"By the end of the night, his beer goggles were clearly working overtime.",beer
+food_311,False,,sentences_food,food,The bartender mixed dark rum with lime and ginger beer.,rum
+food_312,True,homographic,sentences_food,food,The whole contract turned out to be a rather rum deal for everyone involved.,rum
+food_313,False,,sentences_food,food,She ordered a gin and tonic with a slice of lime.,gin
+food_314,True,homographic,sentences_food,food,The invention of the cotton gin changed the textile industry forever.,gin
+food_315,False,,sentences_food,food,The bartender shook the cocktail with ice before straining it.,cocktail
+food_316,True,homographic,sentences_food,food,Doctors warned about the dangerous cocktail of medications he was mixing.,cocktail
+food_317,False,,sentences_food,food,"She blended a smoothie with spinach, banana, and yogurt.",smoothie
+food_318,True,homographic,sentences_food,food,He was such a smoothie that nobody noticed the sales pitch until it was over.,smoothie
+food_319,False,,sentences_food,food,The kids sold lemonade from a stand on the corner.,lemonade
+food_320,True,homographic,sentences_food,food,"When the deal fell through, she decided to make lemonade out of the situation instead.",lemonade
+food_321,False,,sentences_food,food,She ladled fruit punch into paper cups at the party.,punch
+food_322,True,homographic,sentences_food,food,His counterargument really packed a punch during the debate.,punch
+food_323,False,,sentences_food,food,She grated fresh nutmeg over the eggnog.,nutmeg
+food_324,True,homographic,sentences_food,food,The winger nutmegged the defender before slotting the ball into the net.,nutmeg
+food_325,False,,sentences_food,food,She added fresh ginger to the stir-fry for extra heat.,ginger
+food_326,True,homographic,sentences_food,food,He's been teased about his ginger hair since he was a kid.,ginger
+food_327,False,,sentences_food,food,She grew basil on the windowsill for fresh pesto.,basil
+food_328,True,homographic,sentences_food,food,Basil from the front desk always remembers everyone's name.,basil
+food_329,False,,sentences_food,food,She rubbed the roast with rosemary before putting it in the oven.,rosemary
+food_330,True,homographic,sentences_food,food,Rosemary from next door brings over cookies every single holiday.,rosemary
+food_331,False,,sentences_food,food,She added fresh dill to the potato salad.,dill
+food_332,True,homographic,sentences_food,food,Quit acting like such a dill and just admit you were wrong.,dill
+food_333,False,,sentences_food,food,She stirred vanilla extract into the cake batter.,vanilla
+food_334,True,homographic,sentences_food,food,"Compared to his usual wild ideas, this plan felt pretty vanilla.",vanilla
+food_335,False,,sentences_food,food,She simmered the curry with coconut milk and fresh chilies.,curry
+food_336,True,homographic,sentences_food,food,He spent the whole meeting trying to curry favor with the new boss.,curry
+food_337,False,,sentences_food,food,She let the bread bake for exactly forty minutes.,bake
+food_338,True,homographic,sentences_food,food,His plan for the surprise party was still pretty half-baked.,bake
+food_339,False,,sentences_food,food,She let the water boil before adding the pasta.,boil
+food_340,True,homographic,sentences_food,food,The constant delays made his blood absolutely boil.,boil
+food_341,False,,sentences_food,food,She let the chicken fry until golden and crisp.,fry
+food_342,True,homographic,sentences_food,food,"Compared to the big competitors, their startup was still just small fry.",fry
+food_343,False,,sentences_food,food,He grilled the vegetables alongside the burgers.,grill
+food_344,True,homographic,sentences_food,food,The lawyers spent hours grilling the witness on the stand.,grill
+food_345,False,,sentences_food,food,She let the chicken roast slowly for two hours.,roast
+food_346,True,homographic,sentences_food,food,The comedians took turns roasting the guest of honor all night.,roast
+food_347,False,,sentences_food,food,She steamed the broccoli until it was tender.,steam
+food_348,True,homographic,sentences_food,food,He needed to let off some steam after the stressful meeting.,steam
+food_349,False,,sentences_food,food,She poached the eggs gently in simmering water.,poach
+food_350,True,homographic,sentences_food,food,The rival company tried to poach their best engineer with a bigger salary.,poach
+food_351,False,,sentences_food,food,She let the sauce simmer for twenty minutes.,simmer
+food_352,True,homographic,sentences_food,food,He told everyone to simmer down before things got out of hand.,simmer
+food_353,False,,sentences_food,food,She blanched the almonds before slipping off their skins.,blanch
+food_354,True,homographic,sentences_food,food,He blanched at the sight of the final invoice.,blanch
+food_355,False,,sentences_food,food,She let the chicken marinate overnight in the fridge.,marinate
+food_356,True,homographic,sentences_food,food,He decided to let the idea marinate for a few more days before deciding.,marinate
+food_357,False,,sentences_food,food,She seasoned the soup with salt and fresh herbs.,season
+food_358,True,homographic,sentences_food,food,The team looked completely different heading into the new season.,season
+food_359,False,,sentences_food,food,She chopped the vegetables into even pieces.,chop
+food_360,True,homographic,sentences_food,food,"Chop chop, the coach shouted, hurrying the team off the field.",chop
+food_361,False,,sentences_food,food,"She sliced the bread into thin, even pieces.",slice
+food_362,True,homographic,sentences_food,food,That one scene was just a small slice of life in an otherwise ordinary film.,slice
+food_363,False,,sentences_food,food,She grated the cheese directly over the pasta.,grate
+food_364,True,homographic,sentences_food,food,The constant tapping on the desk began to grate on everyone's nerves.,grate
+food_365,False,,sentences_food,food,She kneaded the dough until it turned smooth and elastic.,knead
+food_366,True,homophonic,sentences_food,food,"There's no need to knead the argument any further, everyone already agrees.",knead
+food_367,False,,sentences_food,food,The grapes were left to ferment in oak barrels for months.,ferment
+food_368,True,homographic,sentences_food,food,Rumors of layoffs began to ferment unrest throughout the office.,ferment
+food_369,False,,sentences_food,food,The butcher cured the ham with salt and spices for weeks.,cure
+food_370,True,homographic,sentences_food,food,Researchers were hopeful they had finally found a cure for the disease.,cure
+food_371,False,,sentences_food,food,They smoked the brisket low and slow for twelve hours.,smoke
+food_372,True,homographic,sentences_food,food,"Where there's smoke, there's usually fire, her grandmother always said.",smoke
+food_373,False,,sentences_food,food,She whipped the cream until soft peaks formed.,whip
+food_374,True,homographic,sentences_food,food,The new manager quickly whipped the disorganized team into shape.,whip
+food_375,False,,sentences_food,food,She folded the beaten egg whites gently into the batter.,fold
+food_376,True,homographic,sentences_food,food,"With a weak hand, he decided to fold rather than risk it all.",fold
+food_377,False,,sentences_food,food,She stirred the risotto constantly so it wouldn't stick.,stir
+food_378,True,homographic,sentences_food,food,The announcement managed to stir up quite a bit of controversy online.,stir
+food_379,False,,sentences_food,food,She blended the spices together before rubbing them on the meat.,blend
+food_380,True,homographic,sentences_food,food,He tried to blend in with the crowd despite the bright yellow jacket.,blend
+food_381,False,,sentences_food,food,She strained the broth through a fine mesh sieve.,strain
+food_382,True,homographic,sentences_food,food,The long hours were putting a real strain on the whole team.,strain
+food_383,False,,sentences_food,food,She sifted the flour before folding it into the batter.,sift
+food_384,True,homographic,sentences_food,food,Detectives spent the whole week sifting through old case files.,sift
+food_385,False,,sentences_food,food,She packed a turkey sandwich for lunch.,sandwich
+food_386,True,homographic,sentences_food,food,The tiny apartment was sandwiched between two much larger buildings.,sandwich
+food_387,False,,sentences_food,food,She fried up a plate of corned beef hash for breakfast.,hash
+food_388,True,homographic,sentences_food,food,He really made a hash of things by forgetting the client's name.,hash
+food_389,False,,sentences_food,food,She folded each dumpling by hand before steaming them.,dumpling
+food_390,True,homographic,sentences_food,food,"Come here, you little dumpling, she said, scooping up her toddler.",dumpling
+food_391,False,,sentences_food,food,The soup was filled with delicate pork wontons.,wonton
+food_392,True,homophonic,sentences_food,food,"The rumors accused the executive of wonton disregard for the rules, though everyone meant wanton.",wonton
+food_393,False,,sentences_food,food,She served a slice of chocolate cake for dessert.,dessert
+food_394,True,homophonic,sentences_food,food,Getting lost in the desert was the last thing they expected on a weekend hike.,dessert
+food_395,False,,sentences_food,food,She ordered a side of fries with her sandwich.,side
+food_396,True,homographic,sentences_food,food,He always seemed to take her side no matter what the argument was about.,side
+food_397,False,,sentences_food,food,She measured out a single serving of rice for the recipe.,serving
+food_398,True,homographic,sentences_food,food,The judge sentenced him to a year serving on the county's public works crew.,serving
+food_399,False,,sentences_food,food,She scooped a generous helping of mashed potatoes onto his plate.,helping
+food_400,True,homographic,sentences_food,food,The volunteers spent the whole weekend helping clean up the local park.,helping
+food_401,False,,sentences_food,food,She packed a small snack for the long car ride.,snack
+food_402,True,homographic,sentences_food,food,Everyone at the party agreed the new intern was an absolute snack.,snack
+food_403,False,,sentences_food,food,She handed out treats to the trick-or-treaters at the door.,treat
+food_404,True,homographic,sentences_food,food,He decided to treat himself to a nice dinner after the long week.,treat
+food_405,False,,sentences_food,food,She took a small bite of the sandwich before setting it down.,bite
+food_406,True,homographic,sentences_food,food,The new regulations were designed to take a real bite out of crime.,bite
+food_407,False,,sentences_food,food,The family gathered for a big holiday feast.,feast
+food_408,True,homographic,sentences_food,food,"The tourists stood at the overlook, feasting their eyes on the sunset.",feast
+food_409,False,,sentences_food,food,They piled their plates high at the hotel breakfast buffet.,buffet
+food_410,True,homographic,sentences_food,food,Strong winds buffeted the small boat all the way back to shore.,buffet
+food_411,False,,sentences_food,food,She started a new diet after the holidays.,diet
+food_412,True,homographic,sentences_food,food,The proposal was debated for hours in the national diet before passing.,diet
+food_413,False,,sentences_food,food,Soldiers were given a strict daily food ration during the campaign.,ration
+food_414,True,homographic,sentences_food,food,He tried to ration out his patience carefully during the long meeting.,ration
+food_415,False,,sentences_food,food,"The diner served simple, home-style fare at reasonable prices.",fare
+food_416,True,homophonic,sentences_food,food,It seemed only fair that everyone split the bill evenly this time.,fare
+food_417,False,,sentences_food,food,The chickens pecked at grubs in the freshly turned soil.,grub
+food_418,True,homographic,sentences_food,food,"After the hike, everyone was starving and ready for some grub.",grub
+food_419,False,,sentences_food,food,The soldiers lined up at the chow hall for dinner.,chow
+food_420,True,homographic,sentences_food,food,Their new puppy was a scrappy little chow mix from the shelter.,chow
+food_421,False,,sentences_food,food,Rice is a staple food across much of Asia.,staple
+food_422,True,homographic,sentences_food,food,She reached for a staple to fix the torn pages of the report.,staple
+food_423,False,,sentences_food,food,She picked up fresh produce from the farmer's market.,produce
+food_424,True,homographic,sentences_food,food,The studio agreed to produce the film only after the budget was cut.,produce
+food_425,False,,sentences_food,food,The orchard's apple trees had an unusually large yield this year.,yield
+food_426,True,homographic,sentences_food,food,Drivers are required to yield to pedestrians at the crosswalk.,yield
+food_427,False,,sentences_food,food,The farmers began the wheat harvest just after sunrise.,harvest
+food_428,True,homographic,sentences_food,food,Years of hard work finally let them harvest the benefits of their patience.,harvest
+food_429,False,,sentences_food,food,The farmer rotated crops each season to keep the soil healthy.,crop
+food_430,True,homographic,sentences_food,food,She used a riding crop gently to guide the horse around the ring.,crop
+food_431,False,,sentences_food,food,The cattle grazed peacefully across the open field.,graze
+food_432,True,homographic,sentences_food,food,He grazed his knee pretty badly falling off the skateboard.,graze
+food_433,False,,sentences_food,food,She scattered feed for the chickens every morning.,feed
+food_434,True,homographic,sentences_food,food,He spent the whole afternoon scrolling through his social media feed.,feed
+food_435,False,,sentences_food,food,Farmers stored fodder in the barn to last through winter.,fodder
+food_436,True,homographic,sentences_food,food,The scandal quickly became fodder for late-night talk show jokes.,fodder
+food_437,False,,sentences_food,food,She preheated the oven before sliding in the tray of cookies.,oven
+food_438,True,homographic,sentences_food,food,"They joked that with the baby due any day, she really had a bun in the oven.",oven
+food_439,False,,sentences_food,food,She stirred the soup simmering in the big pot.,pot
+food_440,True,homographic,sentences_food,food,Winning the lottery felt like hitting the jackpot after years of bad luck.,pot
+food_441,False,,sentences_food,food,She heated a bit of oil in the pan before adding the onions.,pan
+food_442,True,homographic,sentences_food,food,Critics panned the new movie almost as soon as it hit theaters.,pan
+food_443,False,,sentences_food,food,He poured a small glass of brandy after dinner.,brandy
+food_444,True,homographic,sentences_food,food,Brandy from marketing always brings the best snacks to team lunches.,brandy
+food_445,False,,sentences_food,food,She added a splash of starch to thicken the sauce.,starch
+food_446,True,homographic,sentences_food,food,He always kept his dress shirts stiff with plenty of starch.,starch
+food_447,False,,sentences_food,food,She served the pasta on a large white plate.,plate
+food_448,True,homographic,sentences_food,food,"With finals and two jobs, he really had a lot on his plate this month.",plate
+food_449,False,,sentences_food,food,She filled the bowl with fresh salad greens.,bowl
+food_450,True,homographic,sentences_food,food,The linebacker bowled straight through the offensive line.,bowl
+food_451,False,,sentences_food,food,She poured hot chocolate into a ceramic cup.,cup
+food_452,True,homographic,sentences_food,food,Every country dreams of one day lifting the World Cup.,cup
+food_453,False,,sentences_food,food,She poured sparkling water into a tall glass.,glass
+food_454,True,homographic,sentences_food,food,"People in glass houses really shouldn't throw stones, her father reminded her.",glass
+food_455,False,,sentences_food,food,She warmed her hands around a mug of hot cider.,mug
+food_456,True,homographic,sentences_food,food,Police released a sketch after the tourist was mugged near the station.,mug
+food_457,False,,sentences_food,food,She set a fork and knife beside each plate.,fork
+food_458,True,homographic,sentences_food,food,They finally had to fork over the deposit before the landlord would sign the lease.,fork
+food_459,False,,sentences_food,food,She stirred the soup with a large wooden spoon.,spoon
+food_460,True,homographic,sentences_food,food,"They fell asleep on the couch, spooning under a single blanket.",spoon
+food_461,False,,sentences_food,food,She sharpened the knife before slicing the roast.,knife
+food_462,True,homographic,sentences_food,food,He felt like his old partner had knifed him in the back over the deal.,knife
+food_463,False,,sentences_food,food,The chef plated each dish with careful precision.,chef
+food_464,True,homographic,sentences_food,food,The dessert earned a genuine chef's kiss from every food critic in the room.,chef
+food_465,False,,sentences_food,food,She cooked dinner for the whole family on Sunday night.,cook
+food_466,True,homographic,sentences_food,food,Investigators later found the accountant had been cooking the books for years.,cook
+food_467,False,,sentences_food,food,The baker arrived before dawn to start the morning bread.,baker
+food_468,True,homographic,sentences_food,food,"The prize was split thirteen ways, one for every member of their baker's dozen club.",baker
+food_469,False,,sentences_food,food,The butcher trimmed the roast before wrapping it in paper.,butcher
+food_470,True,homographic,sentences_food,food,The inexperienced editor completely butchered the final draft of the article.,butcher
+food_471,False,,sentences_food,food,They stopped at a roadside diner for breakfast.,diner
+food_472,True,homographic,sentences_food,food,Every diner in the restaurant turned to look when the cake arrived with sparklers.,diner
+food_473,False,,sentences_food,food,She studied the menu before deciding on the salmon.,menu
+food_474,True,homographic,sentences_food,food,He right-clicked to bring up the computer's context menu.,menu
+food_475,False,,sentences_food,food,The waiter took their order and hurried back to the kitchen.,order
+food_476,True,homographic,sentences_food,food,"The judge banged the gavel, calling the courtroom back to order.",order
+food_477,False,,sentences_food,food,He asked the waiter to close out the tab before leaving.,tab
+food_478,True,homographic,sentences_food,food,She kept a dozen browser tabs open while researching the project.,tab
+food_479,False,,sentences_food,food,The waiter brought the bill at the end of the meal.,bill
+food_480,True,homographic,sentences_food,food,The duck used its wide bill to sift through the muddy water.,bill
+food_481,False,,sentences_food,food,She left a generous tip for the attentive waiter.,tip
+food_482,True,homographic,sentences_food,food,He gave her a helpful tip about which highway to avoid during rush hour.,tip
+food_483,False,,sentences_food,food,She nibbled on crackers while waiting for the soup to heat up.,nibble
+food_484,True,homographic,sentences_food,food,The company only agreed to nibble around the edges of the larger reform.,nibble
+food_485,False,,sentences_food,food,He took a big gulp of water after the long run.,gulp
+food_486,True,homographic,sentences_food,food,She let out a nervous gulp before walking on stage for the first time.,gulp
+food_487,False,,sentences_food,food,She chewed her food slowly during the quiet dinner.,chew
+food_488,True,homographic,sentences_food,food,"The old friends sat on the porch, chewing the fat for hours.",chew
+food_489,False,,sentences_food,food,She took a sip of water to help swallow the pill.,swallow
+food_490,True,homographic,sentences_food,food,A single swallow darted low across the barn at dusk.,swallow
+food_491,False,,sentences_food,food,She bit into the apple with a satisfying crunch.,crunch
+food_492,True,homographic,sentences_food,food,The whole team was working overtime during the final crunch before launch.,crunch
+food_493,False,,sentences_food,food,She added a bit more salt after tasting the sauce.,taste
+food_494,True,homographic,sentences_food,food,"After the prank, he finally got a taste of his own medicine.",taste
+food_495,False,,sentences_food,food,"The wine had a smooth, lingering finish on the palate.",palate
+food_496,True,homophonic,sentences_food,food,She carefully mixed colors on her palette before starting the portrait.,palate
+food_497,False,,sentences_food,food,The long hike left them with a huge appetite for dinner.,appetite
+food_498,True,homographic,sentences_food,food,The band's new single was clearly inspired by their appetite for destruction.,appetite
+food_499,False,,sentences_food,food,She felt pleasantly full after the big dinner.,full
+food_500,True,homographic,sentences_food,food,"He didn't hold back, telling her exactly what he thought, full of it or not.",full

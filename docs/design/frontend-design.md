@@ -1,6 +1,6 @@
 # Frontend Design — Component Library, Visual Design & State
 
-Complements [`../project-spec.md`](../project-spec.md). Owned by the Frontend domain; consumes the `/api/chat` contract only (see [`../contracts.md`](../contracts.md)) — no dependency on Inference. See [`../engineering-practices.md`](../engineering-practices.md) for the cross-domain isolation/testing/progressive-enhancement rules this doc builds on (the "Development & testing" and "Tool-call visibility" sections below are the frontend-specific mechanics for those rules).
+Complements [`../project-spec.md`](../project-spec.md). Owned by the Frontend domain; consumes the `/api/chat` contract only (see [`../contracts.md`](../contracts.md)) — no dependency on the Inference service, though it renders Inference's `/analyze` result shape inside `analyze_pun` tool results. See [`../engineering-practices.md`](../engineering-practices.md) for the cross-domain isolation/testing/progressive-enhancement rules this doc builds on (the "Development & testing" and "Tool-call visibility" sections below are the frontend-specific mechanics for those rules).
 
 ---
 

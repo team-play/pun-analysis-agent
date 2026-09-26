@@ -61,4 +61,4 @@ Full citations for the chapters referenced above are in [`../references.md`](../
 
 ## Question 3: Are your selected jokes involve information in specific domains (module 3)?
 
-Our strategy is to fully nail one domain before expanding: food-based puns are the baseline, and only once that pipeline (detection, sense selection, explanation) works end-to-end do we treat a second domain as a stretch goal. Animal puns are the natural candidate for that stretch goal — our mascot is an otter, so covering both would be fitting 🦦!
+Our baseline covers food and animal puns together from the start (Livia and Prateek, 2026-09-25) — our mascot is an otter, so covering both was a natural fit 🦦! This updates the original plan, which sequenced animal in as a stretch goal only once a food-only pipeline (detection, sense selection, explanation) worked end-to-end; see [`TASK-2.2`](../../.backlog/tasks) for the dataset counts (food, animal, and animal/food categories) backing this baseline.

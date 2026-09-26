@@ -33,6 +33,10 @@ def valid_response(**overrides: object) -> dict[str, object]:
     return response
 
 
+def undetermined_response(**overrides: object) -> dict[str, object]:
+    return valid_response(**{"is_pun": None, "explanation": "", "confidence": None, **overrides})
+
+
 class EvaluateDatasetTests(unittest.TestCase):
     def _write_dataset(self, csv_body: str) -> Path:
         path = Path(self.enterContext(tempfile.TemporaryDirectory())) / "dataset.csv"
@@ -97,6 +101,27 @@ class EvaluateDatasetTests(unittest.TestCase):
         with self.assertRaises(EvaluationError):
             validate_response({"is_pun": True, "pun_type": "homographic"})
 
+    def test_validate_response_accepts_undetermined_result(self) -> None:
+        self.assertIsNone(validate_response(undetermined_response())["is_pun"])
+
+    def test_validate_response_rejects_undetermined_with_confidence(self) -> None:
+        with self.assertRaises(EvaluationError):
+            validate_response(undetermined_response(confidence=0.5))
+
+    def test_validate_response_rejects_determined_without_confidence(self) -> None:
+        with self.assertRaises(EvaluationError):
+            validate_response(valid_response(confidence=None))
+
+    def test_validate_response_rejects_undetermined_with_pun_type_or_sense_source(self) -> None:
+        for overrides in ({"pun_type": "homographic"}, {"sense_source": "wordnet"}):
+            with self.subTest(**overrides), self.assertRaises(EvaluationError):
+                validate_response(undetermined_response(**overrides))
+
+    def test_validate_response_rejects_undetermined_with_words_or_explanation(self) -> None:
+        for overrides in ({"words_involved": ["pun"]}, {"explanation": "A guess."}):
+            with self.subTest(**overrides), self.assertRaises(EvaluationError):
+                validate_response(undetermined_response(**overrides))
+
     def test_fixture_analyzer_matches_gold_labels_and_contract(self) -> None:
         pun_row = DatasetRow("1", "a pun", True, "homographic", "food")
         non_pun_row = DatasetRow("2", "not a pun", False, None, "food")
@@ -124,8 +149,8 @@ class EvaluateDatasetTests(unittest.TestCase):
         result = evaluate(rows, analyzer)
 
         self.assertEqual(result["request_errors"], [])
-        self.assertEqual(result["slices"]["food_baseline"]["rows"], 2)
-        self.assertEqual(result["slices"]["food_baseline"]["is_pun"]["false_positive"], 1)
+        self.assertEqual(result["slices"]["animal_food"]["rows"], 2)
+        self.assertEqual(result["slices"]["animal_food"]["is_pun"]["false_positive"], 1)
         self.assertEqual(result["slices"]["all_categories"]["pun_type"]["support"], 2)
         self.assertEqual(result["slices"]["all_categories"]["pun_type"]["accuracy"], 1.0)
 
@@ -140,29 +165,62 @@ class EvaluateDatasetTests(unittest.TestCase):
         self.assertEqual(result["successful_rows"], 0)
         self.assertEqual(result["request_errors"][0]["id"], "1")
 
-    def test_evaluate_food_baseline_slice_is_empty_when_no_food_rows(self) -> None:
+    def test_evaluate_scores_undetermined_separately_from_request_errors(self) -> None:
+        rows = [
+            DatasetRow("1", "pun", True, "homographic", "general"),
+            DatasetRow("2", "pun", True, "homophonic", "general"),
+            DatasetRow("3", "non-pun", False, None, "general"),
+            DatasetRow("4", "pun", True, "homographic", "general"),
+        ]
+
+        def analyzer(row: DatasetRow) -> dict[str, object]:
+            if row.row_id == "2":
+                return undetermined_response()
+            if row.row_id == "4":
+                raise EvaluationError("request failed: timed out")
+            return valid_response(**expected_output(row))
+
+        result = evaluate(rows, analyzer)
+
+        report = result["slices"]["all_categories"]
+        self.assertEqual([error["id"] for error in result["request_errors"]], ["4"])
+        self.assertEqual(report["successful_rows"], 3)
+        self.assertEqual(report["undetermined_rows"], 1)
+        self.assertAlmostEqual(report["detection_coverage"], 2 / 3)
+        self.assertEqual(report["is_pun"]["support"], 2)
+        self.assertEqual(report["is_pun"]["recall"], 1.0)
+        self.assertEqual(report["is_pun_end_to_end"]["support"], 3)
+        self.assertEqual(report["is_pun_end_to_end"]["false_negative"], 1)
+        self.assertEqual(report["is_pun_end_to_end"]["recall"], 0.5)
+        self.assertEqual(report["pun_type"]["support"], 1)
+        self.assertEqual(report["pun_type"]["accuracy"], 1.0)
+
+    def test_evaluate_animal_food_slice_is_empty_when_no_matching_rows(self) -> None:
         rows = [DatasetRow("1", "pun", True, "homographic", "general")]
 
         result = evaluate(rows, lambda row: valid_response(**expected_output(row)))
 
-        food_slice = result["slices"]["food_baseline"]
-        self.assertEqual(food_slice["rows"], 0)
-        self.assertEqual(food_slice["coverage"], 0.0)
-        self.assertEqual(food_slice["is_pun"]["support"], 0)
-        self.assertEqual(food_slice["is_pun"]["precision"], 0.0)
-        self.assertEqual(food_slice["is_pun"]["recall"], 0.0)
+        animal_food_slice = result["slices"]["animal_food"]
+        self.assertEqual(animal_food_slice["rows"], 0)
+        self.assertEqual(animal_food_slice["response_rate"], 0.0)
+        self.assertEqual(animal_food_slice["is_pun"]["support"], 0)
+        self.assertEqual(animal_food_slice["is_pun"]["precision"], 0.0)
+        self.assertEqual(animal_food_slice["is_pun"]["recall"], 0.0)
 
-    def test_evaluate_food_baseline_slice_includes_animal_food_category(self) -> None:
+    def test_evaluate_animal_food_slice_includes_food_animal_and_animal_food_categories(
+        self,
+    ) -> None:
         rows = [
             DatasetRow("1", "pun", True, "homographic", "food"),
             DatasetRow("2", "pun", True, "homophonic", "animal/food"),
             DatasetRow("3", "pun", True, "homographic", "animal"),
+            DatasetRow("4", "pun", True, "homographic", "general"),
         ]
 
         result = evaluate(rows, lambda row: valid_response(**expected_output(row)))
 
-        self.assertEqual(result["slices"]["food_baseline"]["rows"], 2)
-        self.assertEqual(result["slices"]["all_categories"]["rows"], 3)
+        self.assertEqual(result["slices"]["animal_food"]["rows"], 3)
+        self.assertEqual(result["slices"]["all_categories"]["rows"], 4)
 
 
 class AnalyzeEndpointTests(unittest.TestCase):

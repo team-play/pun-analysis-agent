@@ -23,9 +23,32 @@ Columns:
 
 License: SemEval-2017 Task 7 data is distributed by the task organizers for research use; see the [task page](https://alt.qcri.org/semeval2017/task7/) for terms.
 
+### `datasets/sentences_animal.csv`, `datasets/sentences_food.csv`
+
+Hand-authored sentence sets for a food/animal domain baseline (from [PR #8](https://github.com/team-play/pun-analysis-agent/pull/8)). This is a separate dataset from the food/animal rows already present in `semeval2017_task7_puns.csv` via its own `category` column — `TASK-2.2` covers verifying *that* SemEval-internal subset against the original ≥30-pair bar, not this file. Integrating it was tracked in `TASK-2.6`, and the decision (Livia and Prateek) was to defer: the files stay in the repo untouched, neither folded into the SemEval-derived subset nor dropped, to be revisited when animal work starts or class-balance and word-skew concerns matter.
+
+Columns follow the `semeval2017_task7_puns.csv` convention above, plus one extra:
+
+| Column | Meaning |
+|---|---|
+| `id` | Row id, `animal_*` / `food_*` prefix per file (this project's own scheme; SemEval's `het_*`/`hom_*` prefixes don't apply here). |
+| `is_pun` | `True`/`False`, as above. |
+| `pun_type` | `homographic` \| `homophonic` \| empty, as above. |
+| `source_corpus` | `sentences_animal` \| `sentences_food` — the originating file, mirroring how SemEval's `source_corpus` records which sub-corpus a row came from. |
+| `category` | `animal` \| `food` — matches the file, since each file is domain-pure. |
+| `text` | The sentence. |
+| `pun_target` | The word the pun is built around (e.g. `otter`, `dough`). No SemEval equivalent; named `pun_target` rather than `word` to leave room for multi-word spans, though every value here is currently a single word. |
+
 ## Precision/recall evaluation harness
 
-`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run. The analyzer is an injectable callable (a live HTTP call or a fixture), so it can run against a real Inference deployment or a deterministic fixture without changing the scoring logic.
+`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run.
+
+An undetermined response (`is_pun: null`, Inference couldn't judge the text) is a valid answer, not a request failure. Each slice reports it three ways:
+- `is_pun` and `pun_type` are scored over determined rows only, measuring the detector's quality when it does answer.
+- `undetermined_rows` and `detection_coverage` (determined rows / successful rows) show how often it answered at all. Always read coverage next to `is_pun`, since answering undetermined whenever unsure would otherwise inflate precision/recall.
+- `is_pun_end_to_end` scores undetermined as "not a pun", which is what a chat user sees.
+
+`response_rate` is the separate share of rows whose request succeeded; transport failures (HTTP errors, timeouts, malformed JSON) are failed requests, never undetermined predictions. The analyzer is an injectable callable (a live HTTP call or a fixture), so it can run against a real Inference deployment or a deterministic fixture without changing the scoring logic.
 
 Run against a live Inference instance:
 
@@ -39,4 +62,4 @@ Run against gold-label fixtures to sanity-check the evaluator itself (no HTTP ca
 uv run python evaluate_dataset.py --fixture
 ```
 
-Both report a `food_baseline` slice (`category` in `food`/`animal/food`) and an `all_categories` slice. Use `--dataset` to point at a different CSV and `--output` to also write the JSON result to a file. See [`reports/task-2.3-harness-validation.md`](reports/task-2.3-harness-validation.md) for a recorded fixture-mode self-validation run against the full dataset; a live run against a real `/analyze` classifier is blocked on TASK-16.
+Both report an `animal_food` slice (`category` in `food`/`animal`/`animal/food` — the food+animal baseline, per `TASK-2.2`) and an `all_categories` slice. Use `--dataset` to point at a different CSV and `--output` to also write the JSON result to a file. See [`reports/task-2.3-harness-validation.md`](reports/task-2.3-harness-validation.md) for a recorded fixture-mode self-validation run against the full dataset; a live run against a real `/analyze` classifier is blocked on TASK-16.
