@@ -1,11 +1,11 @@
 ---
 id: TASK-30
 title: 'Pre-commit hooks: auto-format with Ruff and Biome; enforce ruff format in CI'
-status: In Progress
+status: Done
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-26 19:09'
-updated_date: '2026-09-26 19:53'
+updated_date: '2026-09-26 19:58'
 labels: []
 dependencies: []
 references:
@@ -69,3 +69,10 @@ AC #4 (partial staging) replaced with #7, reworded to match the documented cavea
 
 AC #5: PR #43 CI (run 36267298842) ran `uv run ruff format --check .` in both Ruff jobs — "5 files already formatted" each, all 8 checks passing. Failing case is the same command that rejected inference/candidates.py locally before it was reformatted. AC #6 also confirmed on the real Dockerfile: PR #43's "Build image" job passed with lefthook in the lockfile.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Added a Lefthook pre-commit hook (lefthook.yml) that runs `biome check --write` on staged JS/TS/JSON/CSS and `ruff check --fix` + `ruff format` on staged Python in inference/ and eval/, using the lockfile-pinned tools and re-staging fixes. It installs via lefthook's postinstall on `pnpm install` (allowBuilds, not a prepare script, so the git-less backend Docker build keeps working), fails with an explanation when uv is missing, and skips merges/rebases. CI (lint.yml) and verify-setup.mjs now also run `ruff format --check`; inference/candidates.py was reformatted. Docs updated in a separate commit (local-setup.md "Pre-commit hook" section plus README, agent-setup.md, engineering-practices.md, setup-local-env skill).
+Verified: throwaway-worktree tests (fixes re-staged, unfixable lint blocks, md-only passes, merge skipped, missing uv blocked with message, partial-staging caveat documented), git-less `pnpm install --filter backend` exits 0, and PR #43 CI green with the new format step reporting "5 files already formatted" in both packages. Code and architectural reviews done by subagents; findings fixed or noted.
+<!-- SECTION:FINAL_SUMMARY:END -->
