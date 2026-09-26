@@ -63,7 +63,7 @@ Once the tools above are present:
 pnpm install
 
 # each Python package manages its own environment
-cd inference && uv sync && cd ..
+cd inference && uv sync && uv run python -m wn download oewn:2025 && cd ..
 cd eval && uv sync && cd ..
 ```
 
