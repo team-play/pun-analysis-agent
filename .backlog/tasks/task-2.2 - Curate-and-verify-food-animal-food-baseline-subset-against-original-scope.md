@@ -5,7 +5,7 @@ status: Done
 assignee:
   - Livia
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-26 00:08'
+updated_date: '2026-09-26 00:11'
 labels:
   - dataset
 milestone: m-6
@@ -20,7 +20,7 @@ ordinal: 23000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-TASK-2 originally framed animal puns as a stretch goal pending data; that's no longer the blocker. SemEval's own category column already has food/animal rows well past the original >=30-pair bar (218 food, 234 animal, 29 animal/food), and PR #8/TASK-2.5 adds a further aggregated food+animal set (see TASK-2.6 for whether that gets folded in). Per milestone-3.md's domain-sequencing strategy, food is evaluated/improved first, with animal work following once that pipeline works end-to-end -- so this task's counting/verification covers both subsets now, but the TASK-16 training/eval decision it produces should be read as scoped to food first, with the equivalent animal call revisited once animal work begins.
+TASK-2 originally framed animal puns as a stretch goal pending data; that is no longer the case. Livia and Prateek decided the baseline covers food and animal from the beginning. SemEval's own category column has food, animal and animal/food rows well past the original >=30-pair bar (218 food, 234 animal, 29 animal/food), and PR #8/TASK-2.5 adds a further aggregated food+animal set (deferred, see TASK-2.6).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -39,11 +39,11 @@ TASK-2 originally framed animal puns as a stretch goal pending data; that's no l
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Counted eval/datasets/semeval2017_task7_puns.csv by category: food = 218 rows (175 is_pun=True, 43 is_pun=False); animal/food = 29 rows (19 True, 10 False); combined food-baseline = 247 rows, both classes present in each category. This clears TASK-2's original >=30-pair minimum by a wide margin (AC1). AC2 decision (Livia and Prateek, 2026-09-25): TASK-16's baseline classifier uses this food-baseline subset (categories food and animal/food) rather than the full corpus; this matches the eval harness (TASK-2.3), whose food_baseline slice is exactly these categories and which also reports an all_categories slice. Not to be confused with TASK-2.6, which is about PR #8's separate hand-authored dataset (eval/datasets/sentences_animal.csv, sentences_food.csv), deferred by the same group; SemEval was assessed as fine for classification.
+Counted eval/datasets/semeval2017_task7_puns.csv by category: food = 218 rows (175 is_pun=True, 43 False); animal = 234 rows (160 True, 74 False); animal/food = 29 rows (19 True, 10 False); combined food+animal baseline = 481 rows, both classes present in each category. This clears TASK-2's original >=30-pair minimum by a wide margin (AC1). AC2 decision (Livia and Prateek, 2026-09-25): the baseline is food and animal from the beginning, and TASK-16's classifier uses this subset (categories food, animal, animal/food) rather than the full corpus. Note: the eval harness's food_baseline slice (TASK-2.3, evaluate_dataset.py) currently covers only food and animal/food (247 rows), so it does not yet report this combined subset; it also reports all_categories. Not to be confused with TASK-2.6, which is about PR #8's separate dataset (deferred); SemEval was assessed as fine for classification.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Counted the SemEval food-baseline rows (food plus animal/food, 247 rows, past the >=30-pair bar) and recorded the decision that TASK-16's classifier uses this subset rather than the full corpus. The eval harness's food_baseline slice matches it.
+Counted the SemEval food, animal and animal/food rows (481 in total, past the >=30-pair bar) and recorded the decision that the baseline covers food and animal from the beginning, with TASK-16's classifier using this subset rather than the full corpus. The harness's food_baseline slice does not yet include the animal category.
 <!-- SECTION:FINAL_SUMMARY:END -->
