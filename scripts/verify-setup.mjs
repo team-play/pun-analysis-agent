@@ -84,11 +84,21 @@ async function main() {
 	await check("inference: ruff check", () =>
 		run("uv", ["run", "ruff", "check", "."], { cwd: `${ROOT}/inference` }),
 	);
+	await check("inference: ruff format --check", () =>
+		run("uv", ["run", "ruff", "format", "--check", "."], {
+			cwd: `${ROOT}/inference`,
+		}),
+	);
 	await check("inference: pytest", () =>
 		run("uv", ["run", "pytest"], { cwd: `${ROOT}/inference` }),
 	);
 	await check("eval: ruff check", () =>
 		run("uv", ["run", "ruff", "check", "."], { cwd: `${ROOT}/eval` }),
+	);
+	await check("eval: ruff format --check", () =>
+		run("uv", ["run", "ruff", "format", "--check", "."], {
+			cwd: `${ROOT}/eval`,
+		}),
 	);
 
 	await check("backend dev server responds on /health", () =>
