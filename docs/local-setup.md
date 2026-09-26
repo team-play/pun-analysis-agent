@@ -21,7 +21,7 @@ Put local secrets in `.env` / `.env.local` files inside the relevant package fol
 
 ### Frontend deploy (CI only)
 
-[`deploy-frontend.yml`](../.github/workflows/deploy-frontend.yml) builds `frontend/` and deploys it to Firebase Hosting (`pun-agent.web.app`) on every push to `main` that touches `frontend/**` or the workflow itself, via [`FirebaseExtended/action-hosting-deploy`](https://github.com/FirebaseExtended/action-hosting-deploy). Its build step sets `VITE_CHAT_ADAPTER=live` and `VITE_BACKEND_URL` to the Cloud Run URL below, so the deployed site talks to the real Backend; those vars live only in the workflow, so local builds and CI tests stay on the stub. The target Firebase project ID (`pun-agent`) is committed in [`frontend/.firebaserc`](../frontend/.firebaserc) — not a secret, since a project ID isn't sensitive.
+[`deploy-frontend.yml`](../.github/workflows/deploy-frontend.yml) builds `frontend/` and deploys it to Firebase Hosting (`pun-agent.web.app`) on every push to `main` that touches `frontend/**`, the root `package.json`/`pnpm-lock.yaml`/`pnpm-workspace.yaml`, or the workflow itself (or a manual run on `main`), via [`FirebaseExtended/action-hosting-deploy`](https://github.com/FirebaseExtended/action-hosting-deploy). Its build step sets `VITE_CHAT_ADAPTER=live` and `VITE_BACKEND_URL` to the Cloud Run URL below, so the deployed site talks to the real Backend; those vars live only in the workflow, so local builds and CI tests stay on the stub. It first runs the frontend tests through the same [`test-js.yml`](../.github/workflows/test-js.yml) that `test.yml` uses, and deploys only if they pass; deploys run one at a time, in push order. The target Firebase project ID (`pun-agent`) is committed in [`frontend/.firebaserc`](../frontend/.firebaserc) — not a secret, since a project ID isn't sensitive.
 
 The one secret it needs is already set, at the **organization** level (the org's Settings → Secrets and variables → Actions, not the repo's), and is visible to this repo:
 
@@ -40,7 +40,7 @@ No local Firebase login is required to develop `frontend/` day-to-day; this secr
 
 ### Backend deploy (CI only)
 
-[`deploy-backend.yml`](../.github/workflows/deploy-backend.yml) builds [`backend/Dockerfile`](../backend/Dockerfile) on every pull request that touches the backend (build only, so a broken image fails the PR). On pushes to `main` it also pushes the image to Artifact Registry, deploys it to Cloud Run and smoke-tests `/health`, authenticating with the same `GCP_SA_KEY`. It needs no other GitHub secret: the Gemini key never passes through CI.
+[`deploy-backend.yml`](../.github/workflows/deploy-backend.yml) builds [`backend/Dockerfile`](../backend/Dockerfile) on every pull request that touches the backend (build only, so a broken image fails the PR). On pushes to `main` it first runs the backend tests (via [`test-js.yml`](../.github/workflows/test-js.yml)), then also pushes the image to Artifact Registry, deploys it to Cloud Run and smoke-tests `/health`, authenticating with the same `GCP_SA_KEY`. It needs no other GitHub secret: the Gemini key never passes through CI.
 
 One-time GCP setup it relies on (already done, see TASK-13's notes):
 
@@ -146,4 +146,4 @@ pnpm run check:mermaid
 uv run ruff check .
 ```
 
-[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) and [`.github/workflows/test.yml`](../.github/workflows/test.yml) run all of the above (lint/mermaid/ruff, and the frontend/backend test suites, respectively) on every push/PR, so failures show up in CI even if you skip running them locally.
+[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) and [`.github/workflows/test.yml`](../.github/workflows/test.yml) run all of the above (lint/mermaid/ruff, and the frontend/backend test suites plus the frontend's production build, respectively) on every push/PR, so failures show up in CI even if you skip running them locally.
