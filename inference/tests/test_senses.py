@@ -1,11 +1,65 @@
+import json
 import sqlite3
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
-import httpx
 import pytest
 
+import senses
 from candidates import CandidateWord
+from scripts.build_wiktionary_db import build_db, entry_glosses, keep_entry
 from senses import _get_wordnet, get_candidate_senses, get_wiktionary_senses, get_wordnet_senses
+
+FAKE_KAIKKI = [
+    {
+        "word": "rizz",
+        "pos": "noun",
+        "lang_code": "en",
+        "senses": [{"glosses": ["A person's ability to attract a love interest."]}],
+    },
+    {
+        "word": "dance",
+        "pos": "verb",
+        "lang_code": "en",
+        "senses": [{"glosses": ["To move rhythmically to music."]}],
+    },
+    {
+        "word": "pun",
+        "pos": "noun",
+        "lang_code": "en",
+        "senses": [
+            {"glosses": ["A joke exploiting multiple meanings."]},
+            {"glosses": ["Alternative form of bun."], "tags": ["alt-of"]},
+        ],
+    },
+    {
+        "word": "doughs",
+        "pos": "noun",
+        "lang_code": "en",
+        "senses": [{"glosses": ["plural of dough"], "tags": ["form-of"]}],
+    },
+    {
+        "word": "pain",
+        "pos": "noun",
+        "lang_code": "fr",
+        "senses": [{"glosses": ["bread"]}],
+    },
+    {
+        "word": "pun intended",
+        "pos": "noun",
+        "lang_code": "en",
+        "senses": [{"glosses": ["Used to point out a pun."]}],
+    },
+]
+
+
+@pytest.fixture
+def wiktionary_db(tmp_path, monkeypatch):
+    db_path = tmp_path / "wiktionary.sqlite"
+    build_db((json.dumps(entry) for entry in FAKE_KAIKKI), db_path)
+    monkeypatch.setattr(senses, "_WIKTIONARY_DB_PATH", db_path)
+    monkeypatch.setattr(senses, "_wiktionary", None)
+    return db_path
 
 
 def test_wordnet_returns_multiple_senses_for_dough():
@@ -32,92 +86,6 @@ def test_wordnet_returns_multiple_senses_for_dough():
     assert money_sense.lexfile == "noun.possession"
 
 
-def test_wiktionary_fallback_for_coverage_gap(monkeypatch):
-    candidate = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
-
-    assert len(get_wordnet_senses(candidate)) == 0
-
-    def fake_fetch(word):
-        return {
-            "en": [
-                {
-                    "partOfSpeech": "Noun",
-                    "language": "English",
-                    "definitions": [
-                        {"definition": "A person's ability to attract a love interest."}
-                    ],
-                }
-            ]
-        }
-
-    monkeypatch.setattr("senses._fetch_wiktionary_definitions", fake_fetch)
-
-    senses = get_wiktionary_senses(candidate)
-    assert len(senses) > 0
-    assert all(s.source == "wiktionary" for s in senses)
-    assert all(s.hypernyms == () for s in senses)
-    assert all(s.lexfile is None for s in senses)
-    assert senses[0].gloss == "A person's ability to attract a love interest."
-
-
-def test_get_candidate_senses_falls_back_only_when_wordnet_coverage_is_thin(monkeypatch):
-    # "dough" has exactly 2 WordNet senses -- the boundary where no fallback
-    # should happen. The spy both proves that and keeps the test offline.
-    fetched = []
-
-    def spy(word):
-        fetched.append(word)
-        return {}
-
-    monkeypatch.setattr("senses._fetch_wiktionary_definitions", spy)
-
-    dough = CandidateWord(text="dough", lemma="dough", pos="NOUN", index=0)
-    dough_senses = get_candidate_senses(dough)
-    assert len(dough_senses) > 1
-    assert all(s.source == "wordnet" for s in dough_senses)
-    assert fetched == []
-
-    rizz = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
-
-    def fake_fetch(word):
-        return {
-            "en": [
-                {
-                    "partOfSpeech": "Noun",
-                    "language": "English",
-                    "definitions": [
-                        {"definition": "A person's ability to attract a love interest."}
-                    ],
-                }
-            ]
-        }
-
-    monkeypatch.setattr("senses._fetch_wiktionary_definitions", fake_fetch)
-
-    rizz_senses = get_candidate_senses(rizz)
-    assert len(rizz_senses) > 0
-    assert all(s.source == "wiktionary" for s in rizz_senses)
-
-
-def test_wiktionary_senses_looks_up_lemma_not_surface_text(monkeypatch):
-    # text != lemma on purpose -- Wiktionary should be queried with the base
-    # form ("dance"), not the inflected surface form ("dancing"), matching
-    # what get_wordnet_senses already does.
-    dancing = CandidateWord(text="dancing", lemma="dance", pos="VERB", index=0)
-
-    queried_words = []
-
-    def fake_fetch(word):
-        queried_words.append(word)
-        return {"en": []}
-
-    monkeypatch.setattr("senses._fetch_wiktionary_definitions", fake_fetch)
-
-    get_wiktionary_senses(dancing)
-
-    assert queried_words == ["dance"]
-
-
 def test_wordnet_covers_verb_pos():
     running = CandidateWord(text="running", lemma="run", pos="VERB", index=0)
 
@@ -141,28 +109,6 @@ def test_wordnet_covers_both_adjective_pos_tags():
 
     assert len(senses) == plain_only + satellite_only
     assert len(senses) > max(plain_only, satellite_only)
-
-
-def test_get_candidate_senses_merges_wiktionary_when_wordnet_has_one_sense(monkeypatch):
-    # "pun" has exactly 1 WordNet noun sense -- the other side of the < 2
-    # boundary, so WordNet and Wiktionary senses come back together.
-    pun = CandidateWord(text="pun", lemma="pun", pos="NOUN", index=0)
-    assert len(get_wordnet_senses(pun)) == 1
-
-    def fake_fetch(word):
-        return {
-            "en": [
-                {
-                    "partOfSpeech": "Noun",
-                    "definitions": [{"definition": "A joke exploiting multiple meanings."}],
-                }
-            ]
-        }
-
-    monkeypatch.setattr("senses._fetch_wiktionary_definitions", fake_fetch)
-
-    senses = get_candidate_senses(pun)
-    assert [s.source for s in senses] == ["wordnet", "wiktionary"]
 
 
 def test_wordnet_usable_from_another_thread_after_loading():
@@ -191,25 +137,129 @@ def test_sense_is_hashable():
     assert len(set(senses)) == len(senses)
 
 
-def _raise_timeout(*args, **kwargs):
-    raise httpx.TimeoutException("timed out")
+def test_keep_entry_filters_language_pos_and_multiword():
+    by_word = {entry["word"]: entry for entry in FAKE_KAIKKI}
+
+    assert keep_entry(by_word["rizz"])
+    assert not keep_entry(by_word["pain"])
+    assert not keep_entry(by_word["pun intended"])
+    assert not keep_entry({"word": "quickly", "pos": "adv", "lang_code": "en"})
+    assert not keep_entry({})
 
 
-def _server_error(*args, **kwargs):
-    return httpx.Response(500, request=httpx.Request("GET", "https://example"))
+def test_entry_glosses_skips_form_of_and_keeps_last_gloss():
+    by_word = {entry["word"]: entry for entry in FAKE_KAIKKI}
+
+    assert entry_glosses(by_word["pun"]) == ["A joke exploiting multiple meanings."]
+    assert entry_glosses(by_word["doughs"]) == []
+    sub_senses = {"senses": [{"glosses": ["parent", "own"]}, {"glosses": []}, {"tags": ["plural"]}]}
+    assert entry_glosses(sub_senses) == ["own"]
 
 
-def _non_json(*args, **kwargs):
-    return httpx.Response(200, text="<html>", request=httpx.Request("GET", "https://example"))
+def test_wiktionary_fallback_for_coverage_gap(wiktionary_db):
+    candidate = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
+
+    assert len(get_wordnet_senses(candidate)) == 0
+
+    senses_ = get_wiktionary_senses(candidate)
+    assert [s.gloss for s in senses_] == ["A person's ability to attract a love interest."]
+    assert all(s.source == "wiktionary" for s in senses_)
+    assert all(s.hypernyms == () for s in senses_)
+    assert all(s.lexfile is None for s in senses_)
 
 
-def _invalid_url(*args, **kwargs):
-    raise httpx.InvalidURL("bad url")
+def test_wiktionary_senses_looks_up_lemma_not_surface_text(wiktionary_db):
+    dancing = CandidateWord(text="dancing", lemma="dance", pos="VERB", index=0)
+
+    assert [s.gloss for s in get_wiktionary_senses(dancing)] == ["To move rhythmically to music."]
 
 
-@pytest.mark.parametrize("fake_get", [_raise_timeout, _server_error, _non_json, _invalid_url])
-def test_wiktionary_failures_degrade_to_no_senses(monkeypatch, fake_get):
-    monkeypatch.setattr("senses.httpx.get", fake_get)
+def test_wiktionary_missing_file_returns_no_senses(tmp_path, monkeypatch, caplog):
+    monkeypatch.setattr(senses, "_WIKTIONARY_DB_PATH", tmp_path / "missing.sqlite")
+    monkeypatch.setattr(senses, "_wiktionary", None)
     rizz = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
 
     assert get_wiktionary_senses(rizz) == []
+    assert "Wiktionary lookup failed" in caplog.text
+
+
+@pytest.mark.parametrize("folder", ["a#b", "c%20d"])
+def test_wiktionary_opens_paths_with_uri_special_characters(tmp_path, monkeypatch, folder):
+    db_path = tmp_path / folder / "wiktionary.sqlite"
+    build_db((json.dumps(entry) for entry in FAKE_KAIKKI), db_path)
+    monkeypatch.setattr(senses, "_WIKTIONARY_DB_PATH", db_path)
+    monkeypatch.setattr(senses, "_wiktionary", None)
+    rizz = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
+
+    assert len(get_wiktionary_senses(rizz)) == 1
+
+
+def test_wiktionary_usable_from_another_thread_after_loading(wiktionary_db):
+    rizz = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
+    get_wiktionary_senses(rizz)
+    results = []
+    errors = []
+
+    def worker():
+        try:
+            results.append(get_wiktionary_senses(rizz))
+        except sqlite3.ProgrammingError as e:
+            errors.append(e)
+
+    thread = threading.Thread(target=worker)
+    thread.start()
+    thread.join()
+
+    assert errors == []
+    assert len(results[0]) == 1
+
+
+def test_get_candidate_senses_falls_back_only_when_wordnet_coverage_is_thin(
+    wiktionary_db, monkeypatch
+):
+    looked_up = []
+
+    def spy(candidate):
+        looked_up.append(candidate.lemma)
+        return []
+
+    monkeypatch.setattr(senses, "get_wiktionary_senses", spy)
+
+    dough = CandidateWord(text="dough", lemma="dough", pos="NOUN", index=0)
+    dough_senses = get_candidate_senses(dough)
+    assert len(dough_senses) > 1
+    assert all(s.source == "wordnet" for s in dough_senses)
+    assert looked_up == []
+
+
+def test_get_candidate_senses_merges_wiktionary_when_wordnet_has_one_sense(wiktionary_db):
+    pun = CandidateWord(text="pun", lemma="pun", pos="NOUN", index=0)
+    assert len(get_wordnet_senses(pun)) == 1
+
+    senses_ = get_candidate_senses(pun)
+    assert [s.source for s in senses_] == ["wordnet", "wiktionary"]
+
+
+def _assert_consistent_under_concurrency(lookup, candidates):
+    expected = [lookup(candidate) for candidate in candidates]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        for _ in range(20):
+            assert list(pool.map(lookup, candidates)) == expected
+
+
+def test_wordnet_lookups_are_consistent_under_concurrency():
+    # One shared connection: concurrent queries without the lock raise
+    # InterfaceError/IndexError or return the wrong senses.
+    candidates = [
+        CandidateWord(text=word, lemma=word, pos=pos, index=0)
+        for word, pos in [("dough", "NOUN"), ("run", "VERB"), ("light", "ADJ"), ("bank", "NOUN")]
+    ] * 5
+    _assert_consistent_under_concurrency(get_wordnet_senses, candidates)
+
+
+def test_wiktionary_lookups_are_consistent_under_concurrency(wiktionary_db):
+    candidates = [
+        CandidateWord(text=word, lemma=word, pos=pos, index=0)
+        for word, pos in [("rizz", "NOUN"), ("dance", "VERB"), ("pun", "NOUN")]
+    ] * 5
+    _assert_consistent_under_concurrency(get_wiktionary_senses, candidates)

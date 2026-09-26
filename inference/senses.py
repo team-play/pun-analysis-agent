@@ -1,10 +1,10 @@
-import json
+import logging
+import sqlite3
 import threading
 from dataclasses import dataclass
-from html.parser import HTMLParser
+from pathlib import Path
 from typing import Literal
 
-import httpx
 import wn
 
 from candidates import CandidateWord
@@ -16,16 +16,16 @@ _WORDNET_POS = {
 }
 
 _WIKTIONARY_POS = {
-    "NOUN": "Noun",
-    "VERB": "Verb",
-    "ADJ": "Adjective",
+    "NOUN": "noun",
+    "VERB": "verb",
+    "ADJ": "adj",
 }
 
 _MAX_HYPERNYM_DEPTH = 50
 
-_WIKTIONARY_HEADERS = {
-    "User-Agent": "pun-analysis-agent/0.1 (https://github.com/team-play/pun-analysis-agent)",
-}
+logger = logging.getLogger(__name__)
+
+_WIKTIONARY_DB_PATH = Path(__file__).parent / "data" / "wiktionary.sqlite"
 
 
 @dataclass(frozen=True)
@@ -54,7 +54,8 @@ def _get_wordnet() -> wn.Wordnet:
             if _wordnet is None:
                 # wn's SQLite connection is bound to its creating thread unless
                 # this is set; FastAPI runs sync /analyze on threadpool workers.
-                # Safe because we only read and sqlite3.threadsafety == 3.
+                # It only lifts that check -- lookups still hold the lock, since
+                # wn shares one connection and concurrent queries on it collide.
                 wn.config.allow_multithreading = True
                 _wordnet = wn.Wordnet("oewn:2025")
     return _wordnet
@@ -66,16 +67,17 @@ def get_wordnet_senses(candidate: CandidateWord) -> list[Sense]:
     pos_tags = _WORDNET_POS.get(candidate.pos, [])
 
     senses = []
-    for pos in pos_tags:
-        for synset in wordnet.synsets(candidate.lemma, pos=pos):
-            senses.append(
-                Sense(
-                    gloss=synset.definition(),
-                    hypernyms=_hypernym_chain(synset),
-                    lexfile=synset.lexfile(),
-                    source="wordnet",
+    with _wordnet_lock:
+        for pos in pos_tags:
+            for synset in wordnet.synsets(candidate.lemma, pos=pos):
+                senses.append(
+                    Sense(
+                        gloss=synset.definition(),
+                        hypernyms=_hypernym_chain(synset),
+                        lexfile=synset.lexfile(),
+                        source="wordnet",
+                    )
                 )
-            )
     return senses
 
 
@@ -90,54 +92,43 @@ def _hypernym_chain(synset: wn.Synset) -> tuple[str, ...]:
     return tuple(chain)
 
 
-def _fetch_wiktionary_definitions(word: str) -> dict:
-    """GET the raw Wiktionary API response for `word`, or {} on any failure.
-
-    Tier 2 is itself a fallback -- if Wiktionary is unreachable, slow, or
-    errors, that must degrade to "no extra senses found", never propagate
-    an unhandled exception up through /analyze (docs/design/sense-selection.md).
-    """
-    try:
-        response = httpx.get(
-            f"https://en.wiktionary.org/api/rest_v1/page/definition/{word}",
-            headers=_WIKTIONARY_HEADERS,
-            timeout=2.0,
-        )
-        response.raise_for_status()
-        return response.json()
-    except (httpx.HTTPStatusError, httpx.RequestError, httpx.InvalidURL, json.JSONDecodeError):
-        return {}
+_wiktionary: sqlite3.Connection | None = None
+_wiktionary_lock = threading.Lock()
 
 
-class _TextExtractor(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.chunks: list[str] = []
-
-    def handle_data(self, data: str):
-        self.chunks.append(data)
-
-
-def _strip_html(html_text: str) -> str:
-    """Wiktionary definitions embed HTML (links, spans, styles) -- return plain text."""
-    extractor = _TextExtractor()
-    extractor.feed(html_text)
-    return "".join(extractor.chunks)
+def _get_wiktionary() -> sqlite3.Connection:
+    global _wiktionary
+    if _wiktionary is None:
+        with _wiktionary_lock:
+            if _wiktionary is None:
+                # Read-only, so a missing file raises instead of creating an empty
+                # database. Shared across threadpool workers like WordNet above,
+                # so lookups hold the lock too.
+                _wiktionary = sqlite3.connect(
+                    f"{_WIKTIONARY_DB_PATH.as_uri()}?mode=ro", uri=True, check_same_thread=False
+                )
+    return _wiktionary
 
 
 def get_wiktionary_senses(candidate: CandidateWord) -> list[Sense]:
     """Tier 2 fallback: Wiktionary definitions, used when WordNet coverage is thin."""
-    response = _fetch_wiktionary_definitions(candidate.lemma)
-    senses = []
-    for entry in response.get("en", []):
-        if entry.get("partOfSpeech") == _WIKTIONARY_POS.get(candidate.pos):
-            for definition in entry.get("definitions", []):
-                gloss = _strip_html(definition.get("definition", ""))
-                if gloss:
-                    senses.append(
-                        Sense(gloss=gloss, hypernyms=(), lexfile=None, source="wiktionary")
-                    )
-    return senses
+    pos = _WIKTIONARY_POS.get(candidate.pos)
+    if pos is None:
+        return []
+    try:
+        connection = _get_wiktionary()
+        with _wiktionary_lock:
+            rows = connection.execute(
+                "SELECT gloss FROM senses WHERE word = ? AND pos = ?", (candidate.lemma, pos)
+            ).fetchall()
+    except sqlite3.OperationalError:
+        # Tier 2 is a fallback: degrade to "no extra senses", never a 500 --
+        # but log it so a broken data file doesn't read as a coverage gap.
+        logger.warning("Wiktionary lookup failed for %r", candidate.lemma, exc_info=True)
+        return []
+    return [
+        Sense(gloss=gloss, hypernyms=(), lexfile=None, source="wiktionary") for (gloss,) in rows
+    ]
 
 
 def get_candidate_senses(candidate: CandidateWord) -> list[Sense]:
