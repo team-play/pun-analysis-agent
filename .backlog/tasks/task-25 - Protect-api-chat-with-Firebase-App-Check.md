@@ -1,11 +1,11 @@
 ---
 id: TASK-25
 title: Protect /api/chat with Firebase App Check
-status: In Progress
+status: Done
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-23 09:50'
-updated_date: '2026-09-25 03:23'
+updated_date: '2026-09-26 13:44'
 labels: []
 dependencies:
   - TASK-13
@@ -29,7 +29,7 @@ Firebase App Check makes Backend accept only requests carrying a token that atte
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 Backend rejects /api/chat requests without a valid App Check token before invoking the flow, so they never reach Gemini
-- [ ] #2 The deployed frontend attaches a valid App Check token to every /api/chat request, and a real conversation still completes end-to-end
+- [x] #2 The deployed frontend attaches a valid App Check token to every /api/chat request, and a real conversation still completes end-to-end
 - [x] #3 Local dev and CI keep working without real attestation (e.g. App Check debug tokens or a documented off switch), per docs/engineering-practices.md's isolation rule
 - [x] #4 docs/contracts.md documents the App Check header on /api/chat
 - [x] #5 Accept/reject behavior is covered by tests that need no network or real tokens (verifier injected or mocked)
@@ -73,4 +73,12 @@ Review follow-ups and decisions (2026-09-24):
 - Accepted risks: (1) deploy-order window: backend and frontend deploy concurrently on merge; if the backend lands first, the site 401s for minutes, and open tabs fail until reload. (2) A token can be replayed until it expires (1h); limited-use tokens + consume would add a Google call per request. (3) reCAPTCHA Enterprise usage on the billed pun-agent project: free tier judged sufficient by @yaisiel.torres. (4) Tokens identify the project, not which web app in it.
 
 Validation (2026-09-24): backend 37/37 node:test, frontend 62/62 Vitest, tsc (both) and Biome clean. AC #1: middleware tests (route never reached on reject) + real-app 401 test; real firebase-admin verifier rejected malformed and forged tokens locally. AC #3: @yaisiel.torres ran pnpm dev live mode with the shared debug token against a local Backend enforcing App Check, and a real conversation completed; CI tests use injected/mocked verifiers. AC #4: contracts.md. AC #5: injected verifier / mocked token getter and Firebase SDK. AC #2 pending: check after #37 and this PR deploy.
+
+Post-deploy verification (2026-09-26, merge 50e089c): Deploy Backend (run 36245664866) and Deploy Frontend (run 36245664862) succeeded; the new smoke step (token-less POST /api/chat -> 401) passed. Live backend: 401 {"error":"Unauthorized"} with no token and with a bogus one; preflight allows x-firebase-appcheck. On pun-agent.web.app the browser loaded reCAPTCHA Enterprise with our site key, the App Check exchange returned 200, and /api/chat returned 200 (token accepted); Claude's first attempts then hit Gemini 503 UNAVAILABLE (high demand, confirmed in Cloud Run logs), shown correctly as the 'busy' message. @yaisiel.torres then completed a real two-turn conversation on pun-agent.web.app. pun-agent.firebaseapp.com not separately exercised (same bundle, same key allowlist and CORS entry).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+/api/chat now requires a Firebase App Check token. Backend: Hono middleware on /api/* with an injected firebase-admin verifier; uniform 401 for any missing/invalid token, reason logged only; fail-closed APP_CHECK=off opt-out for local dev that refuses to start on Cloud Run (K_SERVICE). Frontend: live adapter sends X-Firebase-AppCheck from reCAPTCHA Enterprise (debug token under pnpm dev, shared via 1Password); SDK loaded only on the live path; token wait bounded by stop/10s; failed setup retried. Deploy smoke-tests the 401. contracts.md and setup docs updated. Verified by 37 backend + 64 frontend tests (no network/real tokens), mutation checks, code + architectural reviews, a local end-to-end run with the debug token, and a real conversation on the deployed site after merge (#38).
+<!-- SECTION:FINAL_SUMMARY:END -->
