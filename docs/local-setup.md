@@ -123,9 +123,9 @@ VITE_CHAT_ADAPTER=live VITE_BACKEND_URL=http://localhost:8080 pnpm dev
 VITE_APPCHECK_DEBUG_TOKEN=<the shared debug token>
 ```
 
-Without it, `live` mode can't get a token, so every message fails with "Couldn't get a reply" before reaching Backend (`APP_CHECK=off` on Backend doesn't help: the frontend stops first). Leaving it unset also makes the browser console print `Firebase App Check debug token: <uuid>`, a new token that works once someone with console access registers it.
+Without it, `live` mode can't get a token, so every message fails with "Couldn't get a reply" before reaching Backend (`APP_CHECK=off` on Backend doesn't help: the frontend stops first). If it's unset, the SDK generates a new token instead, which works once someone with console access registers it.
 
-A debug token gets real App Check tokens from anywhere, so treat it like a password: keep it in `.env.local` and 1Password only, and if it leaks, delete it in the console and share a new one. Only `pnpm dev` reads it; production builds drop that code.
+A debug token gets real App Check tokens from anywhere, so treat it like a password: keep it in `.env.local` and 1Password only, and if it leaks, delete it in the console and share a new one. The SDK prints it to the browser console as `Firebase App Check debug token: <uuid>` on every `pnpm dev` load in `live` mode, whether it's the shared one or a new one, so close devtools before screen sharing, and rotate it if it shows up anywhere. Only `pnpm dev` reads it; production builds drop that code.
 
 The frontend must stay on `http://localhost:5173`: that's the dev origin Backend's CORS allowlist accepts by default (alongside the two deployed Firebase Hosting domains, `pun-agent.web.app` and `pun-agent.firebaseapp.com`) (`CORS_ORIGIN` in `backend/` overrides it).
 
