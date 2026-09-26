@@ -7,20 +7,23 @@ on:
 
 jobs:
   test-js:
-    name: Test (${{ matrix.package }})
-    runs-on: ubuntu-latest
+    name: JS (${{ matrix.package }})
     strategy:
       matrix:
-        package: [frontend, backend]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter ${{ matrix.package }} run test
+        include:
+          # The frontend build (tsc -b && vite build) only runs at deploy time
+          # otherwise, so build it here to catch type and build errors in the
+          # PR. VITE_CHAT_ADAPTER is unset, so this builds the stub.
+          - package: frontend
+            build: true
+          # deploy-backend.yml's image build already compiles the backend on
+          # every pull request that touches it.
+          - package: backend
+            build: false
+    uses: ./.github/workflows/test-js.yml
+    with:
+      package: ${{ matrix.package }}
+      build: ${{ matrix.build }}
 
   test-python:
     name: Pytest (inference)

@@ -4,6 +4,7 @@ title: Protect /api/chat with Firebase App Check
 status: To Do
 assignee: []
 created_date: '2026-09-23 09:50'
+updated_date: '2026-09-25 02:01'
 labels: []
 dependencies:
   - TASK-13
@@ -39,3 +40,9 @@ Firebase App Check makes Backend accept only requests carrying a token that atte
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Exposure widened (2026-09-24, TASK-8 architectural review): the deployed site now builds with VITE_CHAT_ADAPTER=live, so the public UI itself spends Gemini quota; nobody needs to find the run.app URL first. That quota (AI Studio project gen-lang-client-0125403786, free tier) is shared with the team's local-dev keys, so draining it also breaks local development. TASK-13's caps (max 1 instance, billing-off key) still bound the damage to quota, never cost. Worth considering a higher priority.
+<!-- SECTION:NOTES:END -->
