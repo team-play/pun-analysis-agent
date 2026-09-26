@@ -23,6 +23,22 @@ Columns:
 
 License: SemEval-2017 Task 7 data is distributed by the task organizers for research use; see the [task page](https://alt.qcri.org/semeval2017/task7/) for terms.
 
+### `datasets/sentences_animal.csv`, `datasets/sentences_food.csv`
+
+Hand-authored sentence sets for a food/animal domain baseline (from [PR #8](https://github.com/team-play/pun-analysis-agent/pull/8)). This is a separate dataset from the food/animal rows already present in `semeval2017_task7_puns.csv` via its own `category` column — `TASK-2.2` covers verifying *that* SemEval-internal subset against the original ≥30-pair bar, not this file. Integrating it was tracked in `TASK-2.6`, and the decision (Livia and Prateek) was to defer: the files stay in the repo untouched, neither folded into the SemEval-derived subset nor dropped, to be revisited when animal work starts or class-balance and word-skew concerns matter.
+
+Columns follow the `semeval2017_task7_puns.csv` convention above, plus one extra:
+
+| Column | Meaning |
+|---|---|
+| `id` | Row id, `animal_*` / `food_*` prefix per file (this project's own scheme; SemEval's `het_*`/`hom_*` prefixes don't apply here). |
+| `is_pun` | `True`/`False`, as above. |
+| `pun_type` | `homographic` \| `homophonic` \| empty, as above. |
+| `source_corpus` | `sentences_animal` \| `sentences_food` — the originating file, mirroring how SemEval's `source_corpus` records which sub-corpus a row came from. |
+| `category` | `animal` \| `food` — matches the file, since each file is domain-pure. |
+| `text` | The sentence. |
+| `pun_target` | The word the pun is built around (e.g. `otter`, `dough`). No SemEval equivalent; named `pun_target` rather than `word` to leave room for multi-word spans, though every value here is currently a single word. |
+
 ## Precision/recall evaluation harness
 
 `evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run. The analyzer is an injectable callable (a live HTTP call or a fixture), so it can run against a real Inference deployment or a deterministic fixture without changing the scoring logic.
