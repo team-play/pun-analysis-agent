@@ -31,8 +31,8 @@ on:
 permissions:
   contents: read
 
-# Deploys run one at a time, in push order, so an older commit can't finish
-# last and end up serving.
+# Deploys run one at a time, so an older commit can't finish last and end up
+# serving. A newer push replaces a run still waiting, so the newest commit wins.
 concurrency:
   group: deploy-backend-${{ github.ref }}
   cancel-in-progress: false

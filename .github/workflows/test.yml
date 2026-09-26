@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-js:
-    name: ${{ matrix.package }}
+    name: JS
     strategy:
       matrix:
         include:
