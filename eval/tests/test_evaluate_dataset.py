@@ -124,8 +124,8 @@ class EvaluateDatasetTests(unittest.TestCase):
         result = evaluate(rows, analyzer)
 
         self.assertEqual(result["request_errors"], [])
-        self.assertEqual(result["slices"]["food_baseline"]["rows"], 2)
-        self.assertEqual(result["slices"]["food_baseline"]["is_pun"]["false_positive"], 1)
+        self.assertEqual(result["slices"]["animal_food"]["rows"], 2)
+        self.assertEqual(result["slices"]["animal_food"]["is_pun"]["false_positive"], 1)
         self.assertEqual(result["slices"]["all_categories"]["pun_type"]["support"], 2)
         self.assertEqual(result["slices"]["all_categories"]["pun_type"]["accuracy"], 1.0)
 
@@ -140,29 +140,32 @@ class EvaluateDatasetTests(unittest.TestCase):
         self.assertEqual(result["successful_rows"], 0)
         self.assertEqual(result["request_errors"][0]["id"], "1")
 
-    def test_evaluate_food_baseline_slice_is_empty_when_no_food_rows(self) -> None:
+    def test_evaluate_animal_food_slice_is_empty_when_no_matching_rows(self) -> None:
         rows = [DatasetRow("1", "pun", True, "homographic", "general")]
 
         result = evaluate(rows, lambda row: valid_response(**expected_output(row)))
 
-        food_slice = result["slices"]["food_baseline"]
-        self.assertEqual(food_slice["rows"], 0)
-        self.assertEqual(food_slice["coverage"], 0.0)
-        self.assertEqual(food_slice["is_pun"]["support"], 0)
-        self.assertEqual(food_slice["is_pun"]["precision"], 0.0)
-        self.assertEqual(food_slice["is_pun"]["recall"], 0.0)
+        animal_food_slice = result["slices"]["animal_food"]
+        self.assertEqual(animal_food_slice["rows"], 0)
+        self.assertEqual(animal_food_slice["coverage"], 0.0)
+        self.assertEqual(animal_food_slice["is_pun"]["support"], 0)
+        self.assertEqual(animal_food_slice["is_pun"]["precision"], 0.0)
+        self.assertEqual(animal_food_slice["is_pun"]["recall"], 0.0)
 
-    def test_evaluate_food_baseline_slice_includes_animal_food_category(self) -> None:
+    def test_evaluate_animal_food_slice_includes_food_animal_and_animal_food_categories(
+        self,
+    ) -> None:
         rows = [
             DatasetRow("1", "pun", True, "homographic", "food"),
             DatasetRow("2", "pun", True, "homophonic", "animal/food"),
             DatasetRow("3", "pun", True, "homographic", "animal"),
+            DatasetRow("4", "pun", True, "homographic", "general"),
         ]
 
         result = evaluate(rows, lambda row: valid_response(**expected_output(row)))
 
-        self.assertEqual(result["slices"]["food_baseline"]["rows"], 2)
-        self.assertEqual(result["slices"]["all_categories"]["rows"], 3)
+        self.assertEqual(result["slices"]["animal_food"]["rows"], 3)
+        self.assertEqual(result["slices"]["all_categories"]["rows"], 4)
 
 
 class AnalyzeEndpointTests(unittest.TestCase):
