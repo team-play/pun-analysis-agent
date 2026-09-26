@@ -21,14 +21,24 @@ _WIKTIONARY_POS = {
     "ADJ": "Adjective",
 }
 
+_MAX_HYPERNYM_DEPTH = 50
+
 _WIKTIONARY_HEADERS = {
     "User-Agent": "pun-analysis-agent/0.1 (https://github.com/team-play/pun-analysis-agent)",
 }
 
+
 @dataclass(frozen=True)
 class Sense:
+    """One candidate meaning of a word.
+
+    `lexfile` is WordNet's coarse category (e.g. "noun.food"). It is None for
+    Wiktionary senses, meaning "category unknown", NOT "a different category"
+    -- TASK-19 must not count a WordNet/Wiktionary pair as crossing categories.
+    """
+
     gloss: str
-    hypernyms: list[str]
+    hypernyms: tuple[str, ...]
     lexfile: str | None
     source: Literal["wordnet", "wiktionary"]
 
@@ -42,6 +52,10 @@ def _get_wordnet() -> wn.Wordnet:
     if _wordnet is None:
         with _wordnet_lock:
             if _wordnet is None:
+                # wn's SQLite connection is bound to its creating thread unless
+                # this is set; FastAPI runs sync /analyze on threadpool workers.
+                # Safe because we only read and sqlite3.threadsafety == 3.
+                wn.config.allow_multithreading = True
                 _wordnet = wn.Wordnet("oewn:2025")
     return _wordnet
 
@@ -51,23 +65,21 @@ def get_wordnet_senses(candidate: CandidateWord) -> list[Sense]:
     wordnet = _get_wordnet()
     pos_tags = _WORDNET_POS.get(candidate.pos, [])
 
-    senses= []
+    senses = []
     for pos in pos_tags:
         for synset in wordnet.synsets(candidate.lemma, pos=pos):
-           senses.append(
-               Sense(
-                   gloss = synset.definition(),
-                   hypernyms = _hypernym_chain(synset),
-                   lexfile = synset.lexfile(),
-                   source = "wordnet"
-               )
-           )
+            senses.append(
+                Sense(
+                    gloss=synset.definition(),
+                    hypernyms=_hypernym_chain(synset),
+                    lexfile=synset.lexfile(),
+                    source="wordnet",
+                )
+            )
     return senses
 
-_MAX_HYPERNYM_DEPTH = 50
 
-
-def _hypernym_chain(synset: wn.Synset) -> list[str]:
+def _hypernym_chain(synset: wn.Synset) -> tuple[str, ...]:
     chain = []
     current = synset
     hypernyms = current.hypernyms()
@@ -75,7 +87,8 @@ def _hypernym_chain(synset: wn.Synset) -> list[str]:
         current = hypernyms[0]
         chain.append(current.lemmas()[0])
         hypernyms = current.hypernyms()
-    return chain
+    return tuple(chain)
+
 
 def _fetch_wiktionary_definitions(word: str) -> dict:
     """GET the raw Wiktionary API response for `word`, or {} on any failure.
@@ -95,19 +108,22 @@ def _fetch_wiktionary_definitions(word: str) -> dict:
     except (httpx.HTTPStatusError, httpx.RequestError, httpx.InvalidURL, json.JSONDecodeError):
         return {}
 
+
 class _TextExtractor(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.chunks : list[str] = []
+        self.chunks: list[str] = []
 
     def handle_data(self, data: str):
         self.chunks.append(data)
+
 
 def _strip_html(html_text: str) -> str:
     """Wiktionary definitions embed HTML (links, spans, styles) -- return plain text."""
     extractor = _TextExtractor()
     extractor.feed(html_text)
     return "".join(extractor.chunks)
+
 
 def get_wiktionary_senses(candidate: CandidateWord) -> list[Sense]:
     """Tier 2 fallback: Wiktionary definitions, used when WordNet coverage is thin."""
@@ -118,8 +134,11 @@ def get_wiktionary_senses(candidate: CandidateWord) -> list[Sense]:
             for definition in entry.get("definitions", []):
                 gloss = _strip_html(definition.get("definition", ""))
                 if gloss:
-                    senses.append(Sense(gloss=gloss, hypernyms=[], lexfile=None, source="wiktionary"))
+                    senses.append(
+                        Sense(gloss=gloss, hypernyms=(), lexfile=None, source="wiktionary")
+                    )
     return senses
+
 
 def get_candidate_senses(candidate: CandidateWord) -> list[Sense]:
     """Orchestrator: WordNet first; fall back to Wiktionary if coverage is thin (<2 senses)."""
