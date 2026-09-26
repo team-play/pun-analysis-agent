@@ -1,0 +1,38 @@
+name: Test JS package
+
+# The one definition of how a JS workspace package is tested. test.yml calls it
+# for every push and pull request; the deploy workflows call it to gate their
+# deploy, so a failing test never ships even though test.yml runs separately.
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        description: Workspace package to test (frontend or backend)
+        type: string
+        required: true
+      build:
+        description: Also run the package's production build
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (${{ inputs.package }})
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE: ${{ inputs.package }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter "$PACKAGE"
+      - run: pnpm --filter "$PACKAGE" run test
+      - if: inputs.build
+        run: pnpm --filter "$PACKAGE" run build

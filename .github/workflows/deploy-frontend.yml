@@ -1,17 +1,41 @@
 name: Deploy Frontend
 
+# Pushes to main (or a manual run on main) run the frontend tests, then build
+# the site against the live Backend and deploy it to Firebase Hosting. Pull
+# requests don't run this workflow: test.yml tests and builds the frontend there.
+
 on:
   push:
     branches: [main]
     paths:
       - "frontend/**"
+      # The site is built from the root manifest and lockfile, so a
+      # frontend-only dependency bump must redeploy it.
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       # The build env below is part of the frontend build, so changing it
       # should redeploy too.
       - ".github/workflows/deploy-frontend.yml"
+  workflow_dispatch:
+
+# Deploys run one at a time, in push order, so an older commit can't finish
+# last and end up serving.
+concurrency:
+  group: deploy-frontend-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  test:
+    uses: ./.github/workflows/test-js.yml
+    with:
+      package: frontend
+
   deploy:
     name: Build and deploy to Firebase Hosting
+    needs: test
+    # Only main is ever deployed, even for a manual run on another branch.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -20,19 +44,21 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --filter frontend
       # Vite inlines these at build time. They live here rather than in
       # frontend/.env.production so only the deployed site talks to the real
       # Backend; local builds and CI tests stay on the stub. The URL follows
       # deploy-backend.yml's SERVICE, REGION and PROJECT_ID (as its project
       # number, 203365930808); update it if those change.
-      - run: pnpm --filter frontend run build
+      #
+      # An unset VITE_CHAT_ADAPTER silently builds the stub, so the deploy also
+      # fails if the Backend URL didn't make it into the bundle.
+      - run: |
+          pnpm --filter frontend run build
+          grep -rqF "$VITE_BACKEND_URL" frontend/dist/assets
         env:
           VITE_CHAT_ADAPTER: live
           VITE_BACKEND_URL: https://pun-agent-backend-203365930808.us-east1.run.app
-      # An unset VITE_CHAT_ADAPTER silently builds the stub, so fail the deploy
-      # if the Backend URL didn't make it into the bundle.
-      - run: grep -rqF pun-agent-backend-203365930808.us-east1.run.app frontend/dist/assets
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
