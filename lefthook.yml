@@ -1,0 +1,49 @@
+# Git hooks, installed by lefthook's postinstall on `pnpm install`.
+# Each job runs the lockfile-pinned tool (Biome from node_modules, Ruff from
+# each Python package's uv.lock), so hooks, CI and editors agree on versions.
+# Beyond formatting, both tools apply their safe lint fixes (e.g. removing an
+# unused import), and stage_fixed re-stages every file passed to a job.
+# Skip once with `git commit --no-verify`, or `LEFTHOOK=0 git commit`.
+pre-commit:
+  parallel: true
+  # Incoming commits were already checked in CI; reformatting them mid-merge
+  # or mid-rebase only adds churn and conflicts.
+  skip:
+    - merge
+    - rebase
+  jobs:
+    # The binary directly, not `pnpm exec`: pnpm would first run an install
+    # mid-commit whenever node_modules is behind the lockfile.
+    - name: biome
+      run: node_modules/.bin/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true
+
+    # Piped, so a missing uv stops here with an explanation instead of each
+    # Ruff job failing with "uv: command not found".
+    - name: python
+      glob: "*.py"
+      group:
+        piped: true
+        jobs:
+          - name: uv installed
+            run: command -v uv > /dev/null
+            fail_text: >-
+              uv is required to commit Python: the hook runs Ruff from each
+              package's uv.lock so it matches CI. Install it via
+              docs/local-setup.md, or bypass once with --no-verify.
+
+          # `root` runs uv inside the package, so it picks up that package's
+          # .venv and [tool.ruff] config, and {staged_files} are relative to
+          # it. Lint fixes go first: they can leave code (e.g. re-sorted
+          # imports) that the formatter then needs to tidy.
+          - name: ruff (inference)
+            root: inference/
+            glob: "*.py"
+            run: uv run ruff check --fix {staged_files} && uv run ruff format {staged_files}
+            stage_fixed: true
+
+          - name: ruff (eval)
+            root: eval/
+            glob: "*.py"
+            run: uv run ruff check --fix {staged_files} && uv run ruff format {staged_files}
+            stage_fixed: true

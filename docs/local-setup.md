@@ -73,6 +73,7 @@ cd inference
 uv sync
 uv run pytest
 uv run ruff check .
+uv run ruff format .
 uv run uvicorn main:app --reload
 ```
 
@@ -156,6 +157,16 @@ pnpm run check:mermaid
 
 # inside inference/ or eval/
 uv run ruff check .
+uv run ruff format --check .
 ```
 
-[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) and [`.github/workflows/test.yml`](../.github/workflows/test.yml) run all of the above (lint/mermaid/ruff, and the frontend/backend test suites plus the frontend's production build, respectively) on every push/PR, so failures show up in CI even if you skip running them locally.
+[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) and [`.github/workflows/test.yml`](../.github/workflows/test.yml) run all of the above (lint/mermaid/ruff lint and format, and the frontend/backend test suites plus the frontend's production build, respectively) on every push/PR, so failures show up in CI even if you skip running them locally.
+
+### Pre-commit hook
+
+`pnpm install` (from anywhere in the workspace) also installs a git pre-commit hook, via [Lefthook](https://lefthook.dev/) and the repo's [`lefthook.yml`](../lefthook.yml). On each commit it fixes just the staged files and re-stages them: `biome check --write` for JS/TS/JSON/CSS, and `ruff check --fix` then `ruff format` for Python in `inference/` or `eval/`. Both apply safe lint fixes as well as formatting (e.g. dropping an unused import), and an unfixable lint error blocks the commit. Merges and rebases skip it.
+
+- It needs both toolchains: Node/pnpm to be installed at all, and `uv` whenever Python is staged (the commit fails with an explanation if `uv` is missing). A Python-only contributor still needs one `pnpm install` to get the hook; CI's `ruff format --check` catches anything committed without it.
+- Skip it for one commit with `git commit --no-verify` or `LEFTHOOK=0 git commit`.
+- The hook lives in the repo's shared `.git/hooks`, so every worktree uses it; whichever checkout last ran `pnpm install` is the one whose Lefthook it calls. Branches without `lefthook.yml` commit normally.
+- If you stage only part of a file, the unstaged part is kept out of the commit, but an unstaged edit right next to lines the formatter rewrites can be put back a line or two off. Check `git diff` afterwards in that case.

@@ -33,3 +33,5 @@ jobs:
         run: uv sync --locked
       - working-directory: ${{ matrix.package }}
         run: uv run ruff check .
+      - working-directory: ${{ matrix.package }}
+        run: uv run ruff format --check .

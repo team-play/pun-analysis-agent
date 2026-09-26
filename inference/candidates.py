@@ -5,6 +5,8 @@ import spacy
 from spacy.language import Language
 
 _CANDIDATE_POS = {"NOUN", "VERB", "ADJ"}
+
+
 @dataclass(frozen=True)
 class CandidateWord:
     text: str

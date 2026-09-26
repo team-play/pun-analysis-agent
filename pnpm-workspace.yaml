@@ -5,6 +5,13 @@ allowBuilds:
   # Its postinstall writes Firebase web-app config for Firebase App Hosting's
   # auto-init. It arrives through firebase-admin, which doesn't use that.
   '@firebase/util': false
+  # Its postinstall runs `lefthook install`, registering the git hooks in
+  # lefthook.yml, so contributors get them from `pnpm install` with no extra
+  # step. It skips itself when CI is set and ignores lefthook's exit code, so
+  # the backend Docker build (`pnpm install --filter backend`, no .git) just
+  # logs a "not a git repository" error and carries on. A root "prepare"
+  # script running `lefthook install` would fail that build instead.
+  lefthook: true
   # protobufjs is a transitive dep of genkit's OpenTelemetry plumbing, not
   # something our code calls directly — its postinstall/build step isn't
   # needed for the published package to work as a dependency, so left
