@@ -29,6 +29,7 @@ _WIKTIONARY_HEADERS = {
 class Sense:
     gloss: str
     hypernyms: list[str]
+    lexfile: str | None
     source: Literal["wordnet", "wiktionary"]
 
 
@@ -57,6 +58,7 @@ def get_wordnet_senses(candidate: CandidateWord) -> list[Sense]:
                Sense(
                    gloss = synset.definition(),
                    hypernyms = _hypernym_chain(synset),
+                   lexfile = synset.lexfile(),
                    source = "wordnet"
                )
            )
@@ -116,7 +118,7 @@ def get_wiktionary_senses(candidate: CandidateWord) -> list[Sense]:
             for definition in entry.get("definitions", []):
                 gloss = _strip_html(definition.get("definition", ""))
                 if gloss:
-                    senses.append(Sense(gloss=gloss, hypernyms=[], source="wiktionary"))
+                    senses.append(Sense(gloss=gloss, hypernyms=[], lexfile=None, source="wiktionary"))
     return senses
 
 def get_candidate_senses(candidate: CandidateWord) -> list[Sense]:

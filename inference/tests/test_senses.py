@@ -20,6 +20,8 @@ def test_wordnet_returns_multiple_senses_for_dough():
     assert money_sense.hypernyms[:2] == ["money", "medium of exchange"]
     assert food_sense.hypernyms[-1] == "entity"
     assert money_sense.hypernyms[-1] == "entity"
+    assert food_sense.lexfile == "noun.food"
+    assert money_sense.lexfile == "noun.possession"
 
 
 def test_wiktionary_fallback_for_coverage_gap(monkeypatch):
@@ -46,6 +48,7 @@ def test_wiktionary_fallback_for_coverage_gap(monkeypatch):
     assert len(senses) > 0
     assert all(s.source == "wiktionary" for s in senses)
     assert all(s.hypernyms == [] for s in senses)
+    assert all(s.lexfile is None for s in senses)
     assert senses[0].gloss == "A person's ability to attract a love interest."
 
 
