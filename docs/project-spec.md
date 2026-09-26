@@ -42,7 +42,7 @@ sequenceDiagram
     alt pun analysis needed
         Gemini->>BE: tool_use: analyze_pun(text)
         BE->>INF: POST /analyze { text }
-        INF-->>BE: { is_pun, pun_type, words_involved, explanation, confidence }
+        INF-->>BE: { is_pun, pun_type, words_involved,<br/>explanation, confidence, sense_source }
         BE->>Gemini: tool result
     end
     Gemini->>BE: final conversational reply
@@ -58,7 +58,7 @@ See [`contracts.md`](contracts.md) for the exact `/analyze` and `/api/chat` requ
 Four domains, one lead each. Three of the four can start immediately against mocked contracts — only the two API contracts in [`contracts.md`](contracts.md) need to be agreed on day one.
 
 ### 1. Inference (ML/NLP)
-**Owns:** the Inference Cloud Run service — pun classifier, WordNet-based WSD, explanation generation.
+**Owns:** the Inference Cloud Run service — pun classifier, WordNet-based WSD, explanation generation for sense-selection Tiers 0–2. Inference never calls an LLM: when those tiers can't explain a pun, it hands off to Backend's Gemini with `sense_source: "llm_fallback"` (Tier 3, see [`design/sense-selection.md`](design/sense-selection.md)).
 
 **Work:**
 - Collect/prep dataset (SemEval-2017 Task 7 pun detection, Pun of the Day corpus)
@@ -75,13 +75,13 @@ This domain can work independently once the contract is agreed — no dependency
 ---
 
 ### 2. Backend / Orchestration
-**Owns:** the Genkit backend on Cloud Run, the `analyze_pun` tool definition, conversation state/streaming.
+**Owns:** the Genkit backend on Cloud Run, the `analyze_pun` tool definition, conversation state/streaming, and Gemini's system instruction, including acting on `sense_source: "llm_fallback"` (Tier 3 of sense selection). Backend is the only service that calls Gemini.
 
 **Work:**
 - Wire up Gemini via Genkit's Google AI plugin
 - Implement the `analyze_pun` tool to call the Inference domain's `/analyze` endpoint
 - Handle streaming back to the frontend (Genkit's flow streaming)
-- Handle errors/timeouts (e.g. Cloud Run cold start on the Inference service)
+- Handle errors/timeouts (e.g. Cloud Run cold start on the Inference service) by returning the undetermined `/analyze` result defined in [`contracts.md`](contracts.md)
 
 **Contract exposed:** `/api/chat` — see [`contracts.md`](contracts.md).
 
@@ -99,7 +99,7 @@ This domain can work independently once the contract is agreed — no dependency
 - Streaming display consuming the Genkit backend's stream
 - Loading/error states, basic styling
 
-**Contract consumed:** only `/api/chat`. Can build entirely against a stubbed backend response, no dependency on Inference.
+**Contract consumed:** only `/api/chat`. Can build entirely against a stubbed backend response, with no dependency on the Inference *service*; it does render Inference's `/analyze` result shape, which reaches it inside the `analyze_pun` tool result.
 
 **Design:** see [`design/frontend-design.md`](design/frontend-design.md) for the component library, visual design, and state management approach, and [`engineering-practices.md`](engineering-practices.md) for the isolation/testing/progressive-enhancement rules this and the Backend domain build against.
 

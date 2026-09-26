@@ -8,16 +8,24 @@ The only two hard cross-domain dependencies in this project. Any change here mus
 POST /analyze
 { "text": string }
 → {
-    "is_pun": bool,
+    "is_pun": bool | null,
     "pun_type": "homographic" | "homophonic" | null,
     "words_involved": [string],
     "explanation": string,
-    "confidence": float,
+    "confidence": float | null,
     "sense_source": "wordnet" | "wiktionary" | "llm_fallback" | null
   }
 ```
 
-`sense_source` reports which tier of the sense-selection fallback chain produced `explanation` — `null` when `is_pun` is `false` (no sense selection needed) or when every tier failed (the graceful-failure case). See [`design/sense-selection.md`](design/sense-selection.md) for the full tiered design this field tracks.
+`is_pun`, `pun_type` and `confidence` come from pun detection alone: `confidence` is the detector's probability that the text is a pun. Sense selection only runs when `is_pun` is `true` and never changes those three fields.
+
+`is_pun: null` means **undetermined**: Inference couldn't judge the text at all (e.g. detection itself failed). `is_pun` and `confidence` are `null` together, and only in this case. `pun_type`, `confidence` and `sense_source` are then `null`, `words_involved` is `[]` and `explanation` is `""`. Backend's `analyze_pun` tool returns this same object when Inference is unreachable, times out, or answers with something malformed, and Gemini reads it as "Inference couldn't judge; decide yourself whether this is a pun at all".
+
+`sense_source` reports how sense selection resolved: which tier produced `explanation`, or that none did (full design in [`design/sense-selection.md`](design/sense-selection.md)):
+
+- `"wordnet"` / `"wiktionary"`: that tier found a confident sense pair, and `explanation` describes it.
+- `"llm_fallback"`: `is_pun` is `true`, but no tier found a confident sense pair (or sense selection failed). This is a hand-off, not a record: Inference never calls an LLM itself. `explanation` is `""`, and `words_involved` still lists the suspected word(s) when Inference found any. Backend's Gemini receives this unchanged as the `analyze_pun` tool output and supplies two plausible senses and the explanation itself, so Gemini is only ever called from Backend.
+- `null`: sense selection didn't run, because `is_pun` is `false` (not a pun) or `null` (undetermined).
 
 ## `/api/chat` (Backend → Frontend)
 
@@ -44,7 +52,7 @@ The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool cal
 { "content": [{ "toolResponse": { "name": "analyze_pun", "output": <the /analyze response shape above>, "ref"?: string } }] }
 ```
 
-`output` is always a well-formed `/analyze`-shaped object per that endpoint's own graceful-degradation design (low `confidence` and `sense_source: null` on failure, never a raw error) — so the tool never needs a separate error signal at this layer.
+`output` is always a well-formed `/analyze`-shaped object per that endpoint's own graceful-degradation design (a sense-selection failure comes back as `sense_source: "llm_fallback"`, and an Inference that can't judge the text, or can't be reached, as the undetermined result above; never a raw error) — so the tool never needs a separate error signal at this layer.
 
 Genkit's `ref` field exists to disambiguate concurrent calls to the *same* tool, but is inconsistently populated and unneeded here: `analyze_pun` is the only tool and is never called more than once concurrently in a single turn. So Frontend's `ChatModelAdapter` doesn't correlate by `ref` — it mints a `toolCallId` client-side the moment a `toolRequest` chunk for `analyze_pun` arrives, holds it as the one pending call, and attaches the next `toolResponse` chunk's `output` to that same assistant-ui `{ type: "tool-call", toolCallId, toolName, args, result }` part. If a second concurrent tool or genuinely concurrent `analyze_pun` calls are ever needed, this correlation rule needs revisiting alongside `ref`-based matching — not a case this project currently has.
 

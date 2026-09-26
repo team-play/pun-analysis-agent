@@ -4,7 +4,7 @@ title: 'Backend: analyze_pun tool (Phase 2) against a fixture /analyze'
 status: To Do
 assignee: []
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-24 01:55'
+updated_date: '2026-09-25 18:27'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -26,10 +26,11 @@ Per docs/engineering-practices.md's Phase 2 plan: implement the analyze_pun tool
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 analyze_pun tool request/response match the /analyze schema in docs/contracts.md exactly
-- [ ] #2 Inference is called through an injectable client; tests substitute a fixture /analyze response instead of a live HTTP call
-- [ ] #3 Non-2xx or malformed Inference responses don't crash the chat flow — the tool degrades to a well-formed low-confidence result or a plain conversational reply
-- [ ] #4 The tool-call event shape (toolRequest/toolResponse chunks, toolCallId correlation rule) is implemented exactly as finalized in docs/contracts.md, closing sync point 3
+- [ ] #1 Inference is called through an injectable client; tests substitute a fixture /analyze response instead of a live HTTP call
+- [ ] #2 The tool-call event shape (toolRequest/toolResponse chunks, toolCallId correlation rule) is implemented exactly as finalized in docs/contracts.md, closing sync point 3
+- [ ] #3 analyze_pun's tool request/response match the /analyze schema in docs/contracts.md exactly, with is_pun, confidence, pun_type and sense_source declared as nullable (Zod .nullable(), not .optional()), since Genkit validates tool output against the schema
+- [ ] #4 Non-2xx, malformed or timed-out Inference responses don't crash the chat flow: the tool returns docs/contracts.md's undetermined /analyze result (is_pun: null, with null pun_type/confidence/sense_source and no words), so Gemini judges the text itself; the test runs that object through the registered tool (not the bare client), and Backend logs which cause it was (timeout, non-2xx, malformed)
+- [ ] #5 The Inference timeout is a named constant whose value is based on a measured Inference cold start on Cloud Run (measured once Inference is deployed, since deploy-inference.yml is still a placeholder), and the value and measurement are recorded in docs/contracts.md so Frontend can rely on the worst-case wait
 <!-- AC:END -->
 
 ## Definition of Done
