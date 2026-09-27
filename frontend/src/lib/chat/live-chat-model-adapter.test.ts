@@ -11,6 +11,7 @@ import {
 	recordedParallelToolCallsStream,
 	recordedPhase1Stream,
 	recordedToolCallStream,
+	recordedToolCallThenErrorStream,
 } from "./fixtures/recorded-genkit-streams";
 import {
 	APP_CHECK_TIMEOUT_MS,
@@ -482,8 +483,27 @@ describe("createLiveChatModelAdapter with analyze_pun tool calls", () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});
 	});
 
-	it("shows a recorded call running, then completes it with its result", async () => {
+	it("renders a recorded reply: the call, its result, then the text after it", async () => {
 		mockFetch(new Response(recordedToolCallStream));
+
+		const { contents, error } = await contentsOf(run([message("user", "hi")]));
+
+		expect(error).toBeUndefined();
+		const [call, text] = contents.at(-1) ?? [];
+		expect(call).toMatchObject({
+			type: "tool-call",
+			toolCallId: "call_125622",
+			args: { text: "I used to be a banker, but I lost interest." },
+			result: undeterminedResult,
+		});
+		expect(text).toMatchObject({ type: "text" });
+		expect(text?.type === "text" && text.text).toMatch(
+			/^Yes, that is a pun!.*core concept in banking\.$/s,
+		);
+	});
+
+	it("shows a recorded call running, then completes it with its result", async () => {
+		mockFetch(new Response(recordedToolCallThenErrorStream));
 
 		const { contents, error } = await contentsOf(run([message("user", "hi")]));
 

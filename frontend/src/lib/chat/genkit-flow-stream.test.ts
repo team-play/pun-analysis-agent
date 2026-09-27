@@ -3,7 +3,7 @@ import { byteStreamOf, utf8 } from "./fixtures/byte-stream";
 import {
 	recordedErrorStream,
 	recordedPhase1Stream,
-	recordedToolCallStream,
+	recordedToolCallThenErrorStream,
 } from "./fixtures/recorded-genkit-streams";
 import {
 	FlowErrorEvent,
@@ -102,9 +102,9 @@ describe("parseGenkitFlowStream", () => {
 		const body = byteStreamOf([
 			utf8('data: {"message":"Let me check. "}\n\n'),
 			utf8(
-				recordedToolCallStream.slice(
+				recordedToolCallThenErrorStream.slice(
 					0,
-					recordedToolCallStream.indexOf("error: "),
+					recordedToolCallThenErrorStream.indexOf("error: "),
 				),
 			),
 			utf8('data: {"result":"Let me check. "}\n\n'),
