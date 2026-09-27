@@ -5,6 +5,7 @@ status: To Do
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-27 15:25'
+updated_date: '2026-09-27 16:08'
 labels: []
 milestone: m-4
 dependencies:
@@ -36,3 +37,9 @@ TASK-9 added INFERENCE_TIMEOUT_MS (backend/src/tools/analyze-pun.ts) with a prov
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Carries TASK-9's former AC #5, removed from TASK-9 on 2026-09-27: 'The Inference timeout is a named constant whose value is based on a measured Inference cold start on Cloud Run ... and the value and measurement are recorded in docs/contracts.md so Frontend can rely on the worst-case wait.' The constant already exists (INFERENCE_TIMEOUT_MS, backend/src/tools/analyze-pun.ts); contracts.md also states the per-reply worst case (up to 5 rounds x the timeout), which must be updated with the measured value.
+<!-- SECTION:NOTES:END -->

@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-27 16:03'
+updated_date: '2026-09-27 16:08'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -32,7 +32,6 @@ Per docs/engineering-practices.md's Phase 2 plan: implement the analyze_pun tool
 - [x] #2 The tool-call event shape (toolRequest/toolResponse chunks, toolCallId correlation rule) is implemented exactly as finalized in docs/contracts.md, closing sync point 3
 - [x] #3 analyze_pun's tool request/response match the /analyze schema in docs/contracts.md exactly, with is_pun, confidence, pun_type and sense_source declared as nullable (Zod .nullable(), not .optional()), since Genkit validates tool output against the schema
 - [x] #4 Non-2xx, malformed or timed-out Inference responses don't crash the chat flow: the tool returns docs/contracts.md's undetermined /analyze result (is_pun: null, with null pun_type/confidence/sense_source and no words), so Gemini judges the text itself; the test runs that object through the registered tool (not the bare client), and Backend logs which cause it was (timeout, non-2xx, malformed)
-- [ ] #5 The Inference timeout is a named constant whose value is based on a measured Inference cold start on Cloud Run (measured once Inference is deployed, since deploy-inference.yml is still a placeholder), and the value and measurement are recorded in docs/contracts.md so Frontend can rely on the worst-case wait
 <!-- AC:END -->
 
 ## Definition of Done
@@ -84,4 +83,6 @@ Validation (2026-09-27): backend pnpm test 95/95, tsc --noEmit + pnpm build clea
 - Before merge: TASK-10 must deploy first (TASK-9 depends on TASK-10), and one manual pnpm dev smoke test with real Gemini and a two-text prompt ('are these puns: X, Y?') should confirm Gemini accepts Backend-assigned function-call ids (can't be checked offline).
 
 Smoke test (2026-09-27, pnpm dev + real Gemini via curl, 'Are these puns? 1) ... banker ... interest. 2) The meeting starts at noon.'): PASS. Gemini made two parallel analyze_pun calls in one model turn (both chunks index 0), each in its own chunk, and supplied its own ids (call_56935, call_56938). The middleware kept them, and the single tool chunk returned both toolResponses with the matching refs. Gemini judged both texts itself from the undetermined results; result held the full reply; no error event. thoughtSignature metadata was forwarded on the first toolRequest part. Consequence: Backend-assigned refs are a fallback, not the normal path, so the path where Gemini receives ids it didn't issue is still unexercised against real Gemini. Middleware comment and contracts.md corrected; contract now also says a turn's toolRequest parts can span several chunks.
+
+AC #5 (Inference timeout set from a measured Cloud Run cold start, recorded in docs/contracts.md) moved to TASK-32 (2026-09-27, @yaisiel.torres), since it can't be measured until Inference is deployed (TASK-14). TASK-9 ships the named constant INFERENCE_TIMEOUT_MS with a provisional 20 s, marked unmeasured in contracts.md.
 <!-- SECTION:NOTES:END -->
