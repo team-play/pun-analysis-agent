@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-27 15:51'
+updated_date: '2026-09-27 16:03'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -82,4 +82,6 @@ Validation (2026-09-27): backend pnpm test 95/95, tsc --noEmit + pnpm build clea
 - AC #5: open; moved to TASK-32 (provisional 20 s recorded in contracts.md).
 - Reviews: code review + architectural review (subagents), then a third review of the ref middleware / schema rules. Fixed: result lost pre-tool text; parallel-call pairing (ref middleware); partial-piece refs; contract rules in schema; fixture now undetermined; doc drift.
 - Before merge: TASK-10 must deploy first (TASK-9 depends on TASK-10), and one manual pnpm dev smoke test with real Gemini and a two-text prompt ('are these puns: X, Y?') should confirm Gemini accepts Backend-assigned function-call ids (can't be checked offline).
+
+Smoke test (2026-09-27, pnpm dev + real Gemini via curl, 'Are these puns? 1) ... banker ... interest. 2) The meeting starts at noon.'): PASS. Gemini made two parallel analyze_pun calls in one model turn (both chunks index 0), each in its own chunk, and supplied its own ids (call_56935, call_56938). The middleware kept them, and the single tool chunk returned both toolResponses with the matching refs. Gemini judged both texts itself from the undetermined results; result held the full reply; no error event. thoughtSignature metadata was forwarded on the first toolRequest part. Consequence: Backend-assigned refs are a fallback, not the normal path, so the path where Gemini receives ids it didn't issue is still unexercised against real Gemini. Middleware comment and contracts.md corrected; contract now also says a turn's toolRequest parts can span several chunks.
 <!-- SECTION:NOTES:END -->

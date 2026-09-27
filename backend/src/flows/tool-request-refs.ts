@@ -6,14 +6,18 @@ import type {
 } from "genkit/model";
 
 /**
- * A model middleware that gives each tool call the model makes a `ref`,
- * so Frontend can tell which toolResponse answers which toolRequest
+ * A model middleware that makes sure each tool call the model makes has a
+ * `ref`, so Frontend can tell which toolResponse answers which toolRequest
  * (docs/contracts.md). Gemini can call analyze_pun several times at once,
  * and Genkit then returns every result in one chunk, in the order the
- * calls *finished*. Gemini usually leaves `ref` empty, and a toolResponse
- * doesn't carry its input, so without this the results can't be matched
- * to the calls. Genkit copies a toolRequest's `ref` onto its toolResponse,
- * so numbering the requests is enough.
+ * calls *finished*. A toolResponse doesn't carry its input, so the ref is
+ * the only way to match results to calls. Genkit copies a toolRequest's
+ * `ref` onto its toolResponse, so a ref on every request is enough.
+ *
+ * gemini-flash-latest on the Developer API supplies its own ids (e.g.
+ * "call_56935", seen in TASK-9's smoke test), which are kept. This is the
+ * safety net for a model or API version that leaves them out, which the
+ * Gemini plugin allows for (it sets `ref` only when Gemini sends an id).
  *
  * Refs are "0", "1", ... in the order the model made the calls, across
  * every model turn of one reply (create one middleware per reply). The
