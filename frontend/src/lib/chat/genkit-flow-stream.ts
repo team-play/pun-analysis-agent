@@ -1,10 +1,44 @@
 /**
+ * One part of a Genkit chunk. Only the fields Frontend reads are listed;
+ * parts also carry others (e.g. `metadata` with Gemini's thought
+ * signatures), which docs/contracts.md says to ignore.
+ */
+export type GenkitPart = {
+	text?: string;
+	toolRequest?: { name: string; input: unknown; ref: string };
+	toolResponse?: { name: string; output: unknown; ref: string };
+};
+
+/**
+ * A Genkit chunk carrying tool calls (`role: "model"`) or their results
+ * (`role: "tool"`), as Backend forwards it in Phase 2 (docs/contracts.md).
+ */
+export type GenkitChunk = { role: string; content: GenkitPart[] };
+
+/**
  * One event from Genkit's flow-stream wire format, as Backend's `/api/chat`
  * sends it (docs/contracts.md): zero or more `message` chunks — each a new
- * piece of the reply, not the reply so far — then exactly one `result`.
- * Phase 1's flow streams plain text, so both carry strings.
+ * piece of the reply, not the reply so far — then exactly one `result`, the
+ * whole reply's text. A `message` is plain reply text, or, from Phase 2, a
+ * Genkit chunk carrying `analyze_pun` calls or their results.
  */
-export type GenkitFlowEvent = { message: string } | { result: string };
+export type GenkitFlowEvent =
+	| { message: string | GenkitChunk }
+	| { result: string };
+
+const isFlowEvent = (event: unknown): event is GenkitFlowEvent => {
+	if (typeof event !== "object" || event === null) return false;
+	if ("result" in event) return typeof event.result === "string";
+	if (!("message" in event)) return false;
+	const { message } = event;
+	return (
+		typeof message === "string" ||
+		(typeof message === "object" &&
+			message !== null &&
+			"content" in message &&
+			Array.isArray(message.content))
+	);
+};
 
 /**
  * Events are separated by a blank line. JSON.stringify escapes newlines
@@ -39,8 +73,8 @@ const parseEvent = (raw: string): GenkitFlowEvent => {
 		}
 	}
 	if (raw.startsWith(DATA_PREFIX)) {
-		const event = JSON.parse(raw.slice(DATA_PREFIX.length));
-		if ("message" in event || "result" in event) return event;
+		const event: unknown = JSON.parse(raw.slice(DATA_PREFIX.length));
+		if (isFlowEvent(event)) return event;
 	}
 	throw new Error(`Unrecognized Genkit flow-stream event: ${raw}`);
 };
