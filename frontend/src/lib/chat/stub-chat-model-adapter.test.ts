@@ -1,6 +1,9 @@
 import type { ChatModelRunOptions, ThreadMessage } from "@assistant-ui/react";
 import { describe, expect, it } from "vitest";
+import { notAPunResult } from "./fixtures/analyze-results";
 import { createStubChatModelAdapter } from "./stub-chat-model-adapter";
+
+type Step = { content: readonly { type: string; result?: unknown }[] };
 
 const userMessage = (text: string): ThreadMessage => ({
 	id: "msg-1",
@@ -81,6 +84,39 @@ describe("createStubChatModelAdapter", () => {
 		) as AsyncGenerator<unknown>;
 
 		await expect(collect(gen)).rejects.toThrow(/simulated failure/i);
+	});
+
+	it("picks the first matching scenario, so 'not a pun' isn't read as 'pun'", async () => {
+		const adapter = createStubChatModelAdapter();
+		const results = await collect(
+			adapter.run(
+				runOptions([userMessage("this is not a pun")]),
+			) as AsyncGenerator<Step>,
+		);
+
+		const call = results
+			.at(-1)
+			?.content.find((part) => part.type === "tool-call");
+		expect(call?.result).toEqual(notAPunResult);
+	});
+
+	it("starts a tool call, then fails before its result, when the message mentions 'fail'", async () => {
+		const adapter = createStubChatModelAdapter();
+		const results: Step[] = [];
+		const gen = adapter.run(
+			runOptions([userMessage("make the pun fail")]),
+		) as AsyncGenerator<Step>;
+
+		await expect(
+			(async () => {
+				for await (const step of gen) results.push(step);
+			})(),
+		).rejects.toThrow(/simulated failure \(message contained 'fail'\)/);
+		const call = results
+			.at(-1)
+			?.content.find((part) => part.type === "tool-call");
+		expect(call).toBeDefined();
+		expect(call?.result).toBeUndefined();
 	});
 
 	it("stops yielding once the abort signal fires", async () => {
