@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 
-from candidates import CandidateWord, get_model
+from spacy.tokens import Doc, Token
+
+from candidates import CandidateWord
+
+# Dependents that carry a copula-like verb's meaning ("was ready", "looked runny").
+_COPULA_COMPLEMENTS = {"acomp", "attr"}
 
 
 @dataclass(frozen=True)
@@ -9,37 +14,35 @@ class LocalContext:
     predicate: str | None
 
 
-def local_contexts(text: str, candidates: list[CandidateWord]) -> list[LocalContext]:
-    # One parse for the whole sentence, reused for every candidate --
-    # candidates all come from this same text (see docs/design/sense-selection.md
-    # step 3), so re-parsing per candidate would multiply the dependency
-    # parser's cost by len(candidates) for no reason.
-    doc = get_model()(text)
-    return [_local_context(_token_for(doc, candidate)) for candidate in candidates]
+def local_contexts(doc: Doc, candidates: list[CandidateWord]) -> list[LocalContext]:
+    """(relation, predicate) for each candidate; candidates must come from this same Doc."""
+    return [_local_context(doc[candidate.index]) for candidate in candidates]
 
 
-def _token_for(doc, candidate: CandidateWord):
-    # candidate.index is only meaningful against a Doc parsed from the same
-    # text extract_candidates() saw it in -- a mismatched text/candidate
-    # pair could still land in-bounds and silently return the wrong token's
-    # relation/predicate, so check the token actually is the candidate word
-    # rather than trusting the index alone.
-    token = doc[candidate.index]
-    if token.text != candidate.text:
-        raise ValueError(
-            f"candidate {candidate!r} does not match token {token.text!r} at "
-            f"index {candidate.index} in the given text -- candidates must come "
-            "from extract_candidates(text) for this same text"
-        )
-    return token
+def _local_context(token: Token) -> LocalContext:
+    # Conjuncts first, so the rules below see the list's first item: in
+    # "flour, eggs, and dough", dough attaches to eggs, and eggs to flour.
+    while token.dep_ == "conj":
+        token = token.head
 
-
-def _local_context(token) -> LocalContext:
     if token.dep_ == "ROOT":
-        # spaCy sets a ROOT token's own .head to itself; there's no real
-        # governing predicate, so report that honestly instead of the
-        # self-referential placeholder.
+        # spaCy makes a ROOT token its own head; there's no governing predicate.
         return LocalContext(relation="ROOT", predicate=None)
-    else:
-        return LocalContext(relation=token.dep_, predicate=token.head.lemma_)
 
+    if token.dep_ == "pobj":
+        # Skip the preposition, keeping it in the relation so "hide in X" and
+        # "hide from X" stay separate slots.
+        preposition = token.head
+        return LocalContext(
+            relation=f"prep_{preposition.lemma_}", predicate=preposition.head.lemma_
+        )
+
+    if token.dep_ == "nsubj":
+        # "be"/"look"/"seem" accept any subject, so the complement decides the sense.
+        complement = next(
+            (child for child in token.head.children if child.dep_ in _COPULA_COMPLEMENTS), None
+        )
+        if complement is not None:
+            return LocalContext(relation="nsubj", predicate=complement.lemma_)
+
+    return LocalContext(relation=token.dep_, predicate=token.head.lemma_)

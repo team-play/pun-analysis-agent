@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import spacy
 from spacy.language import Language
+from spacy.tokens import Doc
 
 _CANDIDATE_POS = {"NOUN", "VERB", "ADJ"}
 
@@ -26,9 +27,9 @@ def get_model() -> Language:
     # call spacy.load() at once, doubling peak memory/CPU during exactly
     # the window this matters most (see PR #20 review discussion).
     #
-    # Public (no leading underscore): context.py shares this same pipeline
-    # rather than loading a second one, so this is the inference package's
-    # one shared spaCy accessor, not an implementation detail of this file.
+    # Public (no leading underscore): callers parse each sentence once with
+    # this pipeline and pass the same Doc to extract_candidates() and
+    # context.local_contexts(), so candidate indexes always match that Doc.
     global _model
     if _model is None:
         with _model_lock:
@@ -37,8 +38,7 @@ def get_model() -> Language:
     return _model
 
 
-def extract_candidates(text: str) -> list[CandidateWord]:
-    doc = get_model()(text)
+def extract_candidates(doc: Doc) -> list[CandidateWord]:
     return [
         CandidateWord(text=token.text, lemma=token.lemma_, pos=token.pos_, index=token.i)
         for token in doc

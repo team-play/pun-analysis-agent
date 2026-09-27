@@ -1,11 +1,11 @@
 import threading
 
 import candidates as candidates_module
-from candidates import CandidateWord, extract_candidates
+from candidates import CandidateWord, extract_candidates, get_model
 
 
 def test_extracts_open_class_candidates():
-    candidates = extract_candidates("The baker needed more dough.")
+    candidates = extract_candidates(get_model()("The baker needed more dough."))
 
     assert candidates == [
         CandidateWord(text="baker", lemma="baker", pos="NOUN", index=1),
@@ -16,7 +16,7 @@ def test_extracts_open_class_candidates():
 
 
 def test_excludes_closed_class_tokens():
-    candidates = extract_candidates("The baker needed dough for her shop.")
+    candidates = extract_candidates(get_model()("The baker needed dough for her shop."))
 
     assert candidates == [
         CandidateWord(text="baker", lemma="baker", pos="NOUN", index=1),

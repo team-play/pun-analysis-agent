@@ -1,10 +1,10 @@
 ---
 id: TASK-18
 title: Extract dependency-parse local context for candidate words
-status: Done
+status: In Progress
 assignee: []
 created_date: '2026-09-20 10:04'
-updated_date: '2026-09-25 01:41'
+updated_date: '2026-09-27 18:52'
 labels:
   - wsd
 milestone: m-6
@@ -38,10 +38,7 @@ Step 3 of docs/design/sense-selection.md's approach: parse the sentence and find
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Re-enable spaCy's parser in candidates.py's model loader (renamed _get_model -> get_model, now a shared public accessor for context.py to use too).
-2. Add context.py: LocalContext dataclass + local_contexts(text, candidates) batch function -- parses the sentence once per call, maps over every candidate, validates each candidate's index against the actual token text before reporting relation/predicate.
-3. Add tests covering: dough/dobj/need, batter/nsubj/be (copula case), ROOT/None case, mismatched-candidate raises ValueError, single-parse regression guard.
-4. Code review pass (code-review skill, high effort) against the diff.
+1. Re-enable spaCy's parser in candidates.py's model loader (public get_model()). 2. Callers parse each sentence once and pass the same Doc to extract_candidates(doc) and local_contexts(doc, candidates), so candidate indexes always match the Doc. 3. context.py: LocalContext(relation, predicate) per candidate, resolving the real governing predicate: climb conj links to the list's first item; for pobj skip the preposition (relation prep_<prep>, predicate = the preposition's head); for nsubj of a verb with an acomp/attr child, use that complement as the predicate; ROOT has predicate None. 4. Tests: rule cases on hand-built Docs (explicit parse trees, independent of the statistical parser) plus real-sentence checks that the pinned en_core_web_sm produces the shapes the rules expect. 5. Code review pass.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -52,10 +49,12 @@ Verified: 9/9 inference tests pass (uv run pytest), ruff clean. Confirmed via di
 Code review (high) found 4 issues, all fixed: (1) local_context() re-parsed the sentence once per candidate -- rewritten as local_contexts(text, candidates) batch function, one parse per sentence regardless of candidate count; (2) reached into candidates._get_model() (a private symbol) -- renamed to public get_model(), now a documented shared accessor; (3) no validation that candidate.index matches the given text -- _token_for() now raises ValueError on a text/candidate mismatch, covered by a test; (4) stray untracked frontend/package-lock.json left over from an earlier PR-review session (repo is pnpm-only) -- deleted.
 
 Also corrected docs/design/sense-selection.md's Step 3 example: it said dough is 'obj' of need and batter is 'nsubj' of 'was ready' -- actual spaCy output (en_core_web_sm, pinned <3.9.0) is 'dobj', and batter's head is the copula 'be', not 'ready'.
+
+PR #36 review (Yai, 2026-09-26): (1) extract_candidates and local_contexts now both take the parsed Doc instead of text, so each sentence is parsed once and a text/candidate mismatch can't happen; _token_for, its ValueError check (which an out-of-range index bypassed with IndexError) and the mismatch and parse-count tests were removed. (2) The raw parse head often isn't a predicate (pobj gives the preposition, conj gives the sibling noun), and TASK-19's selectional-preference seeds are keyed by (predicate, relation), so the pair is cleaned up here: conj -> climb to the first conjunct (a loop, since spaCy chains lists), pobj -> relation prep_<prep> with the preposition's head as predicate (prep_ chosen over UD-style obl: to match spaCy's other labels), nsubj with an acomp/attr sibling -> that complement as predicate (be/look/seem accept any subject). This reverses the earlier note: batter is now nsubj/ready, matching the design doc's original target, which is restored in docs/design/sense-selection.md step 3 along with a description of the pair format. Verified each rule by removing it (and turning the conj loop into a single hop): at least one test fails every time.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Implemented local_contexts(text, candidates) in inference/context.py: re-enables spaCy's dependency parser (candidates.py) and reports each candidate's grammatical relation + governing predicate (relation="ROOT", predicate=None when the candidate has no governor). Parses once per sentence, not once per candidate. Verified with 5 new unit tests plus the 4 pre-existing candidates/main tests (9/9 passing), ruff clean. Code review (high) done, all 4 findings fixed. docs/design/sense-selection.md's Step 3 example corrected to match verified spaCy output.
+inference/context.py: local_contexts(doc, candidates) returns each candidate's (relation, predicate), resolving the real governing predicate through conjunct lists, prepositions (prep_<prep>) and copula-like verbs with a complement; ROOT has predicate None. extract_candidates now also takes the parsed Doc, so each sentence is parsed once. Verified with 10 rule cases on hand-built Docs (Yai's 9 sentences plus ROOT, trees copied from en_core_web_sm) and 3 real-sentence checks against the pinned model; 35/35 inference tests pass, ruff check and ruff format clean. docs/design/sense-selection.md step 3 describes the pair format.
 <!-- SECTION:FINAL_SUMMARY:END -->

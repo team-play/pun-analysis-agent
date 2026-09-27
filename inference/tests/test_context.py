@@ -1,60 +1,126 @@
 import pytest
+import spacy
+from spacy.tokens import Doc
 
-from candidates import CandidateWord, extract_candidates
+from candidates import CandidateWord, extract_candidates, get_model
 from context import LocalContext, local_contexts
 
-
-def test_obj_relation_dough_needs_example():
-    text = "The baker needed more dough."
-    candidates = extract_candidates(text)
-    dough_candidate = next(c for c in candidates if c.text == "dough")
-    result = local_contexts(text, [dough_candidate])
-    assert result == [LocalContext(relation="dobj", predicate="need")]
+_VOCAB = spacy.blank("en").vocab
 
 
-def test_nsubj_relation_batter_was_ready_example():
-    text = "The batter was ready."
-    candidates = extract_candidates(text)
-    batter_candidate = next(c for c in candidates if c.text == "batter")
-    result = local_contexts(text, [batter_candidate])
-    assert result == [LocalContext(relation="nsubj", predicate="be")]
+def _parsed(*tokens: tuple[str, str, str, int]) -> Doc:
+    """A Doc with an explicit parse, one (word, lemma, dep, head index) per token.
+
+    Tests the rules against a fixed tree, independent of what the statistical
+    parser happens to output. Trees copied from en_core_web_sm's parses.
+    """
+    words, lemmas, deps, heads = (list(column) for column in zip(*tokens))
+    return Doc(_VOCAB, words=words, lemmas=lemmas, deps=deps, heads=heads)
 
 
-def test_root_candidate_has_no_predicate():
-    text = "Run!"
-    candidates = extract_candidates(text)
-    run_candidate = next(c for c in candidates if c.text == "Run")
-    result = local_contexts(text, [run_candidate])
-    assert result == [LocalContext(relation="ROOT", predicate=None)]
+def _candidate(doc: Doc, word: str) -> CandidateWord:
+    token = next(t for t in doc if t.text == word)
+    return CandidateWord(text=token.text, lemma=token.lemma_, pos="NOUN", index=token.i)
 
 
-def test_mismatched_candidate_raises_instead_of_silently_returning_wrong_token():
-    text = "The baker needed more dough."
-    # Same index (4) as "dough" in the sentence above, but for a word that
-    # isn't actually there -- simulates a candidate from a different text.
-    bogus_candidate = CandidateWord(text="wallet", lemma="wallet", pos="NOUN", index=4)
+# fmt: off
+RULE_CASES = [
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("baker", "baker", "nsubj", 2),
+                ("needed", "need", "ROOT", 2), ("flour", "flour", "dobj", 2),
+                ("and", "and", "cc", 3), ("dough", "dough", "conj", 3)),
+        "dough", LocalContext(relation="dobj", predicate="need"),
+        id="conj: The baker needed flour and dough",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("baker", "baker", "nsubj", 2),
+                ("needed", "need", "ROOT", 2), ("flour", "flour", "dobj", 2),
+                (",", ",", "punct", 3), ("eggs", "egg", "conj", 3), (",", ",", "punct", 5),
+                ("and", "and", "cc", 5), ("dough", "dough", "conj", 5)),
+        "dough", LocalContext(relation="dobj", predicate="need"),
+        id="chained conj: The baker needed flour, eggs, and dough",
+    ),
+    pytest.param(
+        _parsed(("He", "he", "nsubj", 1), ("hid", "hide", "ROOT", 1), ("the", "the", "det", 3),
+                ("money", "money", "dobj", 1), ("in", "in", "prep", 1),
+                ("the", "the", "det", 6), ("dough", "dough", "pobj", 4)),
+        "dough", LocalContext(relation="prep_in", predicate="hide"),
+        id="pobj: He hid the money in the dough",
+    ),
+    pytest.param(
+        _parsed(("He", "he", "nsubj", 1), ("hid", "hide", "ROOT", 1), ("the", "the", "det", 3),
+                ("money", "money", "dobj", 1), ("in", "in", "prep", 1),
+                ("the", "the", "det", 6), ("flour", "flour", "pobj", 4),
+                ("and", "and", "cc", 6), ("dough", "dough", "conj", 6)),
+        "dough", LocalContext(relation="prep_in", predicate="hide"),
+        id="conj then pobj: He hid the money in the flour and dough",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 2),
+                ("was", "be", "ROOT", 2), ("ready", "ready", "acomp", 2)),
+        "batter", LocalContext(relation="nsubj", predicate="ready"),
+        id="copula: The batter was ready",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 2),
+                ("looked", "look", "ROOT", 2), ("runny", "runny", "acomp", 2)),
+        "batter", LocalContext(relation="nsubj", predicate="runny"),
+        id="copula-like verb: The batter looked runny",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 5),
+                ("and", "and", "cc", 1), ("the", "the", "det", 4), ("dough", "dough", "conj", 1),
+                ("were", "be", "ROOT", 5), ("ready", "ready", "acomp", 5)),
+        "dough", LocalContext(relation="nsubj", predicate="ready"),
+        id="conj then copula: The batter and the dough were ready",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 3),
+                ("was", "be", "aux", 3), ("swinging", "swing", "ROOT", 3)),
+        "batter", LocalContext(relation="nsubj", predicate="swing"),
+        id="auxiliary, not copula: The batter was swinging",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 2),
+                ("was", "be", "ROOT", 2), ("in", "in", "prep", 2), ("the", "the", "det", 5),
+                ("dugout", "dugout", "pobj", 3)),
+        "batter", LocalContext(relation="nsubj", predicate="be"),
+        id="copula without complement: The batter was in the dugout",
+    ),
+    pytest.param(
+        _parsed(("Run", "run", "ROOT", 0), ("!", "!", "punct", 0)),
+        "Run", LocalContext(relation="ROOT", predicate=None),
+        id="root has no predicate: Run!",
+    ),
+]
+# fmt: on
 
-    with pytest.raises(ValueError, match="does not match token"):
-        local_contexts(text, [bogus_candidate])
+
+@pytest.mark.parametrize(("doc", "word", "expected"), RULE_CASES)
+def test_local_context_rules(doc, word, expected):
+    assert local_contexts(doc, [_candidate(doc, word)]) == [expected]
 
 
-def test_batch_call_parses_once_for_multiple_candidates(monkeypatch):
-    import candidates as candidates_module
+@pytest.mark.parametrize(
+    ("text", "word", "expected"),
+    [
+        ("The baker needed more dough.", "dough", LocalContext(relation="dobj", predicate="need")),
+        ("The batter was ready.", "batter", LocalContext(relation="nsubj", predicate="ready")),
+    ],
+)
+def test_pinned_model_produces_the_shapes_the_rules_expect(text, word, expected):
+    doc = get_model()(text)
+    candidate = next(c for c in extract_candidates(doc) if c.text == word)
 
-    text = "The baker needed more dough."
-    candidates = extract_candidates(text)
+    assert local_contexts(doc, [candidate]) == [expected]
 
-    parse_count = 0
-    real_model = candidates_module.get_model()
-    original_call = type(real_model).__call__
 
-    def counting_call(self, *args, **kwargs):
-        nonlocal parse_count
-        parse_count += 1
-        return original_call(self, *args, **kwargs)
+def test_one_context_per_candidate_in_order():
+    doc = get_model()("The baker needed more dough.")
+    candidates = extract_candidates(doc)
 
-    monkeypatch.setattr(type(real_model), "__call__", counting_call)
+    contexts = local_contexts(doc, candidates)
 
-    local_contexts(text, candidates)
-
-    assert parse_count == 1
+    assert len(candidates) > 1
+    assert len(contexts) == len(candidates)
+    assert contexts[-1] == LocalContext(relation="dobj", predicate="need")
