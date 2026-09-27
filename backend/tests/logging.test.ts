@@ -112,7 +112,8 @@ test("Genkit's log level still applies with the JSON sink installed", () => {
 	assert.equal(onlyEntry().severity, "DEBUG");
 });
 
-test("an App Check rejection is one WARNING entry with the reason", async () => {
+// No stack trace: Error Reporting would count each rejection as an error.
+test("an App Check rejection is one WARNING entry with the reason and no stack", async () => {
 	const app = new Hono();
 	app.use(
 		"/api/*",
@@ -126,13 +127,11 @@ test("an App Check rejection is one WARNING entry with the reason", async () => 
 		headers: { "X-Firebase-AppCheck": "expired-token" },
 	});
 
-	const entry = onlyEntry();
-	assert.equal(entry.severity, "WARNING");
-	assert.equal(entry.message, "/api/chat rejected: invalid App Check token");
-	assert.equal(
-		entry["exception.message"],
-		"Firebase App Check token has expired.",
-	);
+	assert.deepEqual(onlyEntry(), {
+		severity: "WARNING",
+		message: "/api/chat rejected: invalid App Check token",
+		reason: "Firebase App Check token has expired.",
+	});
 });
 
 test("a failed /api/chat is one ERROR entry with the upstream detail and stack", async () => {

@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-26 13:45'
-updated_date: '2026-09-27 15:01'
+updated_date: '2026-09-27 15:06'
 labels: []
 dependencies: []
 references:
@@ -60,4 +60,6 @@ Revised (with Yai): the JSON sink is selected by an explicit LOG_FORMAT=json (st
 
 <!-- SECTION:NOTES:BEGIN -->
 Implemented backend/src/logging.ts (toLogLine + createJsonLogSink for Genkit's logger.init), LOG_FORMAT in config.ts, ENV LOG_FORMAT=json in backend/Dockerfile, install in app.ts; index.ts startup message now goes through logger.info. Tests: tests/logging.test.ts (severity per level, one line with stack, metadata can't spoof severity/message, per-field inspect fallback for circular/BigInt, level filtering, App Check and /api/chat paths end to end, and app.ts in a child process for both formats); LOG_FORMAT cases in tests/config.test.ts. 56/56 pass; mutation-checked the wiring test. Verified locally against real stdout: JSON mode prints one WARNING/INFO line per call, console mode unchanged, LOG_FORMAT=JSON refuses to start. Code review subagent done; acted on: wiring test, per-field fallback, type guard, comments. Not done (possible follow-up): Error Reporting ingestion (would need a stack_trace field). ACs #1-#3 still to confirm in the deployed service's Logs Explorer after merge.
+
+Error Reporting: per Google's docs it scans all jsonPayload fields for a stack trace at any severity (outside App Engine standard), so flow failures should reach it via exception.stacktrace with no stack_trace field. To keep App Check rejections (WARNINGs from junk tokens on the public URL) out of it, app-check.ts now logs {reason: err.message} instead of the Error, so no stack. Post-deploy check: flow failures appear in Error Reporting, App Check rejections don't.
 <!-- SECTION:NOTES:END -->
