@@ -6,6 +6,7 @@ import {
 	SearchCheckIcon,
 	XCircleIcon,
 } from "lucide-react";
+import { SyntaxHighlighter } from "@/components/assistant-ui/elements/lazy-shiki-highlighter";
 import { ToolFallback } from "@/components/assistant-ui/elements/tool-fallback.aui";
 import { CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { AnalyzePunArgs, AnalyzeResult } from "@/lib/chat/analyze-result";
@@ -28,7 +29,8 @@ const STATE_ICONS: Record<AnalyzePunCallSummary["state"], React.ElementType> = {
  * Opening it shows the analyzed text, Inference's explanation and the raw
  * `/analyze` response, for inspecting what Inference actually returned.
  * Reuses ToolFallback's collapsible parts, so it opens and closes like
- * every other tool call in the thread.
+ * every other tool call in the thread, and highlights the JSON like the
+ * reply's code blocks.
  */
 export const AnalyzePunToolUI: ToolCallMessagePartComponent<
 	AnalyzePunArgs,
@@ -91,7 +93,18 @@ export const AnalyzePunToolUI: ToolCallMessagePartComponent<
 						Words involved: {result.words_involved.join(", ")}
 					</p>
 				)}
-				<ToolFallback.Result result={result} />
+				{result && (
+					<div>
+						<p className="text-muted-foreground text-xs font-medium">
+							Inference response
+						</p>
+						<SyntaxHighlighter
+							language="json"
+							code={JSON.stringify(result, null, 2)}
+							className="mt-1 [&_pre]:rounded-md [&_pre]:border-t [&_pre]:p-2.5 [&_pre]:text-xs [&_pre]:whitespace-pre-wrap"
+						/>
+					</div>
+				)}
 			</ToolFallback.Content>
 		</ToolFallback.Root>
 	);

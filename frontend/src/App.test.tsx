@@ -106,9 +106,11 @@ describe("App", () => {
 			expect(
 				await screen.findByText(/its slang sense \(money\)/, { selector: "p" }),
 			).toBeInTheDocument();
-			expect(
-				await screen.findByText(/"sense_source": "wordnet"/),
-			).toBeInTheDocument();
+			// Highlighting splits the JSON into token spans, so check the block's text.
+			const response = await screen.findByText("Inference response");
+			expect(response.parentElement).toHaveTextContent(
+				'"sense_source": "wordnet"',
+			);
 		});
 
 		it("says Gemini supplied the senses for an llm_fallback result", async () => {
