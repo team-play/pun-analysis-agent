@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-27 15:47'
+updated_date: '2026-09-27 15:51'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -39,7 +39,7 @@ Per docs/engineering-practices.md's Phase 2 plan: implement the analyze_pun tool
 <!-- DOD:BEGIN -->
 - [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
 - [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
 ## Implementation Plan
