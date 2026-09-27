@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-27 16:08'
+updated_date: '2026-09-27 19:04'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -85,4 +85,6 @@ Validation (2026-09-27): backend pnpm test 95/95, tsc --noEmit + pnpm build clea
 Smoke test (2026-09-27, pnpm dev + real Gemini via curl, 'Are these puns? 1) ... banker ... interest. 2) The meeting starts at noon.'): PASS. Gemini made two parallel analyze_pun calls in one model turn (both chunks index 0), each in its own chunk, and supplied its own ids (call_56935, call_56938). The middleware kept them, and the single tool chunk returned both toolResponses with the matching refs. Gemini judged both texts itself from the undetermined results; result held the full reply; no error event. thoughtSignature metadata was forwarded on the first toolRequest part. Consequence: Backend-assigned refs are a fallback, not the normal path, so the path where Gemini receives ids it didn't issue is still unexercised against real Gemini. Middleware comment and contracts.md corrected; contract now also says a turn's toolRequest parts can span several chunks.
 
 AC #5 (Inference timeout set from a measured Cloud Run cold start, recorded in docs/contracts.md) moved to TASK-32 (2026-09-27, @yaisiel.torres), since it can't be measured until Inference is deployed (TASK-14). TASK-9 ships the named constant INFERENCE_TIMEOUT_MS with a provisional 20 s, marked unmeasured in contracts.md.
+
+Stacked on PR #50 (TASK-10), 2026-09-27: merged #50's branch in, keeping #50's contracts.md, engineering-practices.md and TASK-10 backlog file, since #50 carries this PR's final contract text plus its additions; then dropped #50's 'Backend side pending PR #47' notes. If #50 is squash-merged, merge main in with -X ours (rehearsed: no conflicts, identical tree). Ref uniqueness (required by #50's contract): decided with @yaisiel.torres to detect and log rather than rename, since Gemini pairs calls with results by its own ids; numberToolRequests logs a WARNING when a reply reuses a ref.
 <!-- SECTION:NOTES:END -->
