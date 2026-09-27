@@ -56,7 +56,7 @@ error: {"error": {"status": string, "message": string}}\n\n   instead of `result
 
 A body that ends without either a `result` or an `error:` event was cut off, and Frontend treats it as a failure. An event missing its closing `\n\n` counts as not received, as in SSE.
 
-The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool calls — see [`engineering-practices.md`](engineering-practices.md)). Phase 2 (the `analyze_pun` tool) adds Genkit chunks to that same stream. A chunk that carries a `toolRequest` or `toolResponse` part is sent as Genkit's own chunk object in the `message` field. Every other chunk stays a plain-text `message`, exactly as in Phase 1. **Status:** Frontend implements this (TASK-10); Backend implements it in TASK-9 ([PR #47](https://github.com/team-play/pun-analysis-agent/pull/47)), which deploys after Frontend. Until it does, `/api/chat` sends only the Phase 1 shape, and the Backend files and TASK-32 referenced below appear when it merges:
+The text-only stream shape above covers Phase 1 (plain Gemini proxy, no tool calls — see [`engineering-practices.md`](engineering-practices.md)). Phase 2 (the `analyze_pun` tool) adds Genkit chunks to that same stream. A chunk that carries a `toolRequest` or `toolResponse` part is sent as Genkit's own chunk object in the `message` field. Every other chunk stays a plain-text `message`, exactly as in Phase 1.:
 
 ```
 data: {"message": string}\n\n                        a piece of the reply, as in Phase 1
