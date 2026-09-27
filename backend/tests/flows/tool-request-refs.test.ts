@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { afterEach, mock, test } from "node:test";
+import { logger } from "genkit/logging";
 import type { GenerateRequestData, GenerateResponseData } from "genkit/model";
 import { numberToolRequests } from "../../src/flows/tool-request-refs.ts";
 
@@ -121,4 +122,48 @@ test("numbers a call whose ref is empty", async () => {
 	}));
 
 	assert.deepEqual(refsOf(numbered.message?.content ?? []), ["0", "1"]);
+});
+
+// Reused refs: Frontend fails a reply that reuses one, so each is logged.
+afterEach(() => mock.restoreAll());
+
+/** Runs one model turn of `middleware` that answers with `content`. */
+const turn = (
+	middleware: ReturnType<typeof numberToolRequests>,
+	content: ReturnType<typeof call>[],
+) =>
+	middleware(request, undefined, async () => ({
+		message: { role: "model", content },
+	}));
+const warnedRefs = (warn: ReturnType<typeof mock.method>) =>
+	warn.mock.calls.map(
+		(c) => (c.arguments[1] as { ref: string } | undefined)?.ref,
+	);
+
+test("warns when a later model turn reuses a ref Gemini gave an earlier call", async () => {
+	const warn = mock.method(logger, "warn", () => {});
+	const middleware = numberToolRequests();
+
+	await turn(middleware, [call("a", "call_1")]);
+	await turn(middleware, [call("b", "call_1")]);
+
+	assert.deepEqual(warnedRefs(warn), ["call_1"]);
+});
+
+test("warns when two calls in one model turn share a ref", async () => {
+	const warn = mock.method(logger, "warn", () => {});
+
+	await turn(numberToolRequests(), [call("a", "call_1"), call("b", "call_1")]);
+
+	assert.deepEqual(warnedRefs(warn), ["call_1"]);
+});
+
+test("stays quiet when every call in the reply has its own ref", async () => {
+	const warn = mock.method(logger, "warn", () => {});
+	const middleware = numberToolRequests();
+
+	await turn(middleware, [call("a", "call_1"), call("b"), call("c")]);
+	await turn(middleware, [call("d", "call_2"), call("e")]);
+
+	assert.equal(warn.mock.callCount(), 0);
 });

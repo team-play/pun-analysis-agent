@@ -1,3 +1,4 @@
+import { logger } from "genkit/logging";
 import type {
 	GenerateResponseData,
 	MessageData,
@@ -26,9 +27,17 @@ import type {
  * pieces (every piece but the last marked `partial`, then merged into one
  * call in the final message), so the pieces of one call share its ref. A
  * call that already has a ref keeps it and isn't counted.
+ *
+ * Refs must also be unique within the reply, since Frontend fails a reply
+ * that reuses one (docs/contracts.md). Gemini's own ids are passed on
+ * unchanged, because Gemini pairs its calls with their results by them, so
+ * that rests on Gemini's ids being unique; they come from what looks like a
+ * server-wide counter. A reuse is logged as a WARNING rather than renamed.
  */
 export function numberToolRequests(): ModelMiddlewareWithOptions {
 	let nextRef = 0;
+	// Every ref this reply's calls have had so far, to spot a reuse.
+	const seenRefs = new Set<string>();
 
 	return async (request, options, next) => {
 		const firstRef = nextRef;
@@ -65,9 +74,37 @@ export function numberToolRequests(): ModelMiddlewareWithOptions {
 			content: message.content.map(final.numberPart),
 		}));
 		nextRef = firstRef + Math.max(streamed.count(), final.count());
+		warnOnReusedRefs(messageOf(numbered), seenRefs);
 		return numbered;
 	};
 }
+
+/**
+ * Logs each call in a model turn's final message whose ref an earlier call
+ * in the reply already had, then records the turn's refs. The final
+ * message is checked, not the streamed chunks, whose pieces of one call
+ * rightly repeat its ref.
+ */
+function warnOnReusedRefs(
+	message: MessageData | undefined,
+	seenRefs: Set<string>,
+): void {
+	for (const part of message?.content ?? []) {
+		const ref = part.toolRequest?.ref;
+		if (ref === undefined) continue;
+		if (seenRefs.has(ref)) {
+			logger.warn(
+				"chat: two tool calls in one reply share a ref, so Frontend will fail the reply",
+				{ ref, tool: part.toolRequest?.name },
+			);
+		}
+		seenRefs.add(ref);
+	}
+}
+
+/** The model turn's message, in whichever form the model returned it. */
+const messageOf = (response: GenerateResponseData) =>
+	response.message ?? response.candidates?.[0]?.message;
 
 /**
  * `response` with its message replaced by `update(message)`. Models return
