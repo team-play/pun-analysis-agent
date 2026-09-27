@@ -36,6 +36,8 @@ X-Firebase-AppCheck: <Firebase App Check token>
 → streamed response (Genkit flow stream format)
 ```
 
+**Known limitation (Phase 2):** `content` is text only, so earlier turns' `analyze_pun` calls and results aren't resent, and Gemini sees only the text of earlier replies. TASK-35 extends the request to carry them.
+
 Every request must carry a Firebase App Check token for the `pun-agent` project in the `X-Firebase-AppCheck` header. It attests that the request comes from our Firebase-hosted app, so the public Cloud Run URL can't be used to spend the team's Gemini quota directly. Frontend gets tokens from the Firebase JS SDK (reCAPTCHA Enterprise in production, a registered debug token under `pnpm dev`; see [`local-setup.md`](local-setup.md)). Backend checks the header before the request reaches the flow (only CORS runs earlier) and answers a missing or invalid token with:
 
 ```

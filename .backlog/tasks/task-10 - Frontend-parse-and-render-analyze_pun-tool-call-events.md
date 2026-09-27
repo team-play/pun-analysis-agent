@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-27 18:40'
+updated_date: '2026-09-27 18:55'
 due_date: '2026-09-21'
 labels: []
 milestone: m-3
@@ -74,4 +74,6 @@ Running UI (stub, :5183): running, complete (pun/llm_fallback/undetermined/not-a
 Gemini returned 503 high demand for the model turn after the tool result on 4 tries; that recording is kept as recordedToolCallThenErrorStream; a complete reply was recorded once Gemini recovered.
 Bundle: Shiki eagerly added ~200 kB (65 kB gzip) to the main chunk; lazy-loaded it's +1.6 kB, with Shiki, its WASM and grammars in on-demand chunks.
 Found pre-existing on main: thread viewport height grows without bound after the 2nd exchange; spun off as a separate task.
+
+History resend (the PR #27 note above): deferred to TASK-35, since carrying tool calls in the request changes the /api/chat contract; recorded as a known limitation in docs/contracts.md.
 <!-- SECTION:NOTES:END -->
