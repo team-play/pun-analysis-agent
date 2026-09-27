@@ -121,7 +121,7 @@ def get_wiktionary_senses(candidate: CandidateWord) -> list[Sense]:
             rows = connection.execute(
                 "SELECT gloss FROM senses WHERE word = ? AND pos = ?", (candidate.lemma, pos)
             ).fetchall()
-    except sqlite3.OperationalError:
+    except sqlite3.DatabaseError:
         # Tier 2 is a fallback: degrade to "no extra senses", never a 500 --
         # but log it so a broken data file doesn't read as a coverage gap.
         logger.warning("Wiktionary lookup failed for %r", candidate.lemma, exc_info=True)

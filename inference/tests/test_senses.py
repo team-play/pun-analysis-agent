@@ -1,6 +1,4 @@
 import json
-import sqlite3
-import threading
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
@@ -114,21 +112,13 @@ def test_wordnet_covers_both_adjective_pos_tags():
 def test_wordnet_usable_from_another_thread_after_loading():
     # FastAPI runs sync endpoints on threadpool workers, so WordNet loaded on
     # one thread must still work on another (wn.config.allow_multithreading).
-    _get_wordnet()
     dough = CandidateWord(text="dough", lemma="dough", pos="NOUN", index=0)
-    errors = []
+    get_wordnet_senses(dough)
 
-    def worker():
-        try:
-            get_wordnet_senses(dough)
-        except sqlite3.ProgrammingError as e:
-            errors.append(e)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        senses_ = pool.submit(get_wordnet_senses, dough).result()
 
-    thread = threading.Thread(target=worker)
-    thread.start()
-    thread.join()
-
-    assert errors == []
+    assert len(senses_) > 1
 
 
 def test_sense_is_hashable():
@@ -183,6 +173,19 @@ def test_wiktionary_missing_file_returns_no_senses(tmp_path, monkeypatch, caplog
     assert "Wiktionary lookup failed" in caplog.text
 
 
+def test_wiktionary_corrupt_file_returns_no_senses(tmp_path, monkeypatch, caplog):
+    # e.g. a download that was never gunzipped: sqlite3 raises DatabaseError,
+    # the parent of the OperationalError a missing file raises.
+    db_path = tmp_path / "wiktionary.sqlite"
+    db_path.write_bytes(b"this is not a sqlite database" * 100)
+    monkeypatch.setattr(senses, "_WIKTIONARY_DB_PATH", db_path)
+    monkeypatch.setattr(senses, "_wiktionary", None)
+    rizz = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
+
+    assert get_wiktionary_senses(rizz) == []
+    assert "Wiktionary lookup failed" in caplog.text
+
+
 @pytest.mark.parametrize("folder", ["a#b", "c%20d"])
 def test_wiktionary_opens_paths_with_uri_special_characters(tmp_path, monkeypatch, folder):
     db_path = tmp_path / folder / "wiktionary.sqlite"
@@ -197,21 +200,11 @@ def test_wiktionary_opens_paths_with_uri_special_characters(tmp_path, monkeypatc
 def test_wiktionary_usable_from_another_thread_after_loading(wiktionary_db):
     rizz = CandidateWord(text="rizz", lemma="rizz", pos="NOUN", index=0)
     get_wiktionary_senses(rizz)
-    results = []
-    errors = []
 
-    def worker():
-        try:
-            results.append(get_wiktionary_senses(rizz))
-        except sqlite3.ProgrammingError as e:
-            errors.append(e)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        senses_ = pool.submit(get_wiktionary_senses, rizz).result()
 
-    thread = threading.Thread(target=worker)
-    thread.start()
-    thread.join()
-
-    assert errors == []
-    assert len(results[0]) == 1
+    assert len(senses_) == 1
 
 
 def test_get_candidate_senses_falls_back_only_when_wordnet_coverage_is_thin(

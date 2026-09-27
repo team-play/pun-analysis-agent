@@ -17,6 +17,7 @@ See [`docs/project-spec.md`](docs/project-spec.md) for the full spec (stack, arc
 
 ```bash
 cd inference && uv sync && uv run python -m wn download oewn:2025
+# plus sense selection's Wiktionary data: see docs/local-setup.md (Inference) for the download step
 cd backend && pnpm install
 cd frontend && pnpm install
 cd eval && uv sync
