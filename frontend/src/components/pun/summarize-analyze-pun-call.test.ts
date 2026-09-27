@@ -29,6 +29,12 @@ describe("summarizeAnalyzePunCall", () => {
 		});
 	});
 
+	it("says just 'Pun' when the pun's type is unknown", () => {
+		expect(
+			summarizeAnalyzePunCall(COMPLETE, { ...punResult, pun_type: null }),
+		).toMatchObject({ verdict: "Pun" });
+	});
+
 	it("shows a non-pun with its (low) pun probability", () => {
 		expect(summarizeAnalyzePunCall(COMPLETE, notAPunResult)).toMatchObject({
 			verdict: "Not a pun",

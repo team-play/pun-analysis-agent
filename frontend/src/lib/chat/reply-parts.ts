@@ -30,27 +30,39 @@ const appendText = (parts: ReplyParts, text: string): ReplyParts => {
 };
 
 /**
- * One tool-call part per call, identified by its `ref`, which Backend
- * guarantees is unique within the reply (docs/contracts.md). A call streamed
- * in pieces repeats its ref, so a known ref updates that call's arguments
- * instead of adding a second card.
+ * One tool-call part per call, identified by its `ref`, which pairs it with
+ * its result (docs/contracts.md). A call streamed in pieces repeats its ref,
+ * each piece carrying the input so far, so a ref still waiting for its
+ * result updates that call's arguments instead of adding a second card. A
+ * ref that already has its result can't be a piece of it, so it breaks the
+ * contract's rule that refs pair one call with one result.
  */
 const addToolCall = (parts: ReplyParts, request: ToolRequest): ReplyParts => {
+	// The first piece of a streamed call can come without input yet.
+	const args = (request.input ?? {}) as ToolCallMessagePart["args"];
 	const call: ToolCallMessagePart = {
 		type: "tool-call",
 		toolCallId: request.ref,
 		toolName: request.name,
-		args: request.input as ToolCallMessagePart["args"],
-		argsText: JSON.stringify(request.input),
+		args,
+		argsText: JSON.stringify(args),
 	};
 	const index = indexOfCall(parts, request.ref);
-	return index === -1 ? [...parts, call] : parts.with(index, call);
+	const existing = parts[index];
+	if (existing?.type !== "tool-call") return [...parts, call];
+	if (existing.result !== undefined) {
+		throw new Error(
+			`/api/chat reused the ref of an answered tool call (ref "${request.ref}").`,
+		);
+	}
+	return parts.with(index, call);
 };
 
 /**
  * Sets the result on the call with the same `ref`. Results of parallel calls
  * arrive in the order the calls finished, so position can't pair them. A
- * result for a call that never arrived breaks the contract's ordering rule.
+ * result for a call that never arrived, or a second result for one call,
+ * breaks the contract's pairing rule.
  */
 const setToolResult = (
 	parts: ReplyParts,
@@ -61,6 +73,11 @@ const setToolResult = (
 	if (call?.type !== "tool-call") {
 		throw new Error(
 			`/api/chat sent a toolResponse for an unknown call (ref "${response.ref}").`,
+		);
+	}
+	if (call.result !== undefined) {
+		throw new Error(
+			`/api/chat sent a second toolResponse for a call (ref "${response.ref}").`,
 		);
 	}
 	return parts.with(index, { ...call, result: response.output });

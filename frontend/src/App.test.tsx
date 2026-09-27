@@ -84,13 +84,19 @@ describe("App", () => {
 
 			await sendMessage("got a good pun for me?");
 
-			expect(
-				await screen.findByText(/let me take a look/i),
-			).toBeInTheDocument();
-			const card = await findCard(/Pun \(homographic\).*Pun probability 94%/);
-			expect(
-				await screen.findByText(/found one/i, {}, { timeout: 3000 }),
-			).toBeInTheDocument();
+			const preamble = await screen.findByText(/let me take a look/i);
+			const card = await findCard("Pun (homographic), Pun probability 94%");
+			const followUp = await screen.findByText(
+				/found one/i,
+				{},
+				{ timeout: 3000 },
+			);
+			expect(preamble.compareDocumentPosition(card)).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING,
+			);
+			expect(card.compareDocumentPosition(followUp)).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING,
+			);
 			// Collapsed: the explanation and the raw response wait for a click.
 			expect(card).toHaveAttribute("aria-expanded", "false");
 			expect(screen.queryByText(/"sense_source": "wordnet"/)).toBeNull();
@@ -101,12 +107,13 @@ describe("App", () => {
 			await screen.findByText("Got a pun for me?");
 			await sendMessage("got a good pun for me?");
 
-			fireEvent.click(await findCard(/Pun \(homographic\)/));
+			fireEvent.click(await findCard("Pun (homographic), Pun probability 94%"));
 
 			expect(
 				await screen.findByText(/its slang sense \(money\)/, { selector: "p" }),
 			).toBeInTheDocument();
-			// Highlighting splits the JSON into token spans, so check the block's text.
+			// Check the block's text: once highlighted, the JSON is split across
+			// token spans (lazy-shiki-highlighter.test.tsx checks the colors).
 			const response = await screen.findByText("Inference response");
 			expect(response.parentElement).toHaveTextContent(
 				'"sense_source": "wordnet"',
@@ -121,7 +128,7 @@ describe("App", () => {
 
 			expect(
 				await findCard(
-					/Pun \(homophonic\).*Senses supplied by Gemini, at lower confidence/,
+					"Pun (homophonic), Pun probability 81%, Senses supplied by Gemini, at lower confidence",
 				),
 			).toBeInTheDocument();
 		});
@@ -132,8 +139,10 @@ describe("App", () => {
 
 			await sendMessage("an undetermined one");
 
-			const card = await findCard(/Inference couldn't analyze this/);
-			expect(card).not.toHaveTextContent(/probability/i);
+			// The exact name rules out a confidence alongside it.
+			expect(
+				await findCard("Inference couldn't analyze this"),
+			).toBeInTheDocument();
 		});
 
 		it("stays running while the call is slow, and shows it cancelled when the user stops", async () => {
@@ -141,10 +150,10 @@ describe("App", () => {
 			await screen.findByText("Got a pun for me?");
 			await sendMessage("a slow pun");
 
-			await findCard(/Checking for a pun…/);
+			await findCard("Checking for a pun…");
 			fireEvent.click(screen.getByRole("button", { name: "Stop generating" }));
 
-			expect(await findCard(/Pun check cancelled/)).toBeInTheDocument();
+			expect(await findCard("Pun check cancelled")).toBeInTheDocument();
 		});
 
 		it("shows the call couldn't finish when the reply fails before its result, keeping the error box", async () => {
@@ -153,7 +162,7 @@ describe("App", () => {
 
 			await sendMessage("make the pun fail");
 
-			expect(await findCard(/Pun check couldn't finish/)).toBeInTheDocument();
+			expect(await findCard("Pun check couldn't finish")).toBeInTheDocument();
 			expect(await screen.findByText(/simulated failure/i)).toBeInTheDocument();
 		});
 	});

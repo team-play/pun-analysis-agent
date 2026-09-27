@@ -170,6 +170,44 @@ describe("applyMessage", () => {
 		expect(before[0]).not.toHaveProperty("result");
 	});
 
+	it("gives a call without input yet empty args, so the card can render it", () => {
+		const parts = applyAll([
+			{
+				role: "model",
+				content: [
+					{ toolRequest: { name: "analyze_pun", input: undefined, ref: "0" } },
+				],
+			},
+		]);
+
+		expect(parts[0]).toMatchObject({ args: {}, argsText: "{}" });
+	});
+
+	it("throws on a toolRequest reusing the ref of an answered call, rather than resetting its card", () => {
+		const answered = applyAll([
+			toolRequests({ ref: "call_1", text: "a" }),
+			toolResponses({ ref: "call_1", output: punResult }),
+		]);
+
+		expect(() =>
+			applyMessage(answered, toolRequests({ ref: "call_1", text: "b" })),
+		).toThrow(/reused the ref of an answered tool call \(ref "call_1"\)/);
+	});
+
+	it("throws on a second result for a call, rather than replacing the first", () => {
+		const answered = applyAll([
+			toolRequests({ ref: "call_1", text: "a" }),
+			toolResponses({ ref: "call_1", output: punResult }),
+		]);
+
+		expect(() =>
+			applyMessage(
+				answered,
+				toolResponses({ ref: "call_1", output: notAPunResult }),
+			),
+		).toThrow(/second toolResponse for a call \(ref "call_1"\)/);
+	});
+
 	it("throws on a result for a call that never arrived", () => {
 		expect(() =>
 			applyAll([toolResponses({ ref: "call_x", output: punResult })]),

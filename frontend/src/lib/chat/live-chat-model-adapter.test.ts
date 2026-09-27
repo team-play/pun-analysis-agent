@@ -562,6 +562,22 @@ describe("createLiveChatModelAdapter with analyze_pun tool calls", () => {
 		]);
 	});
 
+	it("keeps the text it streamed, not the result's, since the contract makes them the same", async () => {
+		// docs/contracts.md: `result` repeats the streamed reply text, so the
+		// adapter never re-reads it; a different `result` isn't shown.
+		mockFetch(
+			new Response(
+				event({ message: "Streamed text." }) +
+					event({ result: "Something else." }),
+			),
+		);
+
+		const { contents, error } = await contentsOf(run([message("user", "hi")]));
+
+		expect(error).toBeUndefined();
+		expect(contents.at(-1)).toEqual([{ type: "text", text: "Streamed text." }]);
+	});
+
 	describe("when the turn ends right after a toolRequest", () => {
 		const afterRequest = toolRequestEvent("0", "I lost interest.");
 

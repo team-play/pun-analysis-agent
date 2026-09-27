@@ -19,8 +19,9 @@ export const SLOW_TOOL_CALL_MS = 30_000;
 
 /**
  * What the stub replays, picked by the first trigger phrase the last user
- * message contains (case-insensitively), so every state the UI renders is
- * reachable by hand. Order matters: "not a pun" must win over "pun".
+ * message contains as whole words (case-insensitively, so "spun" isn't
+ * "pun"), so every state the UI renders is reachable by hand. Order
+ * matters: "not a pun" must win over "pun".
  */
 type StubScenario = {
 	trigger: string;
@@ -81,8 +82,9 @@ export const createStubChatModelAdapter = (): ChatModelAdapter => ({
 	async *run({ messages, abortSignal }: ChatModelRunOptions) {
 		const text = lastUserText(messages).toLowerCase();
 		const scenario =
-			SCENARIOS.find(({ trigger }) => text.includes(trigger)) ??
-			DEFAULT_SCENARIO;
+			SCENARIOS.find(({ trigger }) =>
+				new RegExp(`\\b${trigger}\\b`).test(text),
+			) ?? DEFAULT_SCENARIO;
 		const { fixture, slowStep, failAfterSteps } = scenario;
 
 		for (const [step, content] of fixture.slice(0, failAfterSteps).entries()) {

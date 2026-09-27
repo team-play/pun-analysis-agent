@@ -129,6 +129,19 @@ describe("parseGenkitFlowStream", () => {
 		["a message object without content", '{"message":{"role":"model"}}'],
 		["a message that is neither text nor a chunk", '{"message":42}'],
 		["a result that isn't text", '{"result":{"text":"hi"}}'],
+		["a null message", '{"message":null}'],
+		[
+			"a message whose content isn't a list",
+			'{"message":{"role":"model","content":"hi"}}',
+		],
+		[
+			"a toolRequest without a ref, which would merge parallel calls",
+			'{"message":{"role":"model","content":[{"toolRequest":{"name":"analyze_pun","input":{"text":"a"}}}]}}',
+		],
+		[
+			"a toolResponse without a ref",
+			'{"message":{"role":"tool","content":[{"toolResponse":{"name":"analyze_pun","output":{}}}]}}',
+		],
 	])("throws on %s rather than rendering it", async (_, payload) => {
 		const body = byteStreamOf([utf8(`data: ${payload}\n\n`)]);
 		await expect(collect(body)).rejects.toThrow(/Unrecognized/);

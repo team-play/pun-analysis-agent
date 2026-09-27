@@ -1,7 +1,10 @@
 import type { ChatModelRunOptions, ThreadMessage } from "@assistant-ui/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { notAPunResult } from "./fixtures/analyze-results";
-import { createStubChatModelAdapter } from "./stub-chat-model-adapter";
+import {
+	createStubChatModelAdapter,
+	SLOW_TOOL_CALL_MS,
+} from "./stub-chat-model-adapter";
 
 type Step = { content: readonly { type: string; result?: unknown }[] };
 
@@ -117,6 +120,52 @@ describe("createStubChatModelAdapter", () => {
 			?.content.find((part) => part.type === "tool-call");
 		expect(call).toBeDefined();
 		expect(call?.result).toBeUndefined();
+	});
+
+	it("matches triggers as whole words, so 'spun' gets the plain-text reply", async () => {
+		const adapter = createStubChatModelAdapter();
+		const results = await collect(
+			adapter.run(
+				runOptions([userMessage("I spun around")]),
+			) as AsyncGenerator<Step>,
+		);
+
+		expect(
+			results.every((step) =>
+				step.content.every((part) => part.type === "text"),
+			),
+		).toBe(true);
+	});
+
+	it("keeps the call running for SLOW_TOOL_CALL_MS when the message mentions 'slow'", async () => {
+		vi.useFakeTimers();
+		try {
+			const adapter = createStubChatModelAdapter();
+			const gen = adapter.run(
+				runOptions([userMessage("a slow pun")]),
+			) as AsyncGenerator<Step>;
+			const callOf = (step: Step | undefined) =>
+				step?.content.find((part) => part.type === "tool-call");
+
+			const preamble = gen.next();
+			await vi.advanceTimersByTimeAsync(100);
+			await preamble;
+			const running = gen.next();
+			await vi.advanceTimersByTimeAsync(100);
+			expect(callOf((await running).value)?.result).toBeUndefined();
+
+			let settled = false;
+			const completed = gen.next().then((step) => {
+				settled = true;
+				return step;
+			});
+			await vi.advanceTimersByTimeAsync(SLOW_TOOL_CALL_MS - 1_000);
+			expect(settled).toBe(false);
+			await vi.advanceTimersByTimeAsync(1_000);
+			expect(callOf((await completed).value)?.result).toBeDefined();
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it("stops yielding once the abort signal fires", async () => {

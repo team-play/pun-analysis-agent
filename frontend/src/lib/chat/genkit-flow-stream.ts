@@ -26,17 +26,34 @@ export type GenkitFlowEvent =
 	| { message: string | GenkitChunk }
 	| { result: string };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null;
+
+/**
+ * A tool part must name its tool and carry the `ref` that pairs a call with
+ * its result (docs/contracts.md); without it, parallel calls would merge.
+ */
+const isValidPart = (part: unknown): boolean => {
+	if (!isRecord(part)) return false;
+	const tool = part.toolRequest ?? part.toolResponse;
+	if (tool === undefined) return true;
+	return (
+		isRecord(tool) &&
+		typeof tool.name === "string" &&
+		typeof tool.ref === "string"
+	);
+};
+
 const isFlowEvent = (event: unknown): event is GenkitFlowEvent => {
-	if (typeof event !== "object" || event === null) return false;
+	if (!isRecord(event)) return false;
 	if ("result" in event) return typeof event.result === "string";
 	if (!("message" in event)) return false;
 	const { message } = event;
 	return (
 		typeof message === "string" ||
-		(typeof message === "object" &&
-			message !== null &&
-			"content" in message &&
-			Array.isArray(message.content))
+		(isRecord(message) &&
+			Array.isArray(message.content) &&
+			message.content.every(isValidPart))
 	);
 };
 

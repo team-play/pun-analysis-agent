@@ -3,6 +3,7 @@ import {
 	BanIcon,
 	ChevronDownIcon,
 	LoaderIcon,
+	type LucideIcon,
 	SearchCheckIcon,
 	XCircleIcon,
 } from "lucide-react";
@@ -16,7 +17,7 @@ import {
 	summarizeAnalyzePunCall,
 } from "./summarize-analyze-pun-call";
 
-const STATE_ICONS: Record<AnalyzePunCallSummary["state"], React.ElementType> = {
+const STATE_ICONS: Record<AnalyzePunCallSummary["state"], LucideIcon> = {
 	running: LoaderIcon,
 	complete: SearchCheckIcon,
 	failed: XCircleIcon,
@@ -38,14 +39,22 @@ export const AnalyzePunToolUI: ToolCallMessagePartComponent<
 > = ({ args, result, status }) => {
 	const summary = summarizeAnalyzePunCall(status, result);
 	const Icon = STATE_ICONS[summary.state];
+	// One readable name for screen readers; the visible spans would run
+	// together ("Pun (homographic)Pun probability 94%").
+	const label = [summary.verdict, summary.confidence, summary.note]
+		.filter(Boolean)
+		.join(", ");
 
 	return (
 		<ToolFallback.Root
 			data-slot="analyze-pun"
-			data-state={summary.state}
+			data-call-state={summary.state}
 			className="border-border border-l-primary bg-muted/40 my-2 rounded-lg border border-l-4 px-3"
 		>
-			<CollapsibleTrigger className="group/trigger flex w-full items-center gap-2 py-2 text-start text-sm">
+			<CollapsibleTrigger
+				aria-label={label}
+				className="group/trigger flex w-full items-center gap-2 py-2 text-start text-sm"
+			>
 				<Icon
 					aria-hidden
 					className={cn(
