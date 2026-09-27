@@ -1,11 +1,11 @@
 ---
 id: TASK-31.2
 title: 'Frontend: thinking-otter loading animation with rotating phrases'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-09-27 15:02'
-updated_date: '2026-09-27 15:38'
+updated_date: '2026-09-27 15:51'
 labels: []
 milestone: m-5
 dependencies: []
@@ -65,3 +65,9 @@ Code review (subagent): no correctness bugs. Applied: moved the rotating phrase 
 Known limitation: a live region inserted already containing text is not announced reliably by every screen reader; left as-is (the old dot announced nothing), flagged to the user.
 Docs drift: README/project-spec/local-setup/AGENTS.md don't describe the indicator; no update needed. No architectural review needed (no contract, topology, dependency or service change).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Replaced the thread's pulsing-dot indicator with ThinkingOtto: a pixel-art Otto sprite (string-grid constants -> inline SVG, one path per colour, steps(1) Tailwind v4 animations for bob, blink, chin-rub and thought dots, motion-reduce opt-out on every part) next to a phrase from OTTO_THINKING_PHRASES that shows immediately, rotates every 2s without back-to-back repeats, and clears its interval on unmount. Screen readers get only a stable 'Otto is thinking' role=status label; sprite and phrase are aria-hidden outside the live region. Verified with frontend lint, 76/76 Vitest (fake timers; mutation-checked no-repeat and cleanup), tsc -b, and a browser check in light/dark at desktop and 375px. PR team-play/pun-analysis-agent#46.
+<!-- SECTION:FINAL_SUMMARY:END -->
