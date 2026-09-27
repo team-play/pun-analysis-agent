@@ -75,11 +75,14 @@ export function createChatFlow(
 			outputSchema: z.string(),
 			streamSchema: chatStreamChunkSchema,
 		},
-		async (input, { sendChunk }) => {
+		async (input, { sendChunk, abortSignal }) => {
 			const { stream, response } = ai.generateStream({
 				model,
 				messages: toGenkitMessages(input.messages),
 				tools,
+				// The request's signal (routes/chat.ts): when the user stops or
+				// leaves, no further model turns go to Gemini.
+				abortSignal,
 				// Per reply, so refs are unique across all of the reply's tool calls.
 				use: [numberToolRequests()],
 			});

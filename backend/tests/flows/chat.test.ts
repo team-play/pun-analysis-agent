@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
 import { genkit } from "genkit";
-import type { AnalyzeResult } from "../../src/tools/analyze-pun.ts";
+import { createChatFlow } from "../../src/flows/chat.ts";
+import {
+	type AnalyzeResult,
+	createAnalyzePunTool,
+} from "../../src/tools/analyze-pun.ts";
 import { PUN_ANALYZE_RESULT } from "../fixtures/analyze-results.ts";
 import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.ts";
 
@@ -261,4 +265,54 @@ test("chatFlow keeps refs unique across a reply's model turns", async () => {
 			.filter(Boolean),
 		["0", "0", "1", "1"],
 	);
+});
+
+// When the user stops a reply, the tool loop must stop too: every model
+// turn after that would still be a Gemini call nobody reads (AGENTS.md's
+// Performance section).
+test("chatFlow sends no further model requests once the reply is aborted", async () => {
+	const ai = genkit({});
+	let modelRequestsSent = 0;
+	// Like the Gemini plugin, which hands the signal to its HTTP request:
+	// an aborted signal means the request is never sent.
+	const model = ai.defineModel(
+		{ name: "abortAwareModel", apiVersion: "v2", supports: { tools: true } },
+		async (request, { sendChunk, abortSignal }) => {
+			abortSignal?.throwIfAborted();
+			modelRequestsSent++;
+			if (request.messages.at(-1)?.role === "tool") {
+				return { message: { role: "model", content: [{ text: "Done." }] } };
+			}
+			sendChunk({ content: [{ toolRequest }] });
+			return { message: { role: "model", content: [{ toolRequest }] } };
+		},
+	);
+	const controller = new AbortController();
+	const { promise: stopped, resolve: stop } = Promise.withResolvers<void>();
+	// Inference answers only after the user has stopped, so the next model
+	// turn would start after the abort.
+	const analyzePun = createAnalyzePunTool(ai, {
+		fetch: async () => {
+			await stopped;
+			return Response.json(PUN_ANALYZE_RESULT);
+		},
+		inferenceUrl: "http://inference.test",
+	});
+	const flow = createChatFlow(ai, model, [analyzePun]);
+
+	const { stream, output } = flow.stream(
+		{ messages: [{ role: "user", content: "Is 'I lost interest' a pun?" }] },
+		{ abortSignal: controller.signal },
+	);
+	output.catch(() => {}); // Rejects with the abort; asserted via the stream.
+	await assert.rejects(async () => {
+		for await (const chunk of stream) {
+			if (typeof chunk !== "string") {
+				controller.abort();
+				stop();
+			}
+		}
+	});
+
+	assert.equal(modelRequestsSent, 1);
 });
