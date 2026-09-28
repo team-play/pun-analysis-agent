@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-28 16:31'
-updated_date: '2026-09-28 19:15'
+updated_date: '2026-09-28 19:17'
 labels: []
 dependencies:
   - TASK-42
@@ -75,4 +75,6 @@ Agreed with the user on 2026-09-28, after TASK-43's handoff notes: TASK-44 lands
 2026-09-28: Implemented per plan; code + architectural reviews done and their no-decision findings fixed. Open decisions (discussed with the user, not yet settled): (A) BASELINE_REPLY_WORST_CASE_MS counts one stall limit per model call, but MAX_SILENCE_MS also counts a call's tail after its last chunk; counting it at today's values gives 280 s and a 0 s retry budget. Leading option: MAX_TOOL_ROUNDS = 2 (the legitimate maximum under the TASK-31.1 prompt: analyze a text, then write and analyze one example), giving a 130 s baseline and a 150 s budget at Cloud Run's 300 s. (B) A CI check that a change's new silence fits under main's FRONTEND_SILENCE_LIMIT_MS: recommended for TASK-28, once Frontend enforces the limit. For TASK-43: its retry test must add its longest backoff wait to 'one retry' in packages/timeouts/tests/relationships.test.js, plus a test that the wait fits within the stall limit.
 
 2026-09-28: Decision (A) settled with the user: MAX_TOOL_ROUNDS = 2, and BASELINE_REPLY_WORST_CASE_MS counts each model call's tail (2 x stall limit per call), consistent with MAX_SILENCE_MS. Baseline 130 s, RETRY_BUDGET_MS 150 s at Cloud Run's 300 s (TASK-43 planned 90 s; it's derived, so TASK-43 gets 150 s by importing it). system-instruction.ts and the module now point at each other: a prompt change that chains more analyze_pun calls must raise MAX_TOOL_ROUNDS. (B) stays open, recommended for TASK-28.
+
+2026-09-28: At the user's request (to be conservative about slow first chunks), MODEL_STALL_LIMIT_MS is back to 30 s. The relationship tests then required FRONTEND_SILENCE_LIMIT_MS >= 50 + 10 + 15 = 75 s, so it's now 75 s (safe in one change: TASK-28 hasn't built the limit yet). Baseline 220 s, RETRY_BUDGET_MS 60 s (still >= one 30 s retry). Decision (B) moved to TASK-28 as AC #5, along with importing FRONTEND_SILENCE_LIMIT_MS (AC #1).
 <!-- SECTION:NOTES:END -->
