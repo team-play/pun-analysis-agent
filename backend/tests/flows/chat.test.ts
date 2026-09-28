@@ -667,11 +667,12 @@ async function countCallsOfEndlessToolUse(maxToolRounds?: number) {
 	return { modelCalls, inferenceCalls };
 }
 
-// A limit other than Genkit's own default of 5 shows the flow passes it on.
+// A limit other than both Genkit's default (5) and MAX_TOOL_ROUNDS shows
+// the flow passes on the one it's given.
 test("chatFlow stops a reply after maxToolRounds rounds of tool calls", async () => {
-	assert.deepEqual(await countCallsOfEndlessToolUse(2), {
-		modelCalls: 3,
-		inferenceCalls: 2,
+	assert.deepEqual(await countCallsOfEndlessToolUse(1), {
+		modelCalls: 2,
+		inferenceCalls: 1,
 	});
 });
 

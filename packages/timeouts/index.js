@@ -52,10 +52,18 @@ export const APP_CHECK_TIMEOUT_MS = 10_000;
 
 /**
  * The most rounds of tool calls in one reply: Backend's chat flow passes it
- * to Genkit as maxTurns. 5 is Genkit's own default, made explicit so a
- * Genkit upgrade can't change the worst case below unnoticed.
+ * to Genkit as maxTurns, and a reply whose model asks for one more round
+ * fails with ABORTED. Parallel calls share a round, so this counts calls
+ * that wait on an earlier call's result, not texts.
+ *
+ * 2 is the most a reply needs under Backend's system instruction
+ * (backend/src/flows/system-instruction.ts): analyze the user's text, then
+ * write one example pun and analyze that. A third round means the model is
+ * looping. It's set this tight to keep the worst case below within Cloud
+ * Run's timeout (Genkit's default of 5 didn't fit), so a prompt change that
+ * lets a reply chain more calls must raise it, and re-check the tests.
  */
-export const MAX_TOOL_ROUNDS = 5;
+export const MAX_TOOL_ROUNDS = 2;
 
 /**
  * Cloud Run's request timeout for Backend: every /api/chat reply, however
@@ -91,14 +99,16 @@ export const FRONTEND_SILENCE_MARGIN_MS = 15_000;
 export const FRONTEND_SILENCE_LIMIT_MS = 60_000;
 
 /**
- * The longest a reply can spend waiting, not counting retries: every model call
- * (one per tool round, plus the one after the last round) sitting out the
- * stall limit, and every tool round waiting out the Inference timeout. Time
- * the model spends actually streaming isn't bounded by anything but Cloud
- * Run's timeout.
+ * The longest a reply can spend waiting, not counting retries: every model
+ * call (one per tool round, plus the one after the last round) silent for
+ * up to the stall limit twice, before its first chunk and after its last,
+ * and every tool round waiting out the Inference timeout. The second stall
+ * limit is the same call tail MAX_SILENCE_MS counts. Time the model spends
+ * streaming isn't bounded by anything but Cloud Run's timeout: a call that
+ * sends a chunk just inside the stall limit never stalls.
  */
 export const BASELINE_REPLY_WORST_CASE_MS =
-	(MAX_TOOL_ROUNDS + 1) * MODEL_STALL_LIMIT_MS +
+	(MAX_TOOL_ROUNDS + 1) * 2 * MODEL_STALL_LIMIT_MS +
 	MAX_TOOL_ROUNDS * INFERENCE_TIMEOUT_MS;
 
 /** What a reply's worst case keeps free below Cloud Run's timeout. */

@@ -20,6 +20,10 @@ export const PERSONA =
  * What Otto does and doesn't do. TASK-12 owns this scope. Otto teaches: he
  * may write one example pun to explain something, always analyzed with
  * analyze_pun, but doesn't produce puns in bulk (decided in TASK-31.1).
+ * With ANALYZE_PUN_RULE, that caps a reply at two rounds of tool calls
+ * (the user's text, then the example), which MAX_TOOL_ROUNDS in
+ * @pun-agent/timeouts enforces: a change here that lets a reply chain more
+ * analyze_pun calls must raise it.
  */
 export const PURPOSE =
 	"You help people find out whether a piece of text is a pun, what kind of " +
