@@ -57,22 +57,30 @@ export const APP_CHECK_TIMEOUT_MS = 10_000;
  * fails with ABORTED. Parallel calls share a round, so this counts calls
  * that wait on an earlier call's result, not texts.
  *
- * 2 is the most a reply needs under Backend's system instruction
- * (backend/src/flows/system-instruction.ts): analyze the user's text, then
- * write one example pun and analyze that. A third round means the model is
- * looping. It's set this tight to keep the worst case below within Cloud
- * Run's timeout (Genkit's default of 5 didn't fit), so a prompt change that
- * lets a reply chain more calls must raise it, and re-check the tests.
+ * Under Backend's system instruction (backend/src/flows/system-instruction.ts)
+ * a reply needs 2: analyze the user's text(s), then write one example pun and
+ * analyze that. 3 leaves one round spare, because the instruction asks for
+ * one call per text but not for all of them in the same round, so Gemini
+ * may analyze two texts one after the other before its example. More than
+ * that means the model is looping. Genkit's default of 5 is too many to fit
+ * the worst case below within Cloud Run's timeout, so a prompt change that
+ * lets a reply chain more calls must raise this, and re-check the tests.
  */
-export const MAX_TOOL_ROUNDS = 2;
+export const MAX_TOOL_ROUNDS = 3;
 
 /**
  * Cloud Run's request timeout for Backend: every /api/chat reply, however
  * it's going, is cut off here. deploy-backend.yml passes it to
  * `gcloud run deploy --timeout`, so it must be a whole number of seconds,
- * at most Cloud Run's 3600 s. 300 s is Cloud Run's default.
+ * at most Cloud Run's 3600 s.
+ *
+ * 400 s, above Cloud Run's 300 s default, to fit a reply's worst case with
+ * a 30 s stall limit and 3 tool rounds (TASK-44). Raising it is the way to
+ * make room when the worst case grows (a longer stall limit, more rounds):
+ * it only lets a reply run longer, which the stall guard already cuts
+ * short if the reply goes silent, and it's safe to change in one deploy.
  */
-export const CLOUD_RUN_REQUEST_TIMEOUT_MS = 300_000;
+export const CLOUD_RUN_REQUEST_TIMEOUT_MS = 400_000;
 
 /**
  * Once Backend has started a reply, the longest it goes without sending an

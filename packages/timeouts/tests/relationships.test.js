@@ -5,10 +5,12 @@ import * as timeouts from "../index.js";
 
 const {
 	APP_CHECK_TIMEOUT_MS,
+	BASELINE_REPLY_WORST_CASE_MS,
 	CLOUD_RUN_REQUEST_TIMEOUT_MS,
 	FRONTEND_SILENCE_LIMIT_MS,
 	FRONTEND_SILENCE_MARGIN_MS,
 	MAX_SILENCE_MS,
+	MAX_TOOL_ROUNDS,
 	MODEL_STALL_LIMIT_MS,
 	RETRY_BUDGET_MS,
 } = timeouts;
@@ -31,9 +33,12 @@ test("Frontend's silence limit covers Backend's maximum silence, the App Check w
 // longer fits, e.g. after raising the stall limit, the Inference timeout or
 // the number of tool rounds.
 test("a reply's retry budget fits at least one retry within Cloud Run's timeout", () => {
-	// One retry is one more model call, which can sit out the stall limit.
-	// TASK-43 adds its longest backoff wait here, and a test that the wait
-	// fits within the stall limit (so its keepalives keep MAX_SILENCE_MS).
+	// A failed attempt costs at most one stall limit, not the two per call
+	// the baseline counts: TASK-43 only retries a call that failed before
+	// its first chunk. The attempt that replaces it is already in the
+	// baseline. TASK-43 adds its longest backoff wait here, and a test that
+	// the wait fits within the stall limit (so its keepalives keep
+	// MAX_SILENCE_MS).
 	const oneRetry = MODEL_STALL_LIMIT_MS;
 	assert.ok(
 		RETRY_BUDGET_MS >= oneRetry,
@@ -41,6 +46,19 @@ test("a reply's retry budget fits at least one retry within Cloud Run's timeout"
 			`(${oneRetry} ms): the reply's worst case leaves no room to retry ` +
 			`within Cloud Run's ${CLOUD_RUN_REQUEST_TIMEOUT_MS} ms timeout`,
 	);
+});
+
+// The same worst case as BASELINE_REPLY_WORST_CASE_MS, walked through as
+// the gaps between a slow reply's events instead: each model call waits up
+// to the stall limit for its first chunk, each tool round adds one maximum
+// silence (the call's tail, then Inference), and the last call adds its
+// tail. Catches the baseline losing a term, such as the calls' tails.
+test("the baseline worst case matches a reply walked through gap by gap", () => {
+	const slowestReply =
+		(MAX_TOOL_ROUNDS + 1) * MODEL_STALL_LIMIT_MS +
+		MAX_TOOL_ROUNDS * MAX_SILENCE_MS +
+		MODEL_STALL_LIMIT_MS;
+	assert.equal(BASELINE_REPLY_WORST_CASE_MS, slowestReply);
 });
 
 test("Cloud Run's request timeout is one gcloud accepts: whole seconds, at most 3600", () => {
