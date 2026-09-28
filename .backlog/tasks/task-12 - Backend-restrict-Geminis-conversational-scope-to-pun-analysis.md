@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-17 23:34'
-updated_date: '2026-09-28 11:17'
+updated_date: '2026-09-28 11:25'
 due_date: '2026-09-21'
 labels: []
 milestone: m-5
@@ -72,4 +72,6 @@ Live spot-check, 2026-09-28, local Backend, APP_CHECK=off, gemini-flash-lite-lat
 - Bare "Time flies like an arrow; fruit flies like a banana.": 1 call, analyzed.
 - The first wording of the redirect rule got copied almost verbatim ("I only analyze puns, and invite you to share..."), so it was reworded to describe the behavior rather than offer a quotable phrase.
 - Observation, outside this task's scope: for the banker pun, Gemini (judging alone because of the fixture) called it "homophonic" while describing a homographic pun (one word, two senses).
+
+Merged main after TASK-35 (1 of 2) landed: /api/chat history now carries earlier analyze_pun calls and results. The follow-up rule now says to answer from the conversation so far, including the analyze_pun results already in it (not only from what Gemini already wrote, as the description assumed). The system-message drop runs before TASK-35's parts handling. TASK-35's flow and route tests compared exact message lists, so they now compare the conversation after the system instruction. Live re-check 2026-09-28 (gemini-flash-lite-latest): the banker pun's follow-up "Can you explain that again, more simply?", with the earlier call and result as parts, made 0 analyze_pun calls and was answered correctly. 118/118 Backend tests pass.
 <!-- SECTION:NOTES:END -->

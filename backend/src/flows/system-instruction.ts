@@ -27,5 +27,6 @@ export const SYSTEM_INSTRUCTION = [
 		"answer. If they give several texts, call it once for each. Don't call " +
 		"it again for a text you've already analyzed in this conversation: " +
 		'answer follow-up questions about it (such as "explain that again" or ' +
-		'"which word was it?") from what you have already said.',
+		'"which word was it?") from the conversation so far, including the ' +
+		"analyze_pun results already in it.",
 ].join("\n\n");
