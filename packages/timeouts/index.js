@@ -34,14 +34,15 @@ export const INFERENCE_TIMEOUT_MS = 20_000;
  * wait on Inference never counts against it: tools run between model calls,
  * so INFERENCE_TIMEOUT_MS bounds that wait instead.
  *
- * Provisional and unmeasured: 15 s is a guess meant to sit above a normal
- * Flash-Lite time to first chunk while ending a stall long before Cloud
- * Run's request timeout would. It was halved from a first guess of 30 s to leave
- * room for TASK-43's retries within Cloud Run's timeout (see
- * RETRY_BUDGET_MS); the cost is less room for a slow first chunk, which
- * would fail a healthy reply as a stall. TASK-32 measures it.
+ * Provisional and unmeasured: 30 s is a conservative guess, well above a
+ * normal Flash-Lite time to first chunk, since a limit that's too short
+ * fails healthy replies whose first chunk is slow. It was briefly halved to
+ * 15 s to leave room for TASK-43's retries within Cloud Run's timeout, then
+ * restored once capping MAX_TOOL_ROUNDS at 2 made that room (TASK-44). The
+ * cost is a smaller RETRY_BUDGET_MS and a longer MAX_SILENCE_MS for
+ * Frontend to wait out. TASK-32 measures it.
  */
-export const MODEL_STALL_LIMIT_MS = 15_000;
+export const MODEL_STALL_LIMIT_MS = 30_000;
 
 /**
  * How long Frontend waits for an App Check token. Normally it's cached, but
@@ -96,7 +97,7 @@ export const FRONTEND_SILENCE_MARGIN_MS = 15_000;
  * that lengthening Backend's silence without raising this fails
  * tests/relationships.test.js instead of quietly moving Frontend's limit.
  */
-export const FRONTEND_SILENCE_LIMIT_MS = 60_000;
+export const FRONTEND_SILENCE_LIMIT_MS = 75_000;
 
 /**
  * The longest a reply can spend waiting, not counting retries: every model
