@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, mock, test } from "node:test";
+import { MAX_TOOL_ROUNDS } from "@pun-agent/timeouts";
 import { GenkitError, genkit } from "genkit";
 import { logger } from "genkit/logging";
 import { createChatFlow } from "../../src/flows/chat.ts";
@@ -634,4 +635,49 @@ test("chatFlow aborts a stalled model call's own request", {
 
 	await assert.rejects(flow({ messages: [{ role: "user", content: "Hi" }] }));
 	await modelAborted;
+});
+
+// Each tool round is followed by one more model call, so a reply makes at
+// most maxToolRounds + 1 model calls and maxToolRounds rounds of Inference
+// calls: the counts @pun-agent/timeouts' BASELINE_REPLY_WORST_CASE_MS is
+// built on. Runs a reply whose model calls analyze_pun every time, and
+// counts both.
+async function countCallsOfEndlessToolUse(maxToolRounds?: number) {
+	let inferenceCalls = 0;
+	const answer = answeringWith(PUN_ANALYZE_RESULT);
+	const { model: loopingModel, chatFlow } = buildMockChatFlow(genkit({}), {
+		maxToolRounds,
+		analyzeFetch: (...args) => {
+			inferenceCalls++;
+			return answer(...args);
+		},
+	});
+	let modelCalls = 0;
+	loopingModel.respondWith(() => {
+		modelCalls++;
+		return { toolRequests: [toolRequest] };
+	});
+
+	await assert.rejects(
+		chatFlow({
+			messages: [{ role: "user", content: "Is 'I lost interest' a pun?" }],
+		}),
+		(err) => err instanceof GenkitError && err.status === "ABORTED",
+	);
+	return { modelCalls, inferenceCalls };
+}
+
+// A limit other than Genkit's own default of 5 shows the flow passes it on.
+test("chatFlow stops a reply after maxToolRounds rounds of tool calls", async () => {
+	assert.deepEqual(await countCallsOfEndlessToolUse(2), {
+		modelCalls: 3,
+		inferenceCalls: 2,
+	});
+});
+
+test("chatFlow allows MAX_TOOL_ROUNDS rounds of tool calls by default", async () => {
+	assert.deepEqual(await countCallsOfEndlessToolUse(), {
+		modelCalls: MAX_TOOL_ROUNDS + 1,
+		inferenceCalls: MAX_TOOL_ROUNDS,
+	});
 });

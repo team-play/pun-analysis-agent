@@ -1,0 +1,115 @@
+// The timeouts that make up /api/chat's waiting chain, from Frontend asking
+// for an App Check token to Cloud Run cutting the request off. They depend on
+// each other across the Frontend/Backend deploy boundary, so they live here
+// and nowhere else: Backend, Frontend and deploy-backend.yml read them from
+// this file, and tests/relationships.test.js fails if a change to one breaks
+// another. docs/contracts.md describes what each one bounds.
+//
+// Plain JavaScript (with index.d.ts for its types), not TypeScript: the
+// backend image runs this file from node_modules, where Node refuses to
+// strip types.
+//
+// None of these can be overridden by environment variables. If one ever is
+// (say, for local testing), refuse the override on Cloud Run the way
+// backend/src/config.ts refuses APP_CHECK=off, so production always runs on
+// the values here.
+//
+// Changing a value: a change that lengthens Backend's maximum silence must
+// reach Frontend before Backend (docs/engineering-practices.md).
+
+/**
+ * How long analyze_pun waits for Inference, covering its Cloud Run cold
+ * start. Provisional and unmeasured: the cold start can't be measured until
+ * /analyze answers (TASK-16), so this is a guess until TASK-32 measures it.
+ */
+export const INFERENCE_TIMEOUT_MS = 20_000;
+
+/**
+ * How long one model call may go without sending anything, whether before
+ * its first chunk, between two chunks, or after its last chunk until the
+ * call ends, before it's treated as stalled. The longest legitimate silence
+ * is before the first chunk, since that covers the model's thinking.
+ * Without this limit, a Gemini call that went quiet was bounded only by the
+ * user giving up, or by Cloud Run's request timeout (TASK-42). analyze_pun's
+ * wait on Inference never counts against it: tools run between model calls,
+ * so INFERENCE_TIMEOUT_MS bounds that wait instead.
+ *
+ * Provisional and unmeasured: 15 s is a guess meant to sit above a normal
+ * Flash-Lite time to first chunk while ending a stall long before Cloud
+ * Run's request timeout would. It was halved from a first guess of 30 s to leave
+ * room for TASK-43's retries within Cloud Run's timeout (see
+ * RETRY_BUDGET_MS); the cost is less room for a slow first chunk, which
+ * would fail a healthy reply as a stall. TASK-32 measures it.
+ */
+export const MODEL_STALL_LIMIT_MS = 15_000;
+
+/**
+ * How long Frontend waits for an App Check token. Normally it's cached, but
+ * a blocked reCAPTCHA script (e.g. by an ad-blocker) leaves the SDK waiting
+ * forever.
+ */
+export const APP_CHECK_TIMEOUT_MS = 10_000;
+
+/**
+ * The most rounds of tool calls in one reply: Backend's chat flow passes it
+ * to Genkit as maxTurns. 5 is Genkit's own default, made explicit so a
+ * Genkit upgrade can't change the worst case below unnoticed.
+ */
+export const MAX_TOOL_ROUNDS = 5;
+
+/**
+ * Cloud Run's request timeout for Backend: every /api/chat reply, however
+ * it's going, is cut off here. deploy-backend.yml passes it to
+ * `gcloud run deploy --timeout`, so it must be a whole number of seconds,
+ * at most Cloud Run's 3600 s. 300 s is Cloud Run's default.
+ */
+export const CLOUD_RUN_REQUEST_TIMEOUT_MS = 300_000;
+
+/**
+ * Once Backend has started a reply, the longest it goes without sending an
+ * event, short of ending the reply: after a model call's last chunk, the
+ * call can take up to the stall limit to end, and analyze_pun can then wait
+ * up to the Inference timeout before its toolResponse.
+ */
+export const MAX_SILENCE_MS = MODEL_STALL_LIMIT_MS + INFERENCE_TIMEOUT_MS;
+
+/**
+ * What Frontend's silence limit keeps free on top of Backend's maximum
+ * silence and the App Check wait: Backend's Cloud Run cold start and
+ * waiting for its one instance (--max-instances=1). Provisional and
+ * unmeasured, like the values it covers for.
+ */
+export const FRONTEND_SILENCE_MARGIN_MS = 15_000;
+
+/**
+ * How long Frontend waits without a stream event before giving up on a
+ * reply. Not enforced yet: TASK-28 builds that limit and reads it from
+ * here. Stated rather than computed from the values above, so
+ * that lengthening Backend's silence without raising this fails
+ * tests/relationships.test.js instead of quietly moving Frontend's limit.
+ */
+export const FRONTEND_SILENCE_LIMIT_MS = 60_000;
+
+/**
+ * The longest a reply can spend waiting, not counting retries: every model call
+ * (one per tool round, plus the one after the last round) sitting out the
+ * stall limit, and every tool round waiting out the Inference timeout. Time
+ * the model spends actually streaming isn't bounded by anything but Cloud
+ * Run's timeout.
+ */
+export const BASELINE_REPLY_WORST_CASE_MS =
+	(MAX_TOOL_ROUNDS + 1) * MODEL_STALL_LIMIT_MS +
+	MAX_TOOL_ROUNDS * INFERENCE_TIMEOUT_MS;
+
+/** What a reply's worst case keeps free below Cloud Run's timeout. */
+export const CLOUD_RUN_MARGIN_MS = 20_000;
+
+/**
+ * How much time one reply may spend on retrying failed model calls
+ * (TASK-43), so that the reply's worst case, BASELINE_REPLY_WORST_CASE_MS
+ * plus this, stays CLOUD_RUN_MARGIN_MS below Cloud Run's timeout.
+ */
+export const RETRY_BUDGET_MS =
+	CLOUD_RUN_REQUEST_TIMEOUT_MS -
+	BASELINE_REPLY_WORST_CASE_MS -
+	CLOUD_RUN_MARGIN_MS;
