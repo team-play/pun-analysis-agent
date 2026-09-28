@@ -166,9 +166,10 @@ export function createAnalyzePunTool(
 			name: "analyze_pun",
 			description:
 				"Checks whether a piece of text is a pun, using a dedicated pun " +
-				"classifier and word-sense lookup. Call it whenever the user asks " +
-				"whether something is a pun or asks you to explain one. If is_pun " +
-				"is null, the classifier couldn't judge the text: decide yourself.",
+				"classifier and word-sense lookup. Call it once for each new text " +
+				"the user wants analyzed, not again for follow-up questions about " +
+				"a text already analyzed. If is_pun is null, the classifier " +
+				"couldn't judge the text: decide yourself.",
 			inputSchema: z.object({
 				text: z.string().describe("The text to check, exactly as written."),
 			}),
