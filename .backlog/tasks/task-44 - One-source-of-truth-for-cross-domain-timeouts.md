@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-09-28 16:31'
-updated_date: '2026-09-28 19:17'
+updated_date: '2026-09-28 19:30'
 labels: []
 dependencies:
   - TASK-42
@@ -60,6 +60,8 @@ Agreed with the user on 2026-09-28, after TASK-43's handoff notes: TASK-44 lands
 5. Dockerfile/.dockerignore build with the workspace dependency; deploy-backend.yml sets --timeout from the module; both deploy workflows' path filters and test gates include the package; test.yml gets a timeouts job.
 6. Docs: contracts.md points to the module; engineering-practices.md documents the shared module and deploy order when a value changes; drift check on README/project-spec/local-setup/AGENTS.
 7. Code review + architectural review subagents.
+
+Final values after review (supersede the numbers in steps 1-2 above): MODEL_STALL_LIMIT_MS 30 s, MAX_TOOL_ROUNDS 3, CLOUD_RUN_REQUEST_TIMEOUT_MS 400 s, FRONTEND_SILENCE_LIMIT_MS 75 s; derived MAX_SILENCE_MS 50 s, BASELINE_REPLY_WORST_CASE_MS 300 s (counting each call's tail), RETRY_BUDGET_MS 80 s. An extra test checks the baseline against a reply walked through gap by gap.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -77,4 +79,6 @@ Agreed with the user on 2026-09-28, after TASK-43's handoff notes: TASK-44 lands
 2026-09-28: Decision (A) settled with the user: MAX_TOOL_ROUNDS = 2, and BASELINE_REPLY_WORST_CASE_MS counts each model call's tail (2 x stall limit per call), consistent with MAX_SILENCE_MS. Baseline 130 s, RETRY_BUDGET_MS 150 s at Cloud Run's 300 s (TASK-43 planned 90 s; it's derived, so TASK-43 gets 150 s by importing it). system-instruction.ts and the module now point at each other: a prompt change that chains more analyze_pun calls must raise MAX_TOOL_ROUNDS. (B) stays open, recommended for TASK-28.
 
 2026-09-28: At the user's request (to be conservative about slow first chunks), MODEL_STALL_LIMIT_MS is back to 30 s. The relationship tests then required FRONTEND_SILENCE_LIMIT_MS >= 50 + 10 + 15 = 75 s, so it's now 75 s (safe in one change: TASK-28 hasn't built the limit yet). Baseline 220 s, RETRY_BUDGET_MS 60 s (still >= one 30 s retry). Decision (B) moved to TASK-28 as AC #5, along with importing FRONTEND_SILENCE_LIMIT_MS (AC #1).
+
+2026-09-28: After the delta review found the 2-round cap fragile (the prompt asks for one call per text but not all in one round, so two texts analyzed in sequence plus an example would take 3 rounds and fail with ABORTED), the user chose MAX_TOOL_ROUNDS = 3 with Cloud Run's timeout raised to 400 s (option B) over tightening the prompt or lowering the stall limit. Retry budget 80 s.
 <!-- SECTION:NOTES:END -->

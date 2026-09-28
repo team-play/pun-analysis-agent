@@ -4,7 +4,7 @@ title: 'Frontend: client-side timeout for /api/chat'
 status: To Do
 assignee: []
 created_date: '2026-09-25 18:30'
-updated_date: '2026-09-28 19:17'
+updated_date: '2026-09-28 19:30'
 labels: []
 dependencies:
   - TASK-42
@@ -22,9 +22,9 @@ ordinal: 28000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Raised during PR #31 review (Livia's error-scenario feedback). The live adapter's fetch only aborts on the user's stop, so a Backend that accepts /api/chat but never answers leaves the user waiting until Cloud Run cuts the request (deploy-backend.yml sets no --timeout, so its 300 s default applies); only then does TASK-24's 'cut off' / 'Couldn't get a reply' text show.
+Raised during PR #31 review (Livia's error-scenario feedback). The live adapter's fetch only aborts on the user's stop, so a Backend that accepts /api/chat but never answers leaves the user waiting until Cloud Run cuts the request (CLOUD_RUN_REQUEST_TIMEOUT_MS, which deploy-backend.yml sets as --timeout); only then does TASK-24's 'cut off' / 'Couldn't get a reply' text show.
 
-Since TASK-42, Backend itself fails a Gemini call that goes quiet, so once it has started a reply it sends an event at least every MODEL_STALL_LIMIT_MS + INFERENCE_TIMEOUT_MS (15 s + 20 s = 35 s today) or ends it; docs/contracts.md states the bound and what it doesn't cover (App Check token fetch, cold start, queueing for the single instance). A reply that keeps streaming has no Backend-side maximum short of Cloud Run's 300 s, so a fixed whole-reply AbortSignal.timeout(ms) would either cut off healthy long replies or have to exceed 300 s. The guard is therefore a limit on silence: a timer that restarts on every stream event (including empty-text messages, or simply every body read).
+Since TASK-42, Backend itself fails a Gemini call that goes quiet, so once it has started a reply it sends an event at least every MAX_SILENCE_MS (MODEL_STALL_LIMIT_MS + INFERENCE_TIMEOUT_MS) or ends it. The values live in @pun-agent/timeouts (packages/timeouts, TASK-44); docs/contracts.md states the bound and what it doesn't cover (App Check token fetch, cold start, queueing for the single instance). A reply that keeps streaming has no Backend-side maximum short of Cloud Run's request timeout, so a fixed whole-reply AbortSignal.timeout(ms) would either cut off healthy long replies or have to exceed that timeout. The guard is therefore a limit on silence: a timer that restarts on every stream event (including empty-text messages, or simply every body read).
 
 Pitfall: a resettable timer is naturally built on an AbortController, and controller.abort() with no reason rejects with an AbortError, which the adapter's name-based isAbort check (TASK-24) treats as the user's stop, so the timeout would show as a cancel. Abort with a reason named TimeoutError instead, e.g. controller.abort(new DOMException(message, 'TimeoutError')), and give it its own user-facing text.
 <!-- SECTION:DESCRIPTION:END -->
