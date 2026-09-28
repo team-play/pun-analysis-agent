@@ -92,6 +92,37 @@ RULE_CASES = [
         "Run", LocalContext(relation="ROOT", predicate=None),
         id="root has no predicate: Run!",
     ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 2),
+                ("was", "be", "ROOT", 2), ("a", "a", "det", 4), ("lefty", "lefty", "attr", 2)),
+        "batter", LocalContext(relation="nsubj", predicate="lefty"),
+        id="copula with attr: The batter was a lefty",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 2),
+                ("was", "be", "ROOT", 2), ("ready", "ready", "acomp", 2)),
+        "ready", LocalContext(relation="acomp", predicate="batter"),
+        id="complement takes the subject: The batter was ready",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 2),
+                ("was", "be", "ROOT", 2), ("a", "a", "det", 4), ("lefty", "lefty", "attr", 2)),
+        "lefty", LocalContext(relation="attr", predicate="batter"),
+        id="attr complement takes the subject: The batter was a lefty",
+    ),
+    pytest.param(
+        _parsed(("The", "the", "det", 1), ("batter", "batter", "nsubj", 2),
+                ("was", "be", "ROOT", 2), ("ready", "ready", "acomp", 2),
+                ("and", "and", "cc", 3), ("eager", "eager", "conj", 3)),
+        "eager", LocalContext(relation="acomp", predicate="batter"),
+        id="conj then complement: The batter was ready and eager",
+    ),
+    pytest.param(
+        _parsed(("I", "I", "nsubj", 1), ("used", "use", "ROOT", 1), ("to", "to", "aux", 3),
+                ("be", "be", "xcomp", 1), ("a", "a", "det", 5), ("banker", "banker", "attr", 3)),
+        "banker", LocalContext(relation="attr", predicate="be"),
+        id="complement without its own subject: I used to be a banker",
+    ),
 ]
 # fmt: on
 
@@ -106,6 +137,7 @@ def test_local_context_rules(doc, word, expected):
     [
         ("The baker needed more dough.", "dough", LocalContext(relation="dobj", predicate="need")),
         ("The batter was ready.", "batter", LocalContext(relation="nsubj", predicate="ready")),
+        ("The batter was ready.", "ready", LocalContext(relation="acomp", predicate="batter")),
     ],
 )
 def test_pinned_model_produces_the_shapes_the_rules_expect(text, word, expected):
@@ -121,6 +153,10 @@ def test_one_context_per_candidate_in_order():
 
     contexts = local_contexts(doc, candidates)
 
-    assert len(candidates) > 1
-    assert len(contexts) == len(candidates)
-    assert contexts[-1] == LocalContext(relation="dobj", predicate="need")
+    assert [c.text for c in candidates] == ["baker", "needed", "more", "dough"]
+    assert contexts == [
+        LocalContext(relation="nsubj", predicate="need"),
+        LocalContext(relation="ROOT", predicate=None),
+        LocalContext(relation="amod", predicate="dough"),
+        LocalContext(relation="dobj", predicate="need"),
+    ]
