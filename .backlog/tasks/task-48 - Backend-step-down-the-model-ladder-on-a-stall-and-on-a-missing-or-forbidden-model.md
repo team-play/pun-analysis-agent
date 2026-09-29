@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:54'
+updated_date: '2026-09-29 10:00'
 labels: []
 dependencies:
   - TASK-43
@@ -47,3 +48,9 @@ Decided with the user on 2026-09-29: a stall steps down after one attempt (TASK-
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-09-29 (user): one stall per model stays the rule for now. Whether to allow a second attempt after a stall waits on TASK-32's measurements; if they show second attempts often succeeding, revisit AC #1 (it would need a stall count per model, separate from the attempt count).
+<!-- SECTION:NOTES:END -->
