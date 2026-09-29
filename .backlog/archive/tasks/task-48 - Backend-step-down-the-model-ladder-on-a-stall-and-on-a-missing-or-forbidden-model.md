@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-29 09:54'
-updated_date: '2026-09-29 10:03'
+updated_date: '2026-09-29 10:42'
 labels: []
 dependencies:
   - TASK-43
@@ -56,4 +56,6 @@ Decided with the user on 2026-09-29: a 504 from Gemini itself, which arrives qui
 2026-09-29 (user): one stall per model stays the rule for now. Whether to allow a second attempt after a stall waits on TASK-32's measurements; if they show second attempts often succeeding, revisit AC #1 (it would need a stall count per model, separate from the attempt count).
 
 2026-09-29 (user, correcting the note above): the stall rule itself, not just a later switch to two stalls, waits on TASK-32; AC #1 now leaves the choice to its data. The 504 and 404/403 criteria are independent of TASK-32.
+
+2026-09-29 (user): archived without being implemented. TASK-32's preliminary run (docs/experiments/task-32) found no stall in 92 Flash-Lite attempts (longest silence 14.8 s against a 30 s limit), and the only model seen stalling, gemini-3.8-flash, is the ladder's last rung, where a stall can't step down anyway; so the stall rule has nothing to act on. The 404/403 step-down would only matter if a model on the ladder were removed or restricted, which TASK-45 handled by hand for gemini-2.5-flash-lite; gemini-3.1-flash-lite's earliest shutdown is 2027-05-07. Work moved to Inference. If the ladder changes, ACTION_BY_STATUS in backend/src/flows/model-ladder.ts is where these would go.
 <!-- SECTION:NOTES:END -->
