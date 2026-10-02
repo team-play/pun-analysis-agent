@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-10-02 10:04'
-updated_date: '2026-10-02 11:05'
+updated_date: '2026-10-02 11:24'
 labels: []
 milestone: m-4
 dependencies:
@@ -53,3 +53,9 @@ PR 85 added a three-row probability panel to the expanded analyze_pun card. Rend
 6. Fixtures gain probabilities (undetermined: null); fix the analyze-result.ts and fixture comments; update App.test.tsx's card names and raw-response test.
 7. Tests, lint, render at desktop and phone widths in light and dark, then a review subagent.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Implemented on task-57-lighter-card (stacked on PR 85 head b5dd5f7): validated --chart-1..3 colors, probabilities in fixtures (undetermined fixture omits the key, like Backend's own undetermined result and the recorded streams), and the redesigned card (Pun score label, highlighted words, explanation, stacked bar + legend, collapsed Raw response). Review subagent found the legend could sum to 101% and disagree with the header when classes were rounded separately; fixed by rounding the pun score once and splitting it between the pun types (tested over 201 splits). Bar logic moved to its own tested component. 162 frontend tests pass; rendered at desktop and phone widths in light and dark. Backend's undetermined result omitting probabilities was added to TASK-52 as an acceptance criterion.
+<!-- SECTION:NOTES:END -->
