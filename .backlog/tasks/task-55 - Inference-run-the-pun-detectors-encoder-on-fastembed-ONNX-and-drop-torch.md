@@ -1,10 +1,11 @@
 ---
 id: TASK-55
 title: 'Inference: run the pun detector''s encoder on fastembed ONNX and drop torch'
-status: To Do
+status: In Progress
 assignee:
   - '@yaisiel.torres'
 created_date: '2026-10-02 10:04'
+updated_date: '2026-10-02 10:13'
 labels:
   - pun-classifier
 milestone: m-4
@@ -40,3 +41,14 @@ PR 85 runs all-MiniLM-L6-v2 twice in Inference: through sentence-transformers on
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Compare first, with no production code changed: docs/experiments/task-55/compare.py runs PR 85's torch FeatureExtractor and an ONNX (fastembed) variant over the 605-item test split from splits.json, and records predictions, metrics, embedding cosine and the largest class-probability difference. torch comes in only through `uv run --with`, never pyproject.toml. If a gate fails, stop and hand retraining to TASK-54.
+2. If the gates pass: the detector and select_senses embed through scoring.default_embed (one shared model instance); drop torch, transformers, sentence-transformers and the PyTorch index from pyproject.toml and uv.lock; drop the Hugging Face snapshot step and PUN_RESOURCES from the Dockerfile.
+3. detector.npz: rewrite only its metadata (decided with Yai 2026-10-02, option a) so features.encoder names the ONNX model and points to docs/experiments/task-55 as the equivalence evidence; verify mean, scale, coef, intercept and classes are byte-identical.
+4. Build PR 85's image and the ONNX image locally; record both image sizes and container memory after one prediction; set --memory in deploy-inference.yml from the measurement.
+5. Docs: local-setup.md's Inference section lists every one-time download; inference/README.md drops its own setup steps; the registry-size note is updated.
+6. Code review by a subagent per AGENTS.md, then open the PR into Groverpr93:review/pun-detector (PR 85's branch).
+<!-- SECTION:PLAN:END -->
