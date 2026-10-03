@@ -62,13 +62,26 @@ SELECTIONAL_PREFERENCES: dict[tuple[str, str], frozenset[str]] = {
     ("swing", "dobj"): frozenset({"sports implement", "sports equipment"}),
 }
 
-# Placeholders until TASK-2.4 calibrates them against SemEval.
 # A margin at or below this counts as "both senses plausible" = pun tension.
 # Only embedding-Lesk margins depend on it: selectional-preference scores are
 # 0 or 1, so their margins are too.
-MARGIN_THRESHOLD = 0.1
+#
+# Calibrated by TASK-2.4 (scripts/calibrate_margin.py) against the SemEval eval
+# dataset's homographic is_pun:true rows (recall) vs. is_pun:false rows'
+# candidate-word margins (false-positive proxy, since sense selection only runs
+# once detection says is_pun:true). At 0.03: 71.4% sentence-level recall among
+# the 1,602/1,607 (99.7%) homographic-pun rows with an eligible candidate
+# (uncovered rows counted as misses would put this at ~71.2%), 25.8%
+# candidate-level false-positive rate on ordinary words -- chosen over higher
+# thresholds (e.g. 0.1's 97.5% recall / 63.0% false positives) because a miss
+# here degrades gracefully to Tier 3's llm_fallback, while a false positive
+# confidently explains the wrong word as the pun. Sense-count normalization
+# (margin * sense_count) was tested and rejected: it performed worse at
+# matched recall than this flat threshold (weak -0.228/-0.080
+# margin-vs-sense_count correlation on the negative/positive sets respectively).
+MARGIN_THRESHOLD = 0.03
 # Two glosses with cosine similarity below this count as different senses
-# (used only when lexfiles can't tell -- see _distinct()).
+# (used only when lexfiles can't tell -- see _distinct()). Not yet calibrated.
 GLOSS_DISTINCT_THRESHOLD = 0.5
 
 # Nearly every WordNet adjective shares this lexfile, so it can't tell two
@@ -209,20 +222,16 @@ _embedder: TextEmbedding | None = None
 _embedder_lock = threading.Lock()
 
 
-def default_embed(texts: list[str], batch_size: int = 256) -> list[npt.NDArray[np.float32]]:
+def default_embed(texts: list[str]) -> list[npt.NDArray[np.float32]]:
     """Production Embed: all-MiniLM-L6-v2 via fastembed, loaded lazily on first use.
 
     Lazy + locked for the same reasons as senses._get_wordnet(): don't pay the
     model load at import time (Cloud Run cold start, see AGENTS.md), and don't
     let two concurrent first requests both load it.
-
-    `batch_size` is fastembed's default. Every text in a batch is padded to the
-    longest one, so a caller embedding many texts at once with a long one among
-    them should pass a smaller batch to bound memory.
     """
     global _embedder
     if _embedder is None:
         with _embedder_lock:
             if _embedder is None:
                 _embedder = TextEmbedding(EMBEDDING_MODEL)
-    return list(_embedder.embed(texts, batch_size=batch_size))
+    return list(_embedder.embed(texts))

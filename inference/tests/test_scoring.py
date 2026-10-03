@@ -243,6 +243,12 @@ def test_cosine_of_a_zero_vector_is_zero():
     assert _cosine([0.0, 0.0], [1.0, 0.0]) == 0.0
 
 
+def test_margin_threshold_is_the_task_2_4_calibrated_value():
+    # Regression guard: catches an accidental edit that isn't also reflected
+    # in docs/design/sense-selection.md's open questions (TASK-2.4).
+    assert MARGIN_THRESHOLD == 0.03
+
+
 def test_margin_exactly_at_threshold_counts_as_tension():
     def signal(margin):
         return PunSignal(

@@ -196,7 +196,16 @@ def _binary_metrics(actual: Iterable[bool], predicted: Iterable[bool]) -> dict[s
 
 
 def _type_metrics(rows: list[DatasetRow], predictions: list[dict[str, Any]]) -> dict[str, Any]:
-    pun_rows = [index for index, row in enumerate(rows) if row.is_pun]
+    """pun_type metrics restricted to detector true positives (AC #2): gold is_pun and predicted is_pun must both be True.
+
+    A detector false negative has no predicted pun_type to grade, and crediting it
+    here would hide detection misses behind pun_type's own score.
+    """
+    pun_rows = [
+        index
+        for index, row in enumerate(rows)
+        if row.is_pun and predictions[index].get("is_pun") is True
+    ]
     result: dict[str, Any] = {"support": len(pun_rows)}
     for pun_type in sorted(ALLOWED_PUN_TYPES):
         actual = [rows[index].pun_type == pun_type for index in pun_rows]
@@ -218,10 +227,12 @@ def _slice_report(outcomes: list[tuple[DatasetRow, dict[str, Any] | None]]) -> d
     count toward `rows` and `request_errors` but are excluded from the metrics.
 
     An undetermined prediction (is_pun: null) is a valid answer, not a failure.
-    `is_pun` and `pun_type` are scored over determined rows only, with
-    `detection_coverage` reporting how many rows were determined, so a detector
-    can't look better by answering undetermined more often. `is_pun_end_to_end`
-    scores undetermined as "not a pun" instead, which is what a chat user sees.
+    `is_pun` is scored over determined rows only, with `detection_coverage`
+    reporting how many rows were determined, so a detector can't look better by
+    answering undetermined more often. `pun_type` is scored over detector true
+    positives only (see `_type_metrics`) -- false negatives have no predicted
+    pun_type to grade. `is_pun_end_to_end` scores undetermined as "not a pun"
+    instead, which is what a chat user sees.
     """
 
     answered = [(row, prediction) for row, prediction in outcomes if prediction is not None]
