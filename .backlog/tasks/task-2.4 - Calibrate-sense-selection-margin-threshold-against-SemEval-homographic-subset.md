@@ -2,9 +2,10 @@
 id: TASK-2.4
 title: Calibrate sense-selection margin threshold against SemEval homographic subset
 status: To Do
-assignee: []
+assignee:
+  - '@lecastro-tech'
 created_date: '2026-09-20 10:05'
-updated_date: '2026-09-30 00:47'
+updated_date: '2026-10-04 20:57'
 labels:
   - wsd
   - evaluation
@@ -15,6 +16,7 @@ dependencies:
 references:
   - docs/design/sense-selection.md
 parent_task_id: TASK-2
+priority: medium
 project: eval
 ordinal: 25000
 ---

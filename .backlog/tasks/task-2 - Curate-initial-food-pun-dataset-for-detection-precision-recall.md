@@ -3,9 +3,9 @@ id: TASK-2
 title: Curate initial food-pun dataset for detection precision/recall
 status: To Do
 assignee:
-  - Livia
+  - '@lecastro-tech'
 created_date: '2026-09-16 19:45'
-updated_date: '2026-09-26 00:11'
+updated_date: '2026-10-04 20:57'
 due_date: '2026-09-21'
 labels:
   - dataset
@@ -13,6 +13,7 @@ dependencies: []
 references:
   - docs/milestones/milestone-3.md
   - docs/contracts.md
+priority: medium
 project: eval
 ordinal: 2000
 ---
