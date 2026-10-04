@@ -126,7 +126,7 @@ The cut-short run had one reply that fits the second: rule only, "You've got to 
 - **Run it in-process.** Use Backend's chat flow in-process, as [`../task-47`](../task-47/README.md) does: Inference fixture, one pinned model (`gemini-3.5-flash-lite`). That needs `createChatFlow` to accept a system instruction, like its other options.
 - **Build variants from the current instruction.** Revert each edit's sentence in the runtime string, and fail if the sentence isn't found exactly once.
 - **Pace and interleave.** Interleave variants within each run, one request at a time, paced per AGENTS.md's Gemini quota section.
-- **One day per experiment.** Each experiment fits in half of `gemini-3.5-flash-lite`'s daily requests, with its own `main` baseline the same day. An earlier version of this plan (four variants, six prompts, 8 runs: about 190 replies, about 350 requests) didn't fit, so TASK-60 splits it into an ablation on the three example requests, then a candidate check against main on a later day. TASK-60's notes have the budget.
+- **One day per experiment.** Each experiment fits in one day of `gemini-3.5-flash-lite`'s quota under AGENTS.md's rules, with its own `main` baseline the same day. An earlier version of this plan (four variants, six prompts, 8 runs: about 190 replies, about 350 requests) mixed both questions in one run, so TASK-60 splits it into an ablation on the three example requests, then a candidate check against main. TASK-60's notes have the budget.
 
 ## Lessons
 

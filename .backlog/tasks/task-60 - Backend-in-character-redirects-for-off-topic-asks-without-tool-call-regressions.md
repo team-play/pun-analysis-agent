@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-04 00:16'
-updated_date: '2026-10-04 20:25'
+updated_date: '2026-10-04 20:39'
 labels: []
 dependencies:
   - TASK-61
@@ -30,7 +30,7 @@ Otto's off-topic redirects are flat on main ('Analyzing and explaining puns is w
 - [ ] #1 Off-topic requests are redirected back to puns in Otto's playful voice, without loosening TASK-12's scope rules (the AC moved here from TASK-31.1)
 - [ ] #2 Measured side by side with main's instruction on the same pinned model, a batch request ('Give me 20 puns.') makes no more analyze_pun calls than on main
 - [ ] #3 Measured the same way, single example-pun requests ('Tell me a pun about otters.', 'Write me a pun.', 'Tell me a pun.') get one shown, analyzed example as often as on main, and users' own puns phrased as commands or addressed to 'you' are still analyzed
-- [ ] #4 Each experiment finishes within one day on gemini-3.5-flash-lite, pinned: its main baseline runs the same day, it follows AGENTS.md's Gemini quota rules (request estimate recorded before starting, at most half the model's requests/day including retries), and no conclusion pools runs from different days. Runs are recorded under docs/experiments/task-31/
+- [ ] #4 Each experiment finishes within one quota day on gemini-3.5-flash-lite, pinned: its main baseline runs the same day, it follows AGENTS.md's Gemini quota rules (request estimate recorded before starting; the whole-day exception only when announced to the team), and no conclusion pools runs from different days. Runs are recorded under docs/experiments/task-31/
 <!-- AC:END -->
 
 ## Definition of Done
@@ -52,4 +52,8 @@ Experiment 2, candidate check (ACs #1-#3), on a later day once Experiment 1 has 
 Pinned model: gemini-3.5-flash-lite, production's first rung, so results describe what users get (chosen over 3.1-flash-lite by Yai, accepting that it shares production's primary model's quota). Dropped on purpose: the second half of the TASK-31 hypothesis (that the rule alone makes Otto redirect users' own puns) is not ablated; Experiment 2 still checks users' puns for the chosen wording, which is what AC #3 needs.
 
 Depends on TASK-61 so the pacer enforces the pin, the pace, the budget and the stop at the first 429.
+
+Update (2026-10-04, decided with Yai): Yai is fine using gemini-3.5-flash-lite's whole day, so AGENTS.md gained an announced whole-day exception (up to about 85% of requests/day; production falls back to gemini-3.1-flash-lite once 3.5 runs out). Yai is announcing Monday 2026-10-05 and Tuesday 2026-10-06 to the team; the exception applies only once that message is out. Both experiments run on Monday: Experiment 1 (~190 requests), then, after picking the candidate wording from its results, Experiment 2 (~170), about 360 of a ~425 ceiling. Each keeps its own same-day main baseline. Tuesday is held for a retry if the candidate fails, as a new experiment with its own baseline.
+
+Out of scope (Yai): Otto reintroducing himself more than once in a conversation. It needs multi-turn conversations to measure, and academically the rule breaks this task targets matter more, above all calls to analyze_pun the system instruction doesn't ask for (an unnecessary Inference call), such as on "Give me 20 puns." itself.
 <!-- SECTION:NOTES:END -->
