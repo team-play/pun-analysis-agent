@@ -66,26 +66,33 @@ SELECTIONAL_PREFERENCES: dict[tuple[str, str], frozenset[str]] = {
 # Only embedding-Lesk margins depend on it: selectional-preference scores are
 # 0 or 1, so their margins are too.
 #
-# Calibrated by TASK-2.4 (scripts/calibrate_margin.py) against the SemEval eval
-# dataset's homographic is_pun:true rows (recall) vs. is_pun:false rows'
-# candidate-word margins (false-positive proxy, since sense selection only runs
-# once detection says is_pun:true), measured through selection.pun_readings()
-# (PR #93) so calibration sees exactly what production's other three filters
-# (positive runner-up score, no shared WordNet word, dissimilar glosses) let
-# through -- an earlier version reconstructed the pipeline directly from
-# candidates/context/senses/scoring and measured filters production doesn't
-# apply. 1,580 of 1,607 homographic-pun rows (98.3%) had an eligible reading;
-# recall below is over those rows (counting the other 27 as misses would put
-# 0.05's recall at ~77.2% instead of 78.5%). No threshold cleanly separates
-# real puns from ordinary polysemous words: at 0.03, recall is only 62.8%
-# (25.8% false positives); 0.05 (78.5% recall, 37.7% false positives) trades
-# more false positives for meaningfully higher recall, since a miss here still
-# degrades gracefully to Tier 3's llm_fallback rather than a wrong answer.
-# Sense-count normalization (margin * sense_count) was tested: correlation is
-# weak (-0.244/-0.145 on the negative/positive sets), and it performs roughly
-# on par with this flat threshold at matched recall (sometimes marginally
-# better, sometimes marginally worse) -- no clear win, so the simpler flat
-# constant was kept.
+# Calibrated by TASK-2.4 (scripts/calibrate_margin.py) against the pun
+# detector's own dev/test split (docs/experiments/pun-detector/prototype-1/
+# splits.json) of the SemEval eval dataset: is_pun:false rows' candidate-word
+# margins (false-positive proxy, since sense selection only runs once
+# detection says is_pun:true) vs. homographic is_pun:true rows' per-sentence
+# minimum margin (recall), measured through selection.pun_readings() (PR #93)
+# so calibration sees exactly what production's other three filters (positive
+# runner-up score, no shared WordNet word, dissimilar glosses) let through --
+# an earlier version reconstructed the pipeline directly from
+# candidates/context/senses/scoring, measured filters production doesn't
+# apply, and was tuned and reported on the same rows (both issues flagged in
+# PR #89's review). The threshold was chosen on dev (604 rows) and reported on
+# test (606 rows), never tuned on, matching how the detector itself is
+# evaluated. 237/241 dev and 239/241 test homographic rows had an eligible
+# reading; recall below is over those rows (counting the uncovered rows as
+# misses would put dev's 0.05 recall at ~80.1% and test's at ~77.6%). No
+# threshold cleanly separates real puns from ordinary polysemous words: on
+# dev, 0.03 gives 65.0% recall / 27.9% false positives; 0.05 gives 81.4%
+# recall / 40.2% false positives, trading more false positives for
+# meaningfully higher recall, since a miss here still degrades gracefully to
+# Tier 3's llm_fallback rather than a wrong answer. Held-out test confirms the
+# choice generalizes: 78.2% recall / 37.6% false positives, close to dev's
+# numbers with no overfitting gap. Sense-count normalization (margin *
+# sense_count) was tested on dev: correlation is weak (-0.269/-0.116 on the
+# negative/positive sets), and it performs roughly on par with this flat
+# threshold at matched recall (sometimes marginally better, sometimes
+# marginally worse) -- no clear win, so the simpler flat constant was kept.
 MARGIN_THRESHOLD = 0.05
 # Two glosses with cosine similarity below this count as different senses
 # (used only when lexfiles can't tell -- see _distinct()). Not yet calibrated.
