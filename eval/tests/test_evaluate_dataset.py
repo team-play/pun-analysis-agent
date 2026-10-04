@@ -154,6 +154,24 @@ class EvaluateDatasetTests(unittest.TestCase):
         self.assertEqual(result["slices"]["all_categories"]["pun_type"]["support"], 2)
         self.assertEqual(result["slices"]["all_categories"]["pun_type"]["accuracy"], 1.0)
 
+    def test_evaluate_excludes_detector_false_negatives_from_pun_type(self) -> None:
+        rows = [
+            DatasetRow("1", "pun", True, "homographic", "food"),
+            DatasetRow("2", "missed pun", True, "homophonic", "general"),
+        ]
+
+        def analyzer(row: DatasetRow) -> dict[str, object]:
+            if row.row_id == "2":
+                # Detector false negative: gold says pun, detector disagrees.
+                return valid_response(is_pun=False, pun_type=None)
+            return valid_response(**expected_output(row))
+
+        result = evaluate(rows, analyzer)
+
+        pun_type = result["slices"]["all_categories"]["pun_type"]
+        self.assertEqual(pun_type["support"], 1)
+        self.assertEqual(pun_type["accuracy"], 1.0)
+
     def test_evaluate_records_analyzer_errors(self) -> None:
         rows = [DatasetRow("1", "pun", True, "homographic", "food")]
 

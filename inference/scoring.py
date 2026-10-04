@@ -62,13 +62,33 @@ SELECTIONAL_PREFERENCES: dict[tuple[str, str], frozenset[str]] = {
     ("swing", "dobj"): frozenset({"sports implement", "sports equipment"}),
 }
 
-# Placeholders until TASK-2.4 calibrates them against SemEval.
 # A margin at or below this counts as "both senses plausible" = pun tension.
 # Only embedding-Lesk margins depend on it: selectional-preference scores are
 # 0 or 1, so their margins are too.
-MARGIN_THRESHOLD = 0.1
+#
+# Calibrated by TASK-2.4 (scripts/calibrate_margin.py) against the SemEval eval
+# dataset's homographic is_pun:true rows (recall) vs. is_pun:false rows'
+# candidate-word margins (false-positive proxy, since sense selection only runs
+# once detection says is_pun:true), measured through selection.pun_readings()
+# (PR #93) so calibration sees exactly what production's other three filters
+# (positive runner-up score, no shared WordNet word, dissimilar glosses) let
+# through -- an earlier version reconstructed the pipeline directly from
+# candidates/context/senses/scoring and measured filters production doesn't
+# apply. 1,580 of 1,607 homographic-pun rows (98.3%) had an eligible reading;
+# recall below is over those rows (counting the other 27 as misses would put
+# 0.05's recall at ~77.2% instead of 78.5%). No threshold cleanly separates
+# real puns from ordinary polysemous words: at 0.03, recall is only 62.8%
+# (25.8% false positives); 0.05 (78.5% recall, 37.7% false positives) trades
+# more false positives for meaningfully higher recall, since a miss here still
+# degrades gracefully to Tier 3's llm_fallback rather than a wrong answer.
+# Sense-count normalization (margin * sense_count) was tested: correlation is
+# weak (-0.244/-0.145 on the negative/positive sets), and it performs roughly
+# on par with this flat threshold at matched recall (sometimes marginally
+# better, sometimes marginally worse) -- no clear win, so the simpler flat
+# constant was kept.
+MARGIN_THRESHOLD = 0.05
 # Two glosses with cosine similarity below this count as different senses
-# (used only when lexfiles can't tell -- see _distinct()).
+# (used only when lexfiles can't tell -- see _distinct()). Not yet calibrated.
 GLOSS_DISTINCT_THRESHOLD = 0.5
 
 # Nearly every WordNet adjective shares this lexfile, so it can't tell two
@@ -216,9 +236,8 @@ def default_embed(texts: list[str], batch_size: int = 256) -> list[npt.NDArray[n
     model load at import time (Cloud Run cold start, see AGENTS.md), and don't
     let two concurrent first requests both load it.
 
-    `batch_size` is fastembed's default. Every text in a batch is padded to the
-    longest one, so a caller embedding many texts at once with a long one among
-    them should pass a smaller batch to bound memory.
+    `batch_size` forwards to fastembed's own default (256); pun_detector's
+    onnx_embed passes a smaller value to cap peak memory (TASK-55).
     """
     global _embedder
     if _embedder is None:

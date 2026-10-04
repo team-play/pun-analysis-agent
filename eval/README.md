@@ -41,10 +41,10 @@ Columns follow the `semeval2017_task7_puns.csv` convention above, plus one extra
 
 ## Precision/recall evaluation harness
 
-`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to gold pun rows (`is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run.
+`evaluate_dataset.py` runs `datasets/semeval2017_task7_puns.csv` through an `/analyze` implementation and reports precision/recall/F1 for `is_pun` detection, plus separate `pun_type` metrics restricted to detector true positives (gold `is_pun: True` *and* predicted `is_pun: True`), per [`../docs/contracts.md`](../docs/contracts.md). It validates every response against the full `/analyze` contract shape and records per-row request failures instead of crashing the run.
 
 An undetermined response (`is_pun: null`, Inference couldn't judge the text) is a valid answer, not a request failure. Each slice reports it three ways:
-- `is_pun` and `pun_type` are scored over determined rows only, measuring the detector's quality when it does answer.
+- `is_pun` is scored over determined rows only, measuring the detector's quality when it does answer. `pun_type` is scored over detector true positives only -- a false negative has no predicted pun_type to grade.
 - `undetermined_rows` and `detection_coverage` (determined rows / successful rows) show how often it answered at all. Always read coverage next to `is_pun`, since answering undetermined whenever unsure would otherwise inflate precision/recall.
 - `is_pun_end_to_end` scores undetermined as "not a pun", which is what a chat user sees.
 
