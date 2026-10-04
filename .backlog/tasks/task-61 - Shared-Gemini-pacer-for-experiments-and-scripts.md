@@ -4,7 +4,7 @@ title: Shared Gemini pacer for experiments and scripts
 status: To Do
 assignee: []
 created_date: '2026-10-04 20:15'
-updated_date: '2026-10-04 20:39'
+updated_date: '2026-10-04 20:43'
 labels: []
 dependencies: []
 references:
@@ -19,7 +19,7 @@ ordinal: 57000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Gemini free-tier quota is per project and per model, shared by production, local keys and experiments (AGENTS.md, "Gemini quota"). Experiments have used up production's quota twice: TASK-45 spent gemini-3.8-flash's 20 requests/day, and TASK-31's last run started four Backends at once, hit the per-minute limits, then the daily limits on gemini-3.5-flash-lite and gemini-3.8-flash. On 2026-10-04 both Flash-Lite models were reported over their limits after TASK-31's runs the day before, while the deployed site was answering "The assistant is busy right now". AGENTS.md now states the rules (estimate requests not replies, half the daily quota per day unless a whole day is announced to the team, no gemini-3.8-flash, one paced run at a time, stop at the first 429), but each experiment script (docs/experiments/task-38/record.mjs, task-45/check.mjs, task-47/compare.mjs, task-32/measure.mjs) hand-rolls its own loop, and nothing enforces them. A shared pacer lets every script follow the rules by using it. TASK-60 (rerunning TASK-31's ablation, whose AC #4 requires paced runs) is the first expected user.
+Gemini free-tier quota is per project and per model, shared by production, local keys and experiments (AGENTS.md, "Gemini quota"). Experiments have used up production's quota twice: TASK-45 spent gemini-3.8-flash's 20 requests/day, and TASK-31's last run started four Backends at once, hit the per-minute limits, then the daily limits on gemini-3.5-flash-lite and gemini-3.8-flash. On 2026-10-04 both Flash-Lite models were reported over their limits after TASK-31's runs the day before, while the deployed site was answering "The assistant is busy right now". AGENTS.md now states the rules (estimate requests not replies, half the daily quota per day unless a whole day is announced to the team, no gemini-3.8-flash, one paced run at a time, stop at the first 429), but each experiment script (docs/experiments/task-38/record.mjs, task-45/check.mjs, task-47/compare.mjs, task-32/measure.mjs) hand-rolls its own loop, and nothing enforces them. A shared pacer lets every script follow the rules by using it. TASK-60's 2026-10-05 experiments are paced by hand rather than wait for this task; later runs of that kind are the expected users.
 
 Experiments reach Gemini two ways today: in-process through createChatFlow (task-47, task-32) and over HTTP to a local Backend (task-38, task-45). The pacer cannot see teammates' runs, so the daily share (half, or the announced whole day) stays a team convention it can only enforce per run.
 <!-- SECTION:DESCRIPTION:END -->

@@ -6,10 +6,9 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-10-04 00:16'
-updated_date: '2026-10-04 20:39'
+updated_date: '2026-10-04 20:43'
 labels: []
-dependencies:
-  - TASK-61
+dependencies: []
 references:
   - docs/experiments/task-31/README.md
   - backend/src/flows/system-instruction.ts
@@ -31,6 +30,7 @@ Otto's off-topic redirects are flat on main ('Analyzing and explaining puns is w
 - [ ] #2 Measured side by side with main's instruction on the same pinned model, a batch request ('Give me 20 puns.') makes no more analyze_pun calls than on main
 - [ ] #3 Measured the same way, single example-pun requests ('Tell me a pun about otters.', 'Write me a pun.', 'Tell me a pun.') get one shown, analyzed example as often as on main, and users' own puns phrased as commands or addressed to 'you' are still analyzed
 - [ ] #4 Each experiment finishes within one quota day on gemini-3.5-flash-lite, pinned: its main baseline runs the same day, it follows AGENTS.md's Gemini quota rules (request estimate recorded before starting; the whole-day exception only when announced to the team), and no conclusion pools runs from different days. Runs are recorded under docs/experiments/task-31/
+- [ ] #5 Every reply in both experiments that called analyze_pun is graded for pun type: Otto's stated type matches the tool's pun_type, contradicts it, or isn't stated; the README reports the counts per variant, so a homophonic/homographic mix-up can be traced to Otto or to Inference's classifier
 <!-- AC:END -->
 
 ## Definition of Done
@@ -56,4 +56,8 @@ Depends on TASK-61 so the pacer enforces the pin, the pace, the budget and the s
 Update (2026-10-04, decided with Yai): Yai is fine using gemini-3.5-flash-lite's whole day, so AGENTS.md gained an announced whole-day exception (up to about 85% of requests/day; production falls back to gemini-3.1-flash-lite once 3.5 runs out). Yai is announcing Monday 2026-10-05 and Tuesday 2026-10-06 to the team; the exception applies only once that message is out. Both experiments run on Monday: Experiment 1 (~190 requests), then, after picking the candidate wording from its results, Experiment 2 (~170), about 360 of a ~425 ceiling. Each keeps its own same-day main baseline. Tuesday is held for a retry if the candidate fails, as a new experiment with its own baseline.
 
 Out of scope (Yai): Otto reintroducing himself more than once in a conversation. It needs multi-turn conversations to measure, and academically the rule breaks this task targets matter more, above all calls to analyze_pun the system instruction doesn't ask for (an unnecessary Inference call), such as on "Give me 20 puns." itself.
+
+Update (2026-10-04, decided with Yai): Monday's runs don't wait for TASK-61's pacer, so TASK-60 no longer depends on it (this supersedes the dependency note above). They follow AGENTS.md's Gemini quota rules by hand: in-process with a one-model ladder (gemini-3.5-flash-lite) as docs/experiments/task-47/compare.mjs does, one request at a time with at least 6 s between requests (10/min), the request count logged as it goes, and the run stopping at the first 429.
+
+Pun-type grading added (AC #5): Yai has seen Otto mix up homophonic and homographic. pun_type comes from Inference, so for each reply that called analyze_pun, compare the type Otto states with the tool's pun_type (match, contradicts, not stated). Contradictions point at the system instruction; a wrong type stated faithfully points at the classifier. The tool results and replies are already recorded, so this costs no extra requests.
 <!-- SECTION:NOTES:END -->
