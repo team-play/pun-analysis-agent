@@ -46,7 +46,7 @@ uv run python evaluate_dataset.py --endpoint http://127.0.0.1:8000/analyze --tim
 
 Both runs scored successfully: 0 request errors, 0 undetermined, 100% response rate and detection coverage on every slice. Full output in `task-2.3-*-results.json` (gitignored, not committed — regenerate from the commands above).
 
-**Read the test-split numbers, not the all-rows numbers, as the detector's quality on new text.** `docs/experiments/pun-detector/prototype-1/splits.json` records how PR #85 trained and tuned this detector: 2,820 of the 4,030 rows are its train split, 604 are dev (used to pick the model and its decision threshold), and only the 606 test rows are unseen. The all-rows numbers below score the detector partly against sentences it already trained on, so they read as better than the detector actually is on new text — `--ids`/`--ids-key` (added this session) let the harness restrict to one named split from a file like `splits.json`.
+**Read the test-split numbers, not the all-rows numbers, as the detector's quality on new text.** `docs/experiments/pun-detector/prototype-1/splits.json` records how PR #85 trained and tuned this detector: 2,820 of the 4,030 rows are its train split, 604 are dev (used to pick the model and its decision threshold), and only the 606 test rows are unseen. The all-rows numbers below score the detector partly against sentences it already trained on, so they read as better than the detector actually is on new text — `--ids`/`--ids-key` let the harness restrict to one named split from a file like `splits.json`.
 
 `pun_type` is scored over detector true positives only (AC #2: gold `is_pun: true` *and* predicted `is_pun: true`).
 

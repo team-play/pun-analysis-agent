@@ -1,24 +1,23 @@
 """TASK-2.4: calibrate scoring.MARGIN_THRESHOLD against the SemEval eval dataset.
 
 Runs the detector's dev and test rows (docs/experiments/pun-detector/prototype-1/
-splits.json) through selection.pun_readings() -- production's actual
-sense-selection pipeline, not a reconstruction from candidates/context/senses/
-scoring directly (PR #89's original version did that, which PR #93 found
-measured filters production doesn't apply; see docs/design/sense-selection.md).
+splits.json) through selection.pun_readings().
 Calling pun_readings() with threshold=math.inf applies its other three filters
 (positive runner-up score, no shared WordNet word, dissimilar glosses) while
 leaving every margin visible, regardless of size.
 
 Train rows are skipped entirely: the detector was fit on them, so they say
 nothing about how a threshold generalizes. Dev is for sweeping thresholds;
-test is reported once, at the threshold actually chosen, never used to pick
-it (same split discipline as the detector's own evaluation).
+test is reported once, at the threshold chosen from the dev sweep. Earlier
+exploratory runs used all rows, so test is not a pristine confirmatory holdout.
 
-For each split, collects:
-  - per-candidate margins on is_pun:false rows -- every candidate here is a
-    confirmed non-pun word, so this is the false-positive distribution.
-  - per-sentence minimum margins on homographic is_pun:true rows -- the
-    sentence's best candidate, giving a sentence-level recall distribution.
+Both classes use each sentence's minimum embedding-Lesk margin. Rates are
+conditional on an eligible reading; coverage and all-gold-sentence rates are
+reported too. Selectional-preference readings are excluded, so these are not
+overall production metrics. Detector ranking (preferred) is omitted: ordering
+does not change whether any inspected reading passes. Word-level accuracy is
+not measured; the dataset has no pun-word labels. Without preferred, only the
+first 32 candidates are inspected, so detector-ranked extras are not covered.
 
 Run from inference/:
     uv run python scripts/calibrate_margin.py
@@ -36,13 +35,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from candidates import get_model
-from scoring import MARGIN_THRESHOLD, default_embed
+from scoring import default_embed
 from selection import pun_readings
 from senses import get_candidate_senses
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 DATASET = REPO_ROOT / "eval/datasets/semeval2017_task7_puns.csv"
 SPLITS = REPO_ROOT / "docs/experiments/pun-detector/prototype-1/splits.json"
+THRESHOLDS = (0.0, 0.005, 0.01, 0.015, 0.02, 0.03, 0.05, 0.08, 0.1, 0.15)
+MAX_FP_RATE = 0.30
 
 
 @dataclass(frozen=True)
@@ -82,15 +83,14 @@ def observe(row_id: str, is_pun: bool, pun_type: str | None, text: str) -> list[
 
 @dataclass
 class SplitData:
-    negative_margins: list[Observation]
-    # Every reading for each homographic-pun sentence, not just one "best" --
-    # the flat and normalized schemes can disagree on which candidate is best
-    # for a given sentence, so each analysis below picks its own minimum.
+    negative_observations: list[list[Observation]]
     positive_observations: list[list[Observation]]
+    negative_total: int = 0
+    positive_total: int = 0
 
 
 def collect(rows: list[dict[str, str]], row_ids: set[str]) -> SplitData:
-    data = SplitData(negative_margins=[], positive_observations=[])
+    data = SplitData(negative_observations=[], positive_observations=[])
     wanted = [row for row in rows if row["id"] in row_ids]
     for index, row in enumerate(wanted):
         is_pun = row["is_pun"].strip().lower() == "true"
@@ -98,13 +98,16 @@ def collect(rows: list[dict[str, str]], row_ids: set[str]) -> SplitData:
         observations = observe(row["id"], is_pun, pun_type, row["text"])
 
         if not is_pun:
-            data.negative_margins.extend(observations)
-        elif pun_type == "homographic" and observations:
-            data.positive_observations.append(observations)
+            data.negative_total += 1
+            if observations:
+                data.negative_observations.append(observations)
+        elif pun_type == "homographic":
+            data.positive_total += 1
+            if observations:
+                data.positive_observations.append(observations)
 
         if (index + 1) % 200 == 0:
             print(f"...{index + 1}/{len(wanted)} rows", file=sys.stderr)
-    data.negative_margins.sort(key=lambda o: o.margin)
     return data
 
 
@@ -115,14 +118,18 @@ def report_sweep(data: SplitData) -> None:
         key=lambda o: o.margin,
     )
 
-    print(f"non-pun candidate observations: {len(data.negative_margins)}")
-    print(f"homographic-pun sentence observations: {len(data.positive_observations)}")
+    negative_minimums = sorted(
+        (min(sentence, key=lambda o: o.margin) for sentence in data.negative_observations),
+        key=lambda o: o.margin,
+    )
+    _report_coverage(data)
 
     for percentile in (1, 5, 10, 25, 50):
-        negative_margins = data.negative_margins
-        index = max(0, min(len(negative_margins) - 1, len(negative_margins) * percentile // 100))
-        if negative_margins:
-            print(f"non-pun candidate margin p{percentile}: {negative_margins[index].margin:.4f}")
+        index = max(0, min(len(negative_minimums) - 1, len(negative_minimums) * percentile // 100))
+        if negative_minimums:
+            print(
+                f"non-pun sentence-min margin p{percentile}: {negative_minimums[index].margin:.4f}"
+            )
 
     for percentile in (10, 25, 50, 75, 90):
         index = max(
@@ -134,26 +141,31 @@ def report_sweep(data: SplitData) -> None:
                 f"{raw_margin_minimums[index].margin:.4f}"
             )
 
-    print(f"negative margin/sense_count correlation: {_correlation(data.negative_margins):.3f}")
+    print(
+        f"negative sentence-min margin/sense_count correlation: {_correlation(negative_minimums):.3f}"
+    )
     print(
         "positive sentence-min margin/sense_count correlation: "
         f"{_correlation(raw_margin_minimums):.3f}"
     )
 
     print("-- flat margin threshold --")
-    for threshold in (0.02, 0.03, 0.05, 0.08, 0.1, 0.15):
-        fp_rate, recall = _flat_scores(data, raw_margin_minimums, threshold)
-        print(f"threshold={threshold:.2f}  fp_rate={fp_rate:.3f}  recall={recall:.3f}")
+    for threshold in THRESHOLDS:
+        fp_rate, recall = _flat_scores(data, threshold)
+        print(f"threshold={threshold:.3f}  fp_rate={fp_rate:.3f}  recall={recall:.3f}")
 
     print("-- sense-count-normalized threshold (margin * sense_count) --")
     normalized_minimums = [
         min(o.margin * o.sense_count for o in sentence) for sentence in data.positive_observations
     ]
+    negative_normalized_minimums = [
+        min(o.margin * o.sense_count for o in sentence) for sentence in data.negative_observations
+    ]
     for threshold in (0.1, 0.2, 0.3, 0.5, 0.8, 1.2):
         fp_rate = (
-            sum(1 for o in data.negative_margins if o.margin * o.sense_count <= threshold)
-            / len(data.negative_margins)
-            if data.negative_margins
+            sum(normalized <= threshold for normalized in negative_normalized_minimums)
+            / len(negative_normalized_minimums)
+            if negative_normalized_minimums
             else 0.0
         )
         recall = (
@@ -165,31 +177,58 @@ def report_sweep(data: SplitData) -> None:
         print(f"threshold={threshold:.2f}  fp_rate={fp_rate:.3f}  recall={recall:.3f}")
 
 
-def _flat_scores(
-    data: SplitData, raw_margin_minimums: list[Observation], threshold: float
-) -> tuple[float, float]:
+def _flat_scores(data: SplitData, threshold: float) -> tuple[float, float]:
     fp_rate = (
-        sum(1 for o in data.negative_margins if o.margin <= threshold) / len(data.negative_margins)
-        if data.negative_margins
+        sum(min(o.margin for o in sentence) <= threshold for sentence in data.negative_observations)
+        / len(data.negative_observations)
+        if data.negative_observations
         else 0.0
     )
     recall = (
-        sum(1 for o in raw_margin_minimums if o.margin <= threshold) / len(raw_margin_minimums)
-        if raw_margin_minimums
+        sum(min(o.margin for o in sentence) <= threshold for sentence in data.positive_observations)
+        / len(data.positive_observations)
+        if data.positive_observations
         else 0.0
     )
     return fp_rate, recall
 
 
+def choose_threshold(data: SplitData) -> float:
+    """Maximize dev conditional recall under the FP cap; ties prefer smaller margins."""
+    if not data.negative_observations or not data.positive_observations:
+        raise ValueError("Both classes need eligible dev sentences to choose a threshold")
+    eligible = [
+        threshold for threshold in THRESHOLDS if _flat_scores(data, threshold)[0] <= MAX_FP_RATE
+    ]
+    if not eligible:
+        raise ValueError("No dev grid point meets the false-positive cap")
+    return max(eligible, key=lambda threshold: (_flat_scores(data, threshold)[1], -threshold))
+
+
+def _report_coverage(data: SplitData) -> None:
+    print("embedding-Lesk only; eligible-sentence rates, not end-to-end or word accuracy")
+    print(f"non-pun eligible sentences: {len(data.negative_observations)}/{data.negative_total}")
+    print(
+        f"homographic-pun eligible sentences: {len(data.positive_observations)}/{data.positive_total}"
+    )
+
+
 def report_at_threshold(data: SplitData, threshold: float) -> None:
     """The single fp_rate/recall pair at an already-chosen threshold, for reporting on test."""
-    raw_margin_minimums = [
-        min(sentence, key=lambda o: o.margin) for sentence in data.positive_observations
-    ]
-    fp_rate, recall = _flat_scores(data, raw_margin_minimums, threshold)
-    print(f"non-pun candidate observations: {len(data.negative_margins)}")
-    print(f"homographic-pun sentence observations: {len(data.positive_observations)}")
-    print(f"threshold={threshold:.2f}  fp_rate={fp_rate:.3f}  recall={recall:.3f}")
+    fp_rate, recall = _flat_scores(data, threshold)
+    _report_coverage(data)
+    print(f"threshold={threshold:.3f}  fp_rate={fp_rate:.3f}  recall={recall:.3f}")
+    fp_all = (
+        fp_rate * len(data.negative_observations) / data.negative_total
+        if data.negative_total
+        else 0.0
+    )
+    recall_all = (
+        recall * len(data.positive_observations) / data.positive_total
+        if data.positive_total
+        else 0.0
+    )
+    print(f"all-gold-sentence rates: fp_rate={fp_all:.3f}  recall={recall_all:.3f}")
 
 
 def main() -> None:
@@ -200,10 +239,16 @@ def main() -> None:
     print("== DEV (tune here) ==")
     dev = collect(rows, set(splits["dev"]))
     report_sweep(dev)
+    chosen = choose_threshold(dev)
+    print(
+        f"Dev rule: highest recall with fp_rate <= {MAX_FP_RATE:.0%}; ties choose smaller threshold"
+    )
+    print(f"Chosen threshold: {chosen:.3f}")
+    report_at_threshold(dev, chosen)
 
-    print(f"\n== TEST (report only, at the chosen MARGIN_THRESHOLD={MARGIN_THRESHOLD}) ==")
+    print(f"\n== TEST (report only, at the dev-chosen threshold={chosen}) ==")
     test = collect(rows, set(splits["test"]))
-    report_at_threshold(test, MARGIN_THRESHOLD)
+    report_at_threshold(test, chosen)
 
 
 def _correlation(observations: list[Observation]) -> float:

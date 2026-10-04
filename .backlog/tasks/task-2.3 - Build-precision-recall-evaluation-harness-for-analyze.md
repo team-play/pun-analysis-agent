@@ -5,7 +5,7 @@ status: Done
 assignee:
   - Livia
 created_date: '2026-09-20 10:05'
-updated_date: '2026-10-02 21:17'
+updated_date: '2026-10-04 04:20'
 labels:
   - dataset
   - evaluation
@@ -61,6 +61,8 @@ Open decisions resolved in PR #31 (2026-09-25, option C): (1) validate_response 
 Live run against PR 85's classifier (branch task-2.3-live-eval, stacked on review/pun-detector@b5dd5f7): 4,030/4,030 rows, 0 errors, 0 undetermined. is_pun F1 0.934 (precision 0.900, recall 0.970), pun_type accuracy 0.741 (homographic F1 0.785, homophonic F1 0.709). Required downloading the detector's MiniLM encoder snapshot locally (inference/README.md's local setup step, not yet folded into docs/local-setup.md -- flagging as a docs-drift follow-up). Full numbers in eval/reports/task-2.3-harness-validation.md's new Live run section; raw JSON output gitignored (eval/*-results.json), regenerate via the documented command.
 
 Code review (subagent) flagged two issues, both fixed: (1) baseline-slice naming mismatch between the fixture run's food-only 247-row slice and the live run's animal_food slice -- reworded for clarity. (2) AC #2's 'true-positive pun rows' wording didn't match the implementation, which scored pun_type over all gold is_pun:true rows. Fixed evaluate_dataset.py's _type_metrics to restrict pun_type scoring to detector true positives (gold AND predicted is_pun:true); added test_evaluate_excludes_detector_false_negatives_from_pun_type; updated eval/README.md's description to match. Re-ran the live eval after the fix: pun_type support drops from 2,878/354 (gold-positive) to 2,793/342 (detector-TP) rows; accuracy 0.764 all-categories / 0.751 animal_food (was 0.741/0.726 under the old gold-positive scoring -- is_pun metrics unchanged). 29/29 tests pass (unittest, matching CI's actual command, not pytest), ruff check and ruff format clean. DoD #3 (docs drift): the detector's encoder-download step lives in inference/README.md but is missing from docs/local-setup.md -- that gap belongs to PR #85 (TASK-16), not introduced by this task; checked per explicit instruction, not self-certified as resolved.
+
+PR #89 review (yaitorr, CHANGES_REQUESTED): the live-run numbers scored the detector partly against its own training data (docs/experiments/pun-detector/prototype-1/splits.json: 2,820 train / 604 dev / 606 test rows). Added --ids/--ids-key to evaluate_dataset.py to filter to a named split; rewrote the report to show the unseen test split first (is_pun F1 0.898, pun_type accuracy 0.681) and all-rows second (F1 0.934, accuracy 0.764), with the gap explained and an animal_food small-sample (60 rows) caveat. Also added probabilities contract validation (shape/range/sum-to-1/confidence-consistency) to validate_response, since the review noted it wasn't checked despite the harness's own claim to validate the full contract shape.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
