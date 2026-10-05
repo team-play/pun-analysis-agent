@@ -5,6 +5,8 @@ import pytest
 
 import selection
 from candidates import get_model
+from context import LocalContext
+from scoring import PunSignal, ScoredSense
 from selection import pun_readings, select_senses
 from senses import Sense
 
@@ -22,6 +24,13 @@ DOUGH_FOOD = Sense(
 DOUGH_MONEY = Sense(
     "informal terms for money", ("medium of exchange",), "noun.possession", "wordnet"
 )
+CHEDDAR_CHEESE = Sense(
+    "hard smooth-textured cheese; originally made in Cheddar in southwestern England",
+    (),
+    "noun.food",
+    "wordnet",
+)
+CHEDDAR_MONEY = Sense("Money, cash, currency.", (), None, "wiktionary")
 
 
 @pytest.fixture
@@ -129,16 +138,78 @@ def test_select_senses_explains_the_first_reading(doc, senses):
     assert select_senses(doc, TIED, preferred=[DOUGH]) == {
         "words_involved": ["dough"],
         "explanation": (
-            '"dough" can mean a flour mixture stiff enough to knead or roll or '
-            "informal terms for money. Both meanings match the seeded 'need' / 'dobj' "
-            "slot. Their score difference is 0.000. This is a proposed interpretation, "
-            "not proof that both readings work."
+            '"dough" can mean "a flour mixture stiff enough to knead or roll" or '
+            '"informal terms for money"; the sentence supports both because both fit '
+            'as the object of "need". This is a proposed reading, not proof.'
         ),
         "sense_source": "wordnet",
     }
-    lesk = select_senses(doc, TIED)
-    assert lesk["words_involved"] == ["baker"]
-    assert "Both definitions have positive similarity to the sentence." in lesk["explanation"]
+    assert select_senses(doc, TIED)["explanation"] == (
+        '"baker" can mean "someone who bakes bread or cake" or "a portable oven for '
+        'baking"; the sentence supports both because both definitions are about '
+        "equally close to the sentence's meaning. This is a proposed reading, not proof."
+    )
+
+
+def tied(method, top=DOUGH_FOOD, runner_up=DOUGH_MONEY):
+    """A pair scored by `method` with a margin of 0, for testing the explanation alone."""
+    return PunSignal(
+        top=ScoredSense(top, 1.0, method),
+        runner_up=ScoredSense(runner_up, 1.0, method),
+        margin=0.0,
+        sense_source="wordnet",
+    )
+
+
+@pytest.mark.parametrize(
+    ("relation", "predicate", "evidence"),
+    [
+        ("dobj", "need", 'both fit as the object of "need"'),
+        ("nsubj", "rise", 'both fit as the subject of "rise"'),
+        ("prep_in", "hide", 'both fit in "hide ... in ___"'),
+        ("iobj", "give", 'both fit the seeded "give" / "iobj" slot'),
+    ],
+    ids=["object", "subject", "preposition", "any other slot"],
+)
+def test_seeded_evidence_names_the_slot_in_plain_words(relation, predicate, evidence):
+    context = LocalContext(relation=relation, predicate=predicate)
+
+    assert selection._evidence(context, tied("selectional_preference")) == evidence
+
+
+def test_lesk_evidence_names_no_slot():
+    # Lesk compares each gloss with the whole sentence, so no slot was involved.
+    root = LocalContext(relation="ROOT", predicate=None)
+
+    assert selection._evidence(root, tied("embedding_lesk")) == (
+        "both definitions are about equally close to the sentence's meaning"
+    )
+
+
+def test_glosses_are_quoted_without_their_trailing_period():
+    # A Wiktionary gloss is a sentence: quoted, it keeps its capital but not its
+    # period, so the explanation never reads 'currency.";'.
+    pair = tied("embedding_lesk", CHEDDAR_CHEESE, CHEDDAR_MONEY)
+
+    assert selection._explain("cheddar", LocalContext("dobj", "want"), pair) == (
+        '"cheddar" can mean "hard smooth-textured cheese; originally made in Cheddar '
+        'in southwestern England" or "Money, cash, currency"; the sentence supports '
+        "both because both definitions are about equally close to the sentence's "
+        "meaning. This is a proposed reading, not proof."
+    )
+
+
+@pytest.mark.parametrize(
+    ("gloss", "quoted"),
+    [
+        ("informal terms for money", '"informal terms for money"'),
+        ("Money, cash, currency.", '"Money, cash, currency"'),
+        (" Money, cash, currency. ", '"Money, cash, currency"'),
+    ],
+    ids=["WordNet", "Wiktionary", "stray whitespace"],
+)
+def test_quote(gloss, quoted):
+    assert selection._quote(gloss) == quoted
 
 
 def test_select_senses_is_none_without_a_reading(doc, senses):

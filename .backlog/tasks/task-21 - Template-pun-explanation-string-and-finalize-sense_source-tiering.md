@@ -1,11 +1,11 @@
 ---
 id: TASK-21
 title: Template pun explanation string and finalize sense_source tiering
-status: To Do
+status: In Progress
 assignee:
   - '@Andi-Cast'
 created_date: '2026-09-20 10:04'
-updated_date: '2026-10-04 20:57'
+updated_date: '2026-10-05 18:24'
 labels:
   - wsd
 milestone: m-6
@@ -27,17 +27,24 @@ Step 6 of docs/design/sense-selection.md's approach: once TASK-19 has produced a
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Given a winning sense pair, explanation is templated per docs/design/sense-selection.md's pattern
-- [ ] #2 Unit tests cover the dough/money example end-to-end producing the exact explanation shape
-- [ ] #3 sense_source (added to AnalyzeResponse by TASK-16) is wordnet/wiktionary for whichever tier produced the winning senses; when no tier produced a confident pair it stays llm_fallback with an empty explanation; null when sense selection didn't run (is_pun false or null)
+- [x] #1 Given a winning sense pair, explanation is templated per docs/design/sense-selection.md's pattern
+- [x] #2 Unit tests cover the dough/money example end-to-end producing the exact explanation shape
+- [x] #3 sense_source (added to AnalyzeResponse by TASK-16) is wordnet/wiktionary for whichever tier produced the winning senses; when no tier produced a confident pair it stays llm_fallback with an empty explanation; null when sense selection didn't run (is_pun false or null)
+- [x] #4 Inference logs one INFO line, without the user's text, whenever a homographic pun falls back to llm_fallback because no candidate passed the filters, and whenever a homophonic pun skips sense selection; internal errors stay logged as errors
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
-- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. selection.py: explanation follows design step 6: "{word}" can mean "{gloss_1}" or "{gloss_2}"; the sentence supports both because {evidence}. This is a proposed reading, not proof. Glosses quoted with one trailing period stripped (Wiktionary glosses end in one); evidence names the seeded slot in plain words (dobj -> the object of, nsubj -> the subject of, prep_<p> -> "<predicate> ... <p> ___", any other relation -> the generic slot wording) or, for embedding-Lesk, says both definitions are about equally close to the sentence; the score difference is dropped. 2. pun_detector/agent.py: one INFO log per fallback with its reason (homophonic, no_reading) and the ranked-candidate count, never the sentence; main.py configures logging at INFO so the lines reach Cloud Run. 3. Tests: dough exact string, a Wiktionary gloss, each evidence phrase, caplog per fallback reason. 4. sense-selection.md: step 6 example from the real output, drop the "Until TASK-21 lands" paragraph, eval hooks mention the reason logs. Out of scope: trying the next distinct sense when a filter rejects a pair (TASK-63, needs recalibration).
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
@@ -53,4 +60,16 @@ From TASK-19's review (2026-09-29): the two-category seeds (need/want + dobj -> 
 2026-10-03: PR #85 already templates an explanation in pun_detector/agent.py's select_senses ('"{word}" can mean {gloss} or {gloss}. {evidence} Their score difference is {margin}. This is a proposed interpretation...'), which differs from this task's pattern; TASK-58 moves that orchestration into sense selection first. From PR #85's architectural review: sense-selection.md asks Inference to log why it fell back (no confident pair vs an internal error), but agent.py only logs exceptions, so a no-pair result and every homophonic llm_fallback are silent.
 
 2026-10-03 (TASK-58): sense selection's orchestration and its explanation template now live in inference/selection.py (select_senses / pun_readings), not pun_detector/agent.py. From TASK-58's code review: when the shared-word or gloss-similarity filter rejects a candidate's pair, the whole candidate is skipped instead of trying its next distinct sense, so a word with a valid third sense falls through to the next candidate or llm_fallback. These are really 'distinct sense' rules; folding them into scoring's pun_margin/_distinct would fix it, but changes behaviour, so it belongs here or with TASK-2.4.
+
+Implemented (2026-10-05): selection.py builds the explanation with _explain/_quote/_evidence per design step 6 (glosses quoted minus one trailing period; evidence is the seeded slot in plain words for selectional preference, or "both definitions are about equally close to the sentence's meaning" for embedding-Lesk; closing hedge kept; score difference dropped). pun_detector/agent.py logs one INFO line per fallback (reason=homophonic or no_reading, plus the detector's ranked-candidate count, at most 2), never the user's text; main.py sets logging.basicConfig(level=INFO) so the lines reach Cloud Run (checked under uvicorn: printed once, no duplicate or third-party noise). AC #2 and #3: the dough exact-string test is tests/test_selection.py::test_select_senses_explains_the_first_reading; sense_source outcomes were already covered by tests/test_pun_analysis.py (TASK-16/58) and still pass.
+
+Code review (AGENTS.md, independent subagent): no bugs or contract issues; 23 of 26 deliberate breakages caught by tests after the fix (uncaught: removing basicConfig, which pytest cannot observe and was checked under uvicorn instead; lemma vs surface text, not new behaviour; stripping every trailing period instead of one, part of the out-of-scope _quote edge cases below). The zero-candidate log gap was closed with a test. Fixed in scope: a blank line lost before a design-doc heading, the ranked_candidates count documented as the detector's top picks (not the words tried), and "reason lines never include the user's text" (a traceback can). Architectural review: not required, since the change touches no contract (contracts.md does not fix the explanation's format), topology, isolation rule or dependency; Backend and Frontend only pass explanation through as a string.
+
+Known limitations, left out of TASK-21's scope: _quote strips the period of glosses ending in "etc." (~240 OEWN, ~3.5k Wiktionary) and turns "..." into ".."; Wiktionary glosses containing double quotes (~1.7k) nest them inside the explanation's quotes. Rare for pun words, since Wiktionary is only consulted when WordNet has fewer than 2 senses. frontend/src/lib/chat/fixtures/analyze-results.ts still has a hand-written explanation the template can no longer produce (cosmetic; nothing parses explanation).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+The /analyze explanation now follows design doc step 6: "{word}" can mean "{gloss_1}" or "{gloss_2}"; the sentence supports both because {evidence}. This is a proposed reading, not proof. Evidence is only what scoring used: the seeded slot in plain words (object of / subject of / "<predicate> ... <p> ___") or, for embedding-Lesk, that both definitions are about equally close to the sentence. Inference now logs why a pun fell back to llm_fallback (one INFO line, reason=homophonic or no_reading, no user text), with logging configured in main.py. Verified: 125 inference tests pass (new: exact dough and Lesk strings, evidence per slot, gloss quoting, log line per reason, zero-candidate log, no log when nothing fell back), ruff clean, real-model output and a real uvicorn run checked, independent code review done with in-scope findings fixed. Design doc step 6 and eval hooks updated.
+<!-- SECTION:FINAL_SUMMARY:END -->

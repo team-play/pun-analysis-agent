@@ -117,23 +117,57 @@ def select_senses(
     reading = next(pun_readings(doc, embed, preferred=preferred), None)
     if reading is None:
         return None
-    candidate, context, signal = reading.candidate, reading.context, reading.signal
-    evidence = (
-        f"Both meanings match the seeded '{context.predicate}' / '{context.relation}' slot."
-        if signal.method == "selectional_preference"
-        else "Both definitions have positive similarity to the sentence."
-    )
-    explanation = (
-        f'"{candidate.text}" can mean {signal.top.sense.gloss} or '
-        f"{signal.runner_up.sense.gloss}. {evidence} "
-        f"Their score difference is {signal.margin:.3f}. "
-        "This is a proposed interpretation, not proof that both readings work."
-    )
     return {
-        "words_involved": [candidate.text],
-        "explanation": explanation,
-        "sense_source": signal.sense_source,
+        "words_involved": [reading.candidate.text],
+        "explanation": _explain(reading.candidate.text, reading.context, reading.signal),
+        "sense_source": reading.signal.sense_source,
     }
+
+
+def _explain(word: str, context: LocalContext, signal: PunSignal) -> str:
+    """The explanation string, per docs/design/sense-selection.md step 6.
+
+    '"dough" can mean "a flour mixture stiff enough to knead or roll" or
+    "informal terms for money"; the sentence supports both because both fit as
+    the object of "need". This is a proposed reading, not proof.'
+    """
+    return (
+        f'"{word}" can mean {_quote(signal.top.sense.gloss)} or '
+        f"{_quote(signal.runner_up.sense.gloss)}; the sentence supports both because "
+        f"{_evidence(context, signal)}. This is a proposed reading, not proof."
+    )
+
+
+def _quote(gloss: str) -> str:
+    """A gloss in double quotes, minus one trailing period.
+
+    Wiktionary glosses are sentences ('Money, cash, currency.'), WordNet's
+    aren't ('informal terms for money'); quoted, both read the same mid-sentence.
+    """
+    return f'"{gloss.strip().removesuffix(".")}"'
+
+
+def _evidence(context: LocalContext, signal: PunSignal) -> str:
+    """Why both senses fit, in plain words: the part after "because".
+
+    selectional_preference: the seeded slot both senses fit, e.g.
+      dobj    -> 'both fit as the object of "need"'
+      nsubj   -> 'both fit as the subject of "rise"'
+      prep_in -> 'both fit in "hide ... in ___"'
+      other   -> 'both fit the seeded "give" / "iobj" slot'
+    embedding_lesk (no slot involved):
+      "both definitions are about equally close to the sentence's meaning"
+    """
+    if signal.method == "embedding_lesk":
+        return "both definitions are about equally close to the sentence's meaning"
+    predicate, relation = context.predicate, context.relation
+    if relation == "dobj":
+        return f'both fit as the object of "{predicate}"'
+    if relation == "nsubj":
+        return f'both fit as the subject of "{predicate}"'
+    if relation.startswith("prep_"):
+        return f'both fit in "{predicate} ... {relation.removeprefix("prep_")} ___"'
+    return f'both fit the seeded "{predicate}" / "{relation}" slot'
 
 
 def _share_another_word(candidate: CandidateWord, signal: PunSignal) -> bool:

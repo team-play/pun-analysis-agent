@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
@@ -7,6 +8,10 @@ from pydantic import BaseModel, Field, field_validator
 
 from pun_detector.agent import PunAnalysis, load_analysis
 from pun_detector.features import MAX_CHARS
+
+# Python drops log records below WARNING unless configured, so sense
+# selection's INFO lines saying why a pun fell back would never reach Cloud Run.
+logging.basicConfig(level=logging.INFO)
 
 
 @asynccontextmanager
