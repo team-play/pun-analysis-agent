@@ -1,4 +1,5 @@
 import pytest
+import wn
 
 from pun_detector import agent
 from pun_detector.agent import PunAnalysis, undetermined
@@ -133,3 +134,52 @@ def test_by_default_selection_runs_on_the_detectors_parse_embed_and_ranking(monk
     assert result["sense_source"] == "wordnet"
     # The detector's ranking reaches selection as token indexes, best first.
     assert calls == [("parsed: The baker needed more dough.", Extractor.embed, [0, 1])]
+
+
+def fake_loading(monkeypatch, detector, selector=None):
+    """Make load_analysis build `detector` and `selector`, recording the extractor it is given."""
+    built_with = []
+    monkeypatch.setattr(agent, "FeatureExtractor", lambda: "extractor")
+    monkeypatch.setattr(
+        agent, "PunDetector", lambda extractor: built_with.append(extractor) or detector
+    )
+    monkeypatch.setattr(
+        agent, "select_with_detector", selector or RecordingSelector(selected("wordnet"))
+    )
+    # Restored after the test, since load_analysis sets it process-wide.
+    monkeypatch.setattr(wn.config, "allow_multithreading", False)
+    return built_with
+
+
+def test_loading_warms_the_analysis_up_on_a_real_prediction(monkeypatch):
+    detector = FakeDetector()
+    predicted = []
+    detector.predict = lambda text: predicted.append(text) or detector.prediction
+    built_with = fake_loading(monkeypatch, detector)
+
+    analysis = agent.load_analysis()
+
+    assert analysis.detector is detector
+    assert built_with == ["extractor"]
+    assert predicted == [agent.WARM_UP_TEXT]
+    assert analysis.selector.calls != []
+    # Requests run on worker threads, not the startup thread that opened wn's connection.
+    assert wn.config.allow_multithreading is True
+
+
+LOAD_FAILURES = {
+    "detection fails": (BrokenDetector(), None),
+    "detector misses the pun": (FakeDetector(pun_type=None), None),
+    "selection fails": (FakeDetector(), RecordingSelector(raises=LookupError("no senses"))),
+    "selection finds nothing": (FakeDetector(), RecordingSelector(returns=None)),
+}
+
+
+@pytest.mark.parametrize(("detector", "selector"), LOAD_FAILURES.values(), ids=LOAD_FAILURES.keys())
+def test_loading_raises_when_wordnet_does_not_explain_the_warm_up(monkeypatch, detector, selector):
+    # analyze() degrades these to the undetermined or llm_fallback result; startup must not,
+    # since every request would degrade the same way.
+    fake_loading(monkeypatch, detector, selector)
+
+    with pytest.raises(RuntimeError, match="Warm-up"):
+        agent.load_analysis()

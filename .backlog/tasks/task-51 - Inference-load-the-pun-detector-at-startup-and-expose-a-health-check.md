@@ -1,11 +1,11 @@
 ---
 id: TASK-51
 title: 'Inference: load the pun detector at startup and expose a health check'
-status: To Do
+status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-10-02 10:04'
-updated_date: '2026-10-04 20:57'
+updated_date: '2026-10-05 09:06'
 labels: []
 milestone: m-4
 dependencies:
@@ -40,6 +40,19 @@ PR 85 (TASK-16) loads the detector lazily inside the first /analyze request, und
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. main.py: FastAPI lifespan builds PunAnalysis(PunDetector(extractor=FeatureExtractor())) and runs one warm-up prediction before uvicorn binds; any failure raises so the revision fails startup.
+2. /analyze gets the analysis via Depends(get_analysis) from app.state; tests use app.dependency_overrides.
+3. GET /health returns {status: ok} with no prediction (serving implies loaded, since lifespan completes before uvicorn accepts connections).
+4. PunAnalysis takes a required detector; drop the lazy load and wn multithreading setup moves to startup.
+5. Tests: 500 on a result that breaks AnalyzeResponse; lifespan failure aborts startup; /health 200.
+6. Dockerfile build check, contracts.md, local-setup.md, deploy smoke test -> /health.
+
+Revised in implementation: tests patch main.load_analysis and go through the real lifespan and get_analysis (instead of dependency_overrides), so the wiring is tested too; the analysis lives in lifespan state (request.state), not app.state.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 

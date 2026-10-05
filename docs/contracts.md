@@ -20,6 +20,8 @@ POST /analyze
 
 **Access:** locally, `/analyze` takes no credentials. The deployed Inference service is private: Cloud Run answers 403 to any request without a Google-signed ID token for an identity allowed to invoke it, before the request reaches Inference. Backend calls it as its runtime service account; see [`local-setup.md`](local-setup.md)'s "Inference deploy".
 
+**Health:** `GET /health` answers `200 {"status": "ok"}` without running a prediction; it is the cheap endpoint Backend's warm-up ping uses (TASK-53), not a probe Cloud Run calls. Inference loads the pun detector and runs one warm-up prediction at startup, before it accepts connections, so a 200 means the detector is loaded. The warm-up text is a pun WordNet explains, so if the detector can't load, or detection or sense selection doesn't produce that result, startup fails, so a broken revision fails its deploy and never takes traffic. Access is the same as `/analyze`'s.
+
 `is_pun`, `pun_type` and `confidence` come from pun detection alone: `confidence` is the detector's probability that the text is a pun, from 0 to 1. Sense selection only runs when `is_pun` is `true` and never changes those three fields.
 
 `probabilities` are the detector's three class probabilities, each from 0 to 1 and summing to 1 (within 1e-6), and `confidence` is `homographic` + `homophonic`. Like `confidence`, they are the model's raw output, not calibrated, and sense selection never changes them. A result may omit the field (results from before it existed), and Backend and Frontend treat a missing field as `null` and never fill it in.

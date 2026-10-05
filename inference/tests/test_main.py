@@ -2,11 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 import main
-from pun_detector.agent import PunAnalysis
+from pun_detector.agent import PunAnalysis, undetermined
 from tests.fakes import BrokenDetector, FakeDetector, RecordingSelector, selected
-
-# A server error comes back as a 500 response instead of raising in the test.
-client = TestClient(main.app, raise_server_exceptions=False)
 
 # Each builds a fresh PunAnalysis, so no fake's state outlives its test.
 ANALYSES = {
@@ -18,22 +15,74 @@ ANALYSES = {
 }
 
 
+class FixedAnalysis:
+    def __init__(self, result):
+        self.result = result
+        self.calls = []
+
+    def analyze(self, text):
+        self.calls.append(text)
+        return self.result
+
+
+def serve(monkeypatch, analysis):
+    """A client whose startup loads `analysis` instead of the real detector."""
+    monkeypatch.setattr(main, "load_analysis", lambda: analysis)
+    # A server error comes back as a 500 response instead of raising in the test.
+    return TestClient(main.app, raise_server_exceptions=False)
+
+
 @pytest.mark.parametrize("build", ANALYSES.values(), ids=ANALYSES.keys())
 def test_analyze_returns_every_result_shape_unchanged(monkeypatch, build):
     # AnalyzeResponse must neither 500 on a contract-valid result (e.g. the undetermined
     # result's nulls, or a sense_source it doesn't list) nor drop or alter a field.
-    analysis = build()
-    expected = analysis.analyze("The baker needed more dough.")
-    monkeypatch.setattr(main, "analysis", build())
+    expected = build().analyze("The baker needed more dough.")
 
-    response = client.post("/analyze", json={"text": "The baker needed more dough."})
+    with serve(monkeypatch, build()) as client:
+        response = client.post("/analyze", json={"text": "The baker needed more dough."})
 
     assert response.status_code == 200
     assert response.json() == expected
 
 
+@pytest.mark.parametrize(
+    "breakage",
+    [{"confidence": 1.5}, {"pun_type": "spoonerism"}, {"sense_source": "gemini"}],
+    ids=["confidence above 1", "unknown pun_type", "unknown sense_source"],
+)
+def test_analyze_answers_500_when_a_result_breaks_the_contract(monkeypatch, breakage):
+    # A contract-breaking result must not reach Backend looking like a valid one.
+    with serve(monkeypatch, FixedAnalysis({**undetermined(), **breakage})) as client:
+        response = client.post("/analyze", json={"text": "The baker needed more dough."})
+
+    assert response.status_code == 500
+
+
 @pytest.mark.parametrize("text", ["", "   ", "x" * (main.MAX_CHARS + 1)])
-def test_analyze_rejects_empty_blank_and_overlong_text(text):
-    response = client.post("/analyze", json={"text": text})
+def test_analyze_rejects_empty_blank_and_overlong_text(monkeypatch, text):
+    with serve(monkeypatch, FixedAnalysis(undetermined())) as client:
+        response = client.post("/analyze", json={"text": text})
 
     assert response.status_code == 422
+
+
+def test_health_answers_without_running_a_prediction(monkeypatch):
+    analysis = FixedAnalysis(undetermined())
+
+    with serve(monkeypatch, analysis) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+    assert analysis.calls == []
+
+
+def test_a_failed_load_stops_startup(monkeypatch):
+    def load_analysis():
+        raise RuntimeError("model failed to load")
+
+    monkeypatch.setattr(main, "load_analysis", load_analysis)
+
+    # Entering the client runs startup, as uvicorn does before it accepts connections.
+    with pytest.raises(RuntimeError, match="model failed to load"), TestClient(main.app):
+        pass

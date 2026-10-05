@@ -1,13 +1,30 @@
-from typing import Literal
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Annotated, Literal
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Request
 from pydantic import BaseModel, Field, field_validator
 
-from pun_detector.agent import PunAnalysis
+from pun_detector.agent import PunAnalysis, load_analysis
 from pun_detector.features import MAX_CHARS
 
-app = FastAPI(title="pun-analysis-agent inference")
-analysis = PunAnalysis()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[dict[str, PunAnalysis]]:
+    # uvicorn binds its port only after startup, so the service never answers before the
+    # detector is loaded and warm, and a load failure stops startup. Blocking the event loop
+    # here is fine: nothing else runs until startup is done.
+    yield {"analysis": load_analysis()}
+
+
+app = FastAPI(title="pun-analysis-agent inference", lifespan=lifespan)
+
+
+def get_analysis(request: Request) -> PunAnalysis:
+    return request.state.analysis
+
+
+AnalysisDep = Annotated[PunAnalysis, Depends(get_analysis)]
 
 
 class AnalyzeRequest(BaseModel):
@@ -37,6 +54,11 @@ class AnalyzeResponse(BaseModel):
     sense_source: Literal["wordnet", "wiktionary", "llm_fallback"] | None
 
 
+@app.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 @app.post("/analyze", response_model=AnalyzeResponse)
-def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
-    return AnalyzeResponse.model_validate(analysis.analyze(request.text))
+def analyze(body: AnalyzeRequest, analysis: AnalysisDep) -> AnalyzeResponse:
+    return AnalyzeResponse.model_validate(analysis.analyze(body.text))
