@@ -53,7 +53,7 @@ Starts from assistant-ui's default Tailwind/shadcn theme (light/dark mode includ
 - **Greeting state:** vertically centered, generous negative space, short headline, prominent input field. Transitions to the chat view once the first prompt is sent.
 - **Chat state:** message list scrolls, input field docks to the bottom as a persistent rounded field.
 - **Session behavior:** always starts on a fresh thread on load — no auto-resume of the last active thread.
-- **Export/reset:** conversation can be copied to clipboard as JSON (for eval) or reset, independent of the persistence layer — read directly off the runtime's message state.
+- **Export/reset:** the open thread's sidebar entry has a "Copy as JSON" button (for eval) that reads the runtime's live messages, not the copy in `localStorage`. Only the open thread has a button, since it's the only thread whose messages are loaded. [`export-thread.ts`](../../frontend/src/lib/chat/export-thread.ts) defines the shape: `{exportedAt, threadId, messages: [{role, content: [text | tool-call]}]}`, where a `tool-call` part's `result` is the `/analyze` response unchanged and is left out when the call never got one. Reset is the sidebar's New Thread button: it opens a fresh thread on the greeting and leaves the previous one in the list. Clearing the open thread in place would leave its saved history behind, and the next message would add a second root to it.
 
 ### 3. Thread list
 - Backed by a `localStorage`-based `RemoteThreadListAdapter` (list, create, rename, archive, delete) — assistant-ui's own `createLocalStorageAdapter`, wrapped with a thin `window.localStorage` adapter rather than reimplemented from scratch; no server persistence.
