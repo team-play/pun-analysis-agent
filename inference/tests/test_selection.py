@@ -138,15 +138,15 @@ def test_select_senses_explains_the_first_reading(doc, senses):
     assert select_senses(doc, TIED, preferred=[DOUGH]) == {
         "words_involved": ["dough"],
         "explanation": (
-            '"dough" can mean "a flour mixture stiff enough to knead or roll" or '
-            '"informal terms for money"; the sentence supports both because both fit '
-            'as the object of "need". This is a proposed reading, not proof.'
+            "“dough” can mean “a flour mixture stiff enough to knead or roll” or "
+            "“informal terms for money”; the sentence supports both because both fit "
+            "as the object of “need”. This is a proposed reading, not proof."
         ),
         "sense_source": "wordnet",
     }
     assert select_senses(doc, TIED)["explanation"] == (
-        '"baker" can mean "someone who bakes bread or cake" or "a portable oven for '
-        'baking"; the sentence supports both because both definitions are about '
+        "“baker” can mean “someone who bakes bread or cake” or “a portable oven for "
+        "baking”; the sentence supports both because both definitions are about "
         "equally close to the sentence's meaning. This is a proposed reading, not proof."
     )
 
@@ -164,10 +164,10 @@ def tied(method, top=DOUGH_FOOD, runner_up=DOUGH_MONEY):
 @pytest.mark.parametrize(
     ("relation", "predicate", "evidence"),
     [
-        ("dobj", "need", 'both fit as the object of "need"'),
-        ("nsubj", "rise", 'both fit as the subject of "rise"'),
-        ("prep_in", "hide", 'both fit in "hide ... in ___"'),
-        ("iobj", "give", 'both fit the seeded "give" / "iobj" slot'),
+        ("dobj", "need", "both fit as the object of “need”"),
+        ("nsubj", "rise", "both fit as the subject of “rise”"),
+        ("prep_in", "hide", "both fit in “hide ... in ___”"),
+        ("iobj", "give", "both fit the seeded “give” / “iobj” slot"),
     ],
     ids=["object", "subject", "preposition", "any other slot"],
 )
@@ -188,12 +188,12 @@ def test_lesk_evidence_names_no_slot():
 
 def test_glosses_are_quoted_without_their_trailing_period():
     # A Wiktionary gloss is a sentence: quoted, it keeps its capital but not its
-    # period, so the explanation never reads 'currency.";'.
+    # period, so the explanation never reads 'currency.”;'.
     pair = tied("embedding_lesk", CHEDDAR_CHEESE, CHEDDAR_MONEY)
 
     assert selection._explain("cheddar", LocalContext("dobj", "want"), pair) == (
-        '"cheddar" can mean "hard smooth-textured cheese; originally made in Cheddar '
-        'in southwestern England" or "Money, cash, currency"; the sentence supports '
+        "“cheddar” can mean “hard smooth-textured cheese; originally made in Cheddar "
+        "in southwestern England” or “Money, cash, currency”; the sentence supports "
         "both because both definitions are about equally close to the sentence's "
         "meaning. This is a proposed reading, not proof."
     )
@@ -202,11 +202,30 @@ def test_glosses_are_quoted_without_their_trailing_period():
 @pytest.mark.parametrize(
     ("gloss", "quoted"),
     [
-        ("informal terms for money", '"informal terms for money"'),
-        ("Money, cash, currency.", '"Money, cash, currency"'),
-        (" Money, cash, currency. ", '"Money, cash, currency"'),
+        ("informal terms for money", "“informal terms for money”"),
+        ("Money, cash, currency.", "“Money, cash, currency”"),
+        (" Money, cash, currency. ", "“Money, cash, currency”"),
+        # These final periods belong to an abbreviation or an ellipsis, not a sentence.
+        ("trim the nails, etc.", "“trim the nails, etc.”"),
+        ("a state in the U.S.", "“a state in the U.S.”"),
+        ("A set of proteins...", "“A set of proteins...”"),
+        # A doubled period still ends a sentence: drop one, keep the abbreviation's.
+        ("A football club, F.C..", "“A football club, F.C.”"),
+        # A gloss's own straight quotes (or inch marks) are left as written.
+        ('Usually in the phrase "touch grass".', '“Usually in the phrase "touch grass"”'),
+        ('Paper size (10"-12.5")', '“Paper size (10"-12.5")”'),
     ],
-    ids=["WordNet", "Wiktionary", "stray whitespace"],
+    ids=[
+        "WordNet",
+        "Wiktionary",
+        "stray whitespace",
+        "etc.",
+        "initialism",
+        "ellipsis",
+        "doubled period",
+        "inner quotes",
+        "inch marks",
+    ],
 )
 def test_quote(gloss, quoted):
     assert selection._quote(gloss) == quoted
