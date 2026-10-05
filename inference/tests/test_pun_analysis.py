@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 import wn
 
@@ -100,14 +102,66 @@ def test_a_homographic_pun_falls_back_to_the_llm_when_selection_finds_nothing_or
     assert result["words_involved"] == ["dough"]
 
 
-def test_a_homographic_pun_without_candidates_falls_back_with_no_suspected_word():
+def test_a_homographic_pun_without_candidates_falls_back_with_no_suspected_word(caplog):
     # docs/contracts.md: words_involved lists suspected words only "when Inference found any".
+    caplog.set_level(logging.INFO, logger=agent.__name__)
     detector = FakeDetector(candidates=())
 
     result = PunAnalysis(detector, RecordingSelector()).analyze("The baker needed more dough.")
 
     assert result["sense_source"] == "llm_fallback"
     assert result["words_involved"] == []
+    # Still logged: "the detector found no word" is its own coverage gap.
+    [record] = caplog.records
+    assert record.getMessage().endswith("reason=no_reading ranked_candidates=0")
+
+
+@pytest.mark.parametrize(
+    ("detector", "selector", "reason"),
+    [
+        (FakeDetector(pun_type="homophonic"), RecordingSelector(), "homophonic"),
+        (FakeDetector(), RecordingSelector(returns=None), "no_reading"),
+    ],
+    ids=["homophonic", "no reading"],
+)
+def test_a_fallback_logs_its_reason_but_not_the_text(caplog, detector, selector, reason):
+    # Design doc eval hooks: log why a pun fell back, so coverage gaps can be counted.
+    caplog.set_level(logging.INFO, logger=agent.__name__)
+
+    PunAnalysis(detector, selector).analyze("The baker needed more dough.")
+
+    [record] = caplog.records
+    assert record.levelno == logging.INFO
+    assert record.getMessage() == (
+        f"Sense selection fell back to llm_fallback: reason={reason} ranked_candidates=2"
+    )
+
+
+def test_a_failed_selection_is_logged_as_an_error_not_a_fallback_reason(caplog):
+    # A bug must not read as a coverage gap (design doc, eval hooks).
+    caplog.set_level(logging.INFO, logger=agent.__name__)
+    selector = RecordingSelector(raises=LookupError("no senses"))
+
+    PunAnalysis(FakeDetector(), selector).analyze("The baker needed more dough.")
+
+    [record] = caplog.records
+    assert record.levelno == logging.ERROR
+
+
+@pytest.mark.parametrize(
+    ("detector", "selector"),
+    [
+        (FakeDetector(pun_type=None), RecordingSelector()),
+        (FakeDetector(), RecordingSelector(returns=selected("wordnet"))),
+    ],
+    ids=["not a pun", "senses selected"],
+)
+def test_no_fallback_logs_nothing(caplog, detector, selector):
+    caplog.set_level(logging.INFO, logger=agent.__name__)
+
+    PunAnalysis(detector, selector).analyze("The baker needed more dough.")
+
+    assert caplog.records == []
 
 
 def test_by_default_selection_runs_on_the_detectors_parse_embed_and_ranking(monkeypatch):

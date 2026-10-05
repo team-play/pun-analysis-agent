@@ -45,20 +45,39 @@ class PunAnalysis:
             if not result["is_pun"]:
                 return result
             result["sense_source"] = "llm_fallback"
+            ranked = prediction.get("candidate_pairs", [])
             # Same-word meanings do not explain a sound-alike pun.
             if result["pun_type"] != "homographic":
+                _log_fallback("homophonic", len(ranked))
                 return result
-            ranked = prediction.get("candidate_pairs", [])
             result["words_involved"] = [p["candidate"]["text"] for p in ranked[:1]]
             try:
                 selected = self.selector(text, ranked, self.detector.extractor)
-                if selected is not None:
+                if selected is None:
+                    _log_fallback("no_reading", len(ranked))
+                else:
                     result.update(
                         {k: selected[k] for k in ("words_involved", "explanation", "sense_source")}
                     )
             except Exception:
                 logger.exception("Local sense selection failed; handing off to backend")
             return result
+
+
+def _log_fallback(reason, ranked_candidates):
+    """One INFO line saying why a pun went to llm_fallback (design doc, eval hooks).
+
+    Format: "Sense selection fell back to llm_fallback: reason=<reason>
+    ranked_candidates=<n>". n counts the detector's top-ranked candidate words
+    (at most 2; 0 means it found none), not the words selection tried. Never
+    includes the user's text. Errors aren't logged here: they're logged as
+    exceptions where they're caught.
+    """
+    logger.info(
+        "Sense selection fell back to llm_fallback: reason=%s ranked_candidates=%d",
+        reason,
+        ranked_candidates,
+    )
 
 
 # A homographic pun WordNet explains (the Dockerfile checks the same result), so

@@ -9,6 +9,7 @@ text is a homographic pun; calibration calls pun_readings() to measure the
 same pipeline production runs.
 """
 
+import re
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from typing import Literal, TypedDict
@@ -33,6 +34,10 @@ from senses import alternative_lemmas, get_candidate_senses
 # accepts up to 2,000 characters, a few hundred words. Preferred candidates are
 # always kept, so this can't drop a word the detector ranked.
 MAX_CANDIDATES = 32
+
+# A final period that belongs to an abbreviation ("etc.", "U.S.", "p.m.") or
+# an ellipsis doesn't end a sentence, so _quote() keeps it.
+_ABBREVIATION_END = re.compile(r"(?:\betc|\b(?:[A-Za-z]\.)+[A-Za-z]|\.\.)\.$")
 
 
 class SenseSelection(TypedDict):
@@ -117,23 +122,68 @@ def select_senses(
     reading = next(pun_readings(doc, embed, preferred=preferred), None)
     if reading is None:
         return None
-    candidate, context, signal = reading.candidate, reading.context, reading.signal
-    evidence = (
-        f"Both meanings match the seeded '{context.predicate}' / '{context.relation}' slot."
-        if signal.method == "selectional_preference"
-        else "Both definitions have positive similarity to the sentence."
-    )
-    explanation = (
-        f'"{candidate.text}" can mean {signal.top.sense.gloss} or '
-        f"{signal.runner_up.sense.gloss}. {evidence} "
-        f"Their score difference is {signal.margin:.3f}. "
-        "This is a proposed interpretation, not proof that both readings work."
-    )
     return {
-        "words_involved": [candidate.text],
-        "explanation": explanation,
-        "sense_source": signal.sense_source,
+        "words_involved": [reading.candidate.text],
+        "explanation": _explain(reading.candidate.text, reading.context, reading.signal),
+        "sense_source": reading.signal.sense_source,
     }
+
+
+def _explain(word: str, context: LocalContext, signal: PunSignal) -> str:
+    """The explanation string, per docs/design/sense-selection.md step 6.
+
+    '“dough” can mean “a flour mixture stiff enough to knead or roll” or
+    “informal terms for money”; the sentence supports both because both fit as
+    the object of “need”. This is a proposed reading, not proof.'
+    """
+    return (
+        f"“{word}” can mean {_quote(signal.top.sense.gloss)} or "
+        f"{_quote(signal.runner_up.sense.gloss)}; the sentence supports both because "
+        f"{_evidence(context, signal)}. This is a proposed reading, not proof."
+    )
+
+
+def _quote(gloss: str) -> str:
+    """A gloss in curly quotes, minus a sentence-ending period.
+
+    Wiktionary glosses are sentences ('Money, cash, currency.'), WordNet's
+    aren't ('informal terms for money'); quoted, both read the same mid-sentence.
+    Curly quotes never clash with a gloss's own straight ones ('the phrase
+    "touch grass"', or inch marks: '10"-12.5"'), so the gloss is shown as written.
+    """
+    gloss = gloss.strip()
+    if not _ABBREVIATION_END.search(gloss):
+        gloss = gloss.removesuffix(".")
+    return f"“{gloss}”"
+
+
+def _evidence(context: LocalContext, signal: PunSignal) -> str:
+    """Why both senses fit, in plain words: the part after "because".
+
+    selectional_preference: the seeded slot both senses fit, e.g.
+      dobj    -> 'both fit as the object of “need”'
+      nsubj   -> 'both fit as the subject of “rise”'
+      prep_in -> 'both fit in “hide ... in ___”'
+      acomp / attr (the predicate is the subject noun, see context.py)
+              -> 'both fit as something “batter” can be'
+      other   -> 'both fit the seeded “give” / “iobj” slot'
+    embedding_lesk (no slot involved):
+      "both definitions are about equally close to the sentence's meaning"
+    """
+    if signal.method == "embedding_lesk":
+        return "both definitions are about equally close to the sentence's meaning"
+    predicate, relation = context.predicate, context.relation
+    if relation == "dobj":
+        return f"both fit as the object of “{predicate}”"
+    if relation == "nsubj":
+        return f"both fit as the subject of “{predicate}”"
+    if relation.startswith("prep_"):
+        return f"both fit in “{predicate} ... {relation.removeprefix('prep_')} ___”"
+    if relation in ("acomp", "attr"):
+        return f"both fit as something “{predicate}” can be"
+    # A newly seeded relation needs its own wording above: this fallback shows
+    # spaCy's raw label, which a reader of the explanation can't interpret.
+    return f"both fit the seeded “{predicate}” / “{relation}” slot"
 
 
 def _share_another_word(candidate: CandidateWord, signal: PunSignal) -> bool:
