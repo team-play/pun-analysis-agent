@@ -2,6 +2,7 @@ import { INFERENCE_TIMEOUT_MS } from "@pun-agent/timeouts";
 import type { Genkit } from "genkit";
 import { z } from "genkit";
 import { logger } from "genkit/logging";
+import { InferenceAuthError } from "./inference-fetch.ts";
 
 const analyzeResultFields = z.object({
 	is_pun: z.boolean().nullable(),
@@ -10,6 +11,9 @@ const analyzeResultFields = z.object({
 	explanation: z.string(),
 	// The detector's probability that the text is a pun.
 	confidence: z.number().min(0).max(1).nullable(),
+	// Optional as well as nullable, unlike the other fields: threads saved
+	// in the browser before the field existed still send their results back
+	// without it (docs/contracts.md).
 	probabilities: z
 		.object({
 			non_pun: z.number().min(0).max(1),
@@ -99,11 +103,17 @@ export const UNDETERMINED_ANALYZE_RESULT: AnalyzeResult = {
 	words_involved: [],
 	explanation: "",
 	confidence: null,
+	probabilities: null,
 	sense_source: null,
 };
 
 /** Why a call to Inference didn't produce a result, as logged. */
-type InferenceFailure = "timeout" | "unreachable" | "non_2xx" | "malformed";
+type InferenceFailure =
+	| "timeout"
+	| "unreachable"
+	| "auth"
+	| "non_2xx"
+	| "malformed";
 
 // AbortSignal.timeout() rejects fetch, and a body read in progress, with a
 // DOMException of this name (an Error subclass on Node).
@@ -163,8 +173,9 @@ export interface AnalyzePunToolOptions {
 /**
  * Registers the analyze_pun tool on `ai`: Gemini calls it with the text to
  * check, and gets back Inference's /analyze result, or the undetermined
- * result if Inference timed out, couldn't be reached, answered non-2xx or
- * answered with something that isn't an /analyze result.
+ * result if Inference timed out, couldn't be reached or authenticated to,
+ * answered non-2xx or answered with something that isn't an /analyze
+ * result.
  */
 export function createAnalyzePunTool(
 	ai: Genkit,
@@ -200,13 +211,14 @@ export function createAnalyzePunTool(
 					signal: AbortSignal.timeout(timeoutMs),
 				});
 			} catch (err) {
-				return isTimeout(err)
-					? undetermined({ cause: "timeout", err })
-					: undetermined({
-							cause: "unreachable",
-							errorCode: networkErrorCode(err),
-							err,
-						});
+				if (isTimeout(err)) return undetermined({ cause: "timeout", err });
+				if (err instanceof InferenceAuthError)
+					return undetermined({ cause: "auth", err });
+				return undetermined({
+					cause: "unreachable",
+					errorCode: networkErrorCode(err),
+					err,
+				});
 			}
 
 			if (!response.ok) {

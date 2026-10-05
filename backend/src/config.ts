@@ -9,11 +9,14 @@ const DEFAULT_ALLOWED_ORIGINS = [
 	"https://pun-agent.firebaseapp.com",
 ];
 
+// Cloud Run sets K_SERVICE in every container; nothing sets it locally.
+const onCloudRun = Boolean(process.env.K_SERVICE);
+
 const appCheckOff = process.env.APP_CHECK === "off";
-// Cloud Run sets K_SERVICE in every container; nothing sets it locally. So
-// the opt-out below can't reach production: a revision configured with it
-// fails to start, and Cloud Run keeps serving the previous one.
-if (appCheckOff && process.env.K_SERVICE) {
+// The opt-out below can't reach production: on Cloud Run, a revision
+// configured with it fails to start, and Cloud Run keeps serving the
+// previous one.
+if (appCheckOff && onCloudRun) {
 	throw new Error(
 		`APP_CHECK=off is for local development only, but this is Cloud Run ` +
 			`(K_SERVICE=${process.env.K_SERVICE}). Remove APP_CHECK from the service.`,
@@ -73,6 +76,7 @@ const parsedAllowedOrigins = process.env.CORS_ORIGIN?.split(",")
 	.filter(Boolean);
 
 export const config = {
+	onCloudRun,
 	port: Number(process.env.PORT ?? 8080),
 	// Unset (or empty, as a bare `GEMINI_MODEL=` line in .env.local leaves
 	// it) means GEMINI_MODEL_LADDER. Set, it replaces the ladder with that one

@@ -26,7 +26,7 @@ POST /analyze
 
 `probabilities` are the detector's three class probabilities, each from 0 to 1 and summing to 1 (within 1e-6), and `confidence` is `homographic` + `homophonic`. Like `confidence`, they are the model's raw output, not calibrated, and sense selection never changes them. A result may omit the field (results from before it existed), and Backend and Frontend treat a missing field as `null` and never fill it in.
 
-`is_pun: null` means **undetermined**: Inference couldn't judge the text at all (e.g. detection itself failed). `is_pun` and `confidence` are `null` together, and only in this case. `pun_type`, `confidence`, `probabilities` and `sense_source` are then `null`, `words_involved` is `[]` and `explanation` is `""`. Backend's `analyze_pun` tool returns this same object when Inference is unreachable, times out, or answers with something malformed, and Gemini reads it as "Inference couldn't judge; decide yourself whether this is a pun at all".
+`is_pun: null` means **undetermined**: Inference couldn't judge the text at all (e.g. detection itself failed). `is_pun` and `confidence` are `null` together, and only in this case. `pun_type`, `confidence`, `probabilities` and `sense_source` are then `null`, `words_involved` is `[]` and `explanation` is `""`. Backend's `analyze_pun` tool returns this same object when Inference is unreachable, times out, can't be authenticated to (Backend couldn't get its ID token), answers non-2xx, or answers with something malformed, and Gemini reads it as "Inference couldn't judge; decide yourself whether this is a pun at all".
 
 `sense_source` reports how sense selection resolved: which tier produced `explanation`, or that none did (full design in [`design/sense-selection.md`](design/sense-selection.md)):
 
