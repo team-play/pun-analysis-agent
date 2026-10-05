@@ -1,11 +1,11 @@
 ---
 id: TASK-52
 title: 'Backend: harden analyze_pun''s authenticated call to Inference'
-status: To Do
+status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-10-02 10:04'
-updated_date: '2026-10-04 20:57'
+updated_date: '2026-10-05 09:24'
 labels: []
 milestone: m-4
 dependencies:
@@ -44,8 +44,24 @@ PR 85 added `backend/src/tools/inference-fetch.ts`, a hand-written metadata-serv
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Tests first for createInferenceFetch (URL validation, token only on Cloud Run and only for Inference's origin, auth failure).
+2. Add google-auth-library@^11.1.0 (same major as firebase-admin); inference-fetch takes { onCloudRun, getAuthHeaders } and defaults to a lazily created, reused IdTokenClient (token caching is the library's).
+3. config.ts exports onCloudRun; inference-fetch no longer reads K_SERVICE.
+4. Token failure throws InferenceAuthError; analyze_pun logs cause=auth.
+5. probabilities: comment why optional, probabilities: null on UNDETERMINED_ANALYZE_RESULT, tests for the rule.
+6. deploy-backend.yml: bare assignment + non-empty guard for INFERENCE_URL.
+7. Docs (scope added with user's OK): local-setup.md says Inference deploys first; engineering-practices.md no longer claims deploys are independent. Architectural review + code review.
+<!-- SECTION:PLAN:END -->
+
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 From PR #85's architectural review (2026-10-03, on TASK-16): deploy-backend.yml resolves INFERENCE_URL with gcloud run services describe pun-agent-inference, so Backend's deploy now needs the Inference service to exist; in a fresh project (or if Inference is deleted) the URL is empty and Backend fails at startup (new URL('')) instead of degrading to the undetermined result. That contradicts engineering-practices.md's claim that deploys don't block on each other; besides the empty-URL guard here, say in local-setup.md's one-time GCP setup that Inference deploys first.
+
+Implemented all ACs. Token fetch is raced against analyze_pun's abort signal (google-auth-library's getRequestHeaders takes none), so a hung token fetch still ends at INFERENCE_TIMEOUT_MS and logs as timeout, not auth. InferenceAuthError puts the underlying reason in its message because Genkit's logger drops err.cause.
+Architectural review: no blocking issues; fixed contracts.md's fallback-cause list (added non-2xx and auth), a stale Frontend fixture comment, and qualified engineering-practices.md's 'deploy independently'.
+Code review: added tests for reusing one IdTokenClient and retrying a failed client creation (mutation-checked), an already-aborted signal, the auth reason in the message, a history test in chat.test.ts for results without probabilities, and isolated the probabilities-on-undetermined test. Backend: 205 tests pass, tsc clean, Biome and actionlint clean.
 <!-- SECTION:NOTES:END -->

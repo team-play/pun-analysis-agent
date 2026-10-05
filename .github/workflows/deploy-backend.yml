@@ -106,7 +106,16 @@ jobs:
       - if: env.DEPLOY == 'true'
         name: Resolve private Inference service
         id: inference
-        run: echo "url=$(gcloud run services describe pun-agent-inference --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')" >> "$GITHUB_OUTPUT"
+        # A bare assignment, so a failed lookup fails the step (inside echo's
+        # arguments it wouldn't). Backend can't start without the URL, so an
+        # empty one, e.g. before Inference's first deploy, fails it too.
+        run: |
+          url=$(gcloud run services describe pun-agent-inference --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
+          if [[ -z "$url" ]]; then
+            echo "::error::pun-agent-inference has no URL. Deploy Inference first (docs/local-setup.md)."
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - if: env.DEPLOY == 'true'
         id: deploy

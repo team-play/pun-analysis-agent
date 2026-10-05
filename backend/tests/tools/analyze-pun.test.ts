@@ -10,6 +10,7 @@ import {
 	UNDETERMINED_ANALYZE_RESULT,
 } from "../../src/tools/analyze-pun.ts";
 import { fixtureFetch } from "../../src/tools/analyze-pun-fixture.ts";
+import { InferenceAuthError } from "../../src/tools/inference-fetch.ts";
 import { PUN_ANALYZE_RESULT } from "../fixtures/analyze-results.ts";
 
 const INFERENCE_URL = "http://inference.test";
@@ -78,6 +79,14 @@ const nullableResults: Record<string, AnalyzeResult> = {
 		sense_source: "llm_fallback",
 	},
 	"Inference's own undetermined result": UNDETERMINED_ANALYZE_RESULT,
+	"a pun with class probabilities": {
+		...PUN_ANALYZE_RESULT,
+		// Sum to 1, and homographic + homophonic is the confidence.
+		probabilities: { non_pun: 0.07, homographic: 0.81, homophonic: 0.12 },
+	},
+	// The field is optional (docs/contracts.md); the case that needs it,
+	// history resent from the browser, is in tests/flows/chat.test.ts.
+	"a result without probabilities": PUN_ANALYZE_RESULT,
 };
 for (const [name, inferenceResult] of Object.entries(nullableResults)) {
 	test(`passes through ${name} unchanged, without logging a failure`, async () => {
@@ -118,6 +127,14 @@ const failures: Array<[string, typeof fetch, string]> = [
 			throw new TypeError("fetch failed");
 		},
 		"unreachable",
+	],
+	[
+		// So the logs point at auth, not networking.
+		"can't be authenticated to",
+		async () => {
+			throw new InferenceAuthError("Could not obtain an ID token");
+		},
+		"auth",
 	],
 	[
 		"answers non-2xx",
@@ -165,6 +182,23 @@ const failures: Array<[string, typeof fetch, string]> = [
 		"a confidence above 1": { confidence: 1.3 },
 		"a pun without a sense_source": { sense_source: null },
 		"an llm_fallback with an explanation": { sense_source: "llm_fallback" },
+		"probabilities that don't sum to 1": {
+			probabilities: { non_pun: 0.2, homographic: 0.81, homophonic: 0.12 },
+		},
+		"probabilities that disagree with confidence": {
+			probabilities: { non_pun: 0.3, homographic: 0.6, homophonic: 0.1 },
+		},
+		"probabilities on an undetermined result": {
+			is_pun: null,
+			confidence: null,
+			pun_type: null,
+			sense_source: null,
+			words_involved: [],
+			explanation: "",
+			// Sums to 1 and agrees with a null confidence read as 0, so only
+			// the rule that an undetermined result has none rejects it.
+			probabilities: { non_pun: 1, homographic: 0, homophonic: 0 },
+		},
 		"an undetermined result with words": {
 			is_pun: null,
 			confidence: null,
@@ -189,6 +223,13 @@ for (const [name, fetch, cause] of failures) {
 		assert.equal(loggedCause(), cause);
 	});
 }
+
+// docs/contracts.md's undetermined result sends every nullable field,
+// probabilities included, as null.
+test("Backend's undetermined result has probabilities: null", () => {
+	assert.ok("probabilities" in UNDETERMINED_ANALYZE_RESULT);
+	assert.equal(UNDETERMINED_ANALYZE_RESULT.probabilities, null);
+});
 
 test("the stand-in for Inference answers the undetermined result", async () => {
 	const analyzePun = buildTool(fixtureFetch);

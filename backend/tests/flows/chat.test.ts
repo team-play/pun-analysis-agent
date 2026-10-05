@@ -86,6 +86,29 @@ const earlierCall = {
 	output: PUN_ANALYZE_RESULT,
 };
 
+// Threads saved in the browser before probabilities existed resend their
+// results without it (docs/contracts.md).
+test("chatFlow keeps an earlier analyze_pun result saved before probabilities existed", async () => {
+	const warn = mock.method(logger, "warn", () => {});
+	model.respondWith("ok");
+	assert.ok(!("probabilities" in earlierCall.output));
+
+	await chatFlow({
+		messages: [
+			{ role: "user", content: "Is 'I lost interest' a pun?" },
+			{ role: "assistant", content: [earlierCall] },
+			{ role: "user", content: "Why?" },
+		],
+	});
+
+	const { name, ref, output } = earlierCall;
+	assert.deepEqual(sentConversation()?.[2], {
+		role: "tool",
+		content: [{ toolResponse: { name, ref, output } }],
+	});
+	assert.equal(warn.mock.callCount(), 0);
+});
+
 test("chatFlow gives the model an earlier reply's analyze_pun calls and results as tool history", async () => {
 	model.respondWith("ok");
 

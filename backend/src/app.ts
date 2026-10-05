@@ -36,9 +36,11 @@ if (config.appCheckEnforced) {
 	);
 }
 
-// Use the same transport locally and in deployment; Cloud Run adds its service identity.
+// The same transport locally and on Cloud Run, where it adds an ID token.
 const analyzePun = createAnalyzePunTool(ai, {
-	fetch: createInferenceFetch(config.inferenceUrl),
+	fetch: createInferenceFetch(config.inferenceUrl, {
+		onCloudRun: config.onCloudRun,
+	}),
 	inferenceUrl: config.inferenceUrl,
 });
 const chatFlow = createChatFlow(ai, chatModels, [analyzePun]);

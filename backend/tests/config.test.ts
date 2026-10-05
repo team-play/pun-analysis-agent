@@ -99,3 +99,14 @@ test("uses the model GEMINI_MODEL names", async () => {
 	});
 	assert.equal(config.geminiModel, "gemini-flash-latest");
 });
+
+test("knows it's on Cloud Run when K_SERVICE is set", async () => {
+	const config = await loadConfigWith(undefined, {
+		kService: "pun-agent-backend",
+	});
+	assert.equal(config.onCloudRun, true);
+});
+
+test("knows it's local when K_SERVICE is unset", async () => {
+	assert.equal((await loadConfigWith(undefined)).onCloudRun, false);
+});
