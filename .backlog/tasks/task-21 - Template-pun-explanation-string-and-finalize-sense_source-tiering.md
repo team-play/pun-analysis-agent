@@ -1,11 +1,11 @@
 ---
 id: TASK-21
 title: Template pun explanation string and finalize sense_source tiering
-status: In Progress
+status: Done
 assignee:
   - '@Andi-Cast'
 created_date: '2026-09-20 10:04'
-updated_date: '2026-10-05 23:51'
+updated_date: '2026-10-05 23:56'
 labels:
   - wsd
 milestone: m-6
@@ -70,10 +70,12 @@ Follow-up on the review (2026-10-05, asked for by Andi): _quote now uses curly q
 Known limitation, left out of TASK-21's scope: frontend/src/lib/chat/fixtures/analyze-results.ts still has a hand-written explanation the template can no longer produce (cosmetic; nothing parses explanation).
 
 PR #106 review (Yai, approved 2026-10-05), three small items addressed: (1) _evidence gives copula complements their own wording (acomp/attr -> "both fit as something “<subject>” can be"), so a future copula seed like ("batter", "acomp") doesn't show raw spaCy labels; the generic branch now has a comment saying a newly seeded relation needs its own wording. (2) The outdated frontend fixture explanation is filed as TASK-64 (@Andi-Cast, low). (3) Cloud Logging stores Inference's plain-text log lines with no severity (DEFAULT), as TASK-29 found for Backend, so the design doc's eval hooks say to count fallbacks by the "Sense selection fell back to llm_fallback" prefix, not by severity. Inference has no TASK-29-style JSON logging, so logger.exception tracebacks are DEFAULT too and split across entries (not changed here). 133 inference tests pass.
+
+Merged in #106 as 70fbbe5 after one review round: Yai approved, and the three small items were fixed in 686b416 before the merge.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-The /analyze explanation now follows design doc step 6: “{word}” can mean “{gloss_1}” or “{gloss_2}”; the sentence supports both because {evidence}. This is a proposed reading, not proof. Evidence is only what scoring used: the seeded slot in plain words (object of / subject of / “<predicate> ... <p> ___”) or, for embedding-Lesk, that both definitions are about equally close to the sentence. Glosses are shown as written in curly quotes, minus a sentence-ending period (abbreviation and ellipsis periods stay). Inference now logs why a pun fell back to llm_fallback (one INFO line, reason=homophonic or no_reading, no user text), with logging configured in main.py. Verified: 131 inference tests pass (exact dough and Lesk strings, evidence per slot, gloss quoting on real-data edge cases, log line per reason, zero-candidate log, no log when nothing fell back), ruff clean, real-model output and a real uvicorn run checked, and an independent code review done with its in-scope findings fixed. Design doc step 6 and eval hooks updated.
+The /analyze explanation now follows design doc step 6: “{word}” can mean “{gloss_1}” or “{gloss_2}”; the sentence supports both because {evidence}. This is a proposed reading, not proof. Evidence is only what scoring used: the seeded slot in plain words (object of / subject of / “<predicate> ... <p> ___” / something “<subject>” can be) or, for embedding-Lesk, that both definitions are about equally close to the sentence. Glosses are shown as written in curly quotes, minus a sentence-ending period (abbreviation and ellipsis periods stay). Inference logs why a pun fell back to llm_fallback (one INFO line, reason=homophonic or no_reading, no user text), with logging configured in main.py. Verified: 133 inference tests pass, ruff clean, real-model output and a real uvicorn run checked, independent code review and Yai's review done. Merged in #106 as 70fbbe5.
 <!-- SECTION:FINAL_SUMMARY:END -->
