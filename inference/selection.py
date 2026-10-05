@@ -164,6 +164,8 @@ def _evidence(context: LocalContext, signal: PunSignal) -> str:
       dobj    -> 'both fit as the object of “need”'
       nsubj   -> 'both fit as the subject of “rise”'
       prep_in -> 'both fit in “hide ... in ___”'
+      acomp / attr (the predicate is the subject noun, see context.py)
+              -> 'both fit as something “batter” can be'
       other   -> 'both fit the seeded “give” / “iobj” slot'
     embedding_lesk (no slot involved):
       "both definitions are about equally close to the sentence's meaning"
@@ -177,6 +179,10 @@ def _evidence(context: LocalContext, signal: PunSignal) -> str:
         return f"both fit as the subject of “{predicate}”"
     if relation.startswith("prep_"):
         return f"both fit in “{predicate} ... {relation.removeprefix('prep_')} ___”"
+    if relation in ("acomp", "attr"):
+        return f"both fit as something “{predicate}” can be"
+    # A newly seeded relation needs its own wording above: this fallback shows
+    # spaCy's raw label, which a reader of the explanation can't interpret.
     return f"both fit the seeded “{predicate}” / “{relation}” slot"
 
 

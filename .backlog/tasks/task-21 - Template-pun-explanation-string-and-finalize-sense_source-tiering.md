@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@Andi-Cast'
 created_date: '2026-09-20 10:04'
-updated_date: '2026-10-05 18:32'
+updated_date: '2026-10-05 23:51'
 labels:
   - wsd
 milestone: m-6
@@ -68,6 +68,8 @@ Code review (AGENTS.md, independent subagent): no bugs or contract issues; 23 of
 Follow-up on the review (2026-10-05, asked for by Andi): _quote now uses curly quotes, so a gloss's own straight quotes (~1.7k Wiktionary glosses) and inch marks (28, e.g. 10"-12.5") are shown as written. Swapping them to single quotes would have turned inches into feet. A final period that belongs to an abbreviation ("etc.": 246 OEWN, 3,464 Wiktionary; "U.S.", "p.m.", "B.C.E.") or an ellipsis is kept, and every other gloss still loses its sentence-ending period. The rule was checked against every gloss in both sources. The word and the evidence's slot words use curly quotes too, for one consistent style. New _quote tests: etc., initialism, ellipsis, doubled period, inner quotes, inch marks. Each new rule fails a test when removed, including stripping every trailing period instead of one (the review's uncaught S3). 131 inference tests pass.
 
 Known limitation, left out of TASK-21's scope: frontend/src/lib/chat/fixtures/analyze-results.ts still has a hand-written explanation the template can no longer produce (cosmetic; nothing parses explanation).
+
+PR #106 review (Yai, approved 2026-10-05), three small items addressed: (1) _evidence gives copula complements their own wording (acomp/attr -> "both fit as something “<subject>” can be"), so a future copula seed like ("batter", "acomp") doesn't show raw spaCy labels; the generic branch now has a comment saying a newly seeded relation needs its own wording. (2) The outdated frontend fixture explanation is filed as TASK-64 (@Andi-Cast, low). (3) Cloud Logging stores Inference's plain-text log lines with no severity (DEFAULT), as TASK-29 found for Backend, so the design doc's eval hooks say to count fallbacks by the "Sense selection fell back to llm_fallback" prefix, not by severity. Inference has no TASK-29-style JSON logging, so logger.exception tracebacks are DEFAULT too and split across entries (not changed here). 133 inference tests pass.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

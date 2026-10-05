@@ -167,9 +167,12 @@ def tied(method, top=DOUGH_FOOD, runner_up=DOUGH_MONEY):
         ("dobj", "need", "both fit as the object of “need”"),
         ("nsubj", "rise", "both fit as the subject of “rise”"),
         ("prep_in", "hide", "both fit in “hide ... in ___”"),
+        # A complement's predicate is its subject noun: "The batter was ready."
+        ("acomp", "batter", "both fit as something “batter” can be"),
+        ("attr", "batter", "both fit as something “batter” can be"),
         ("iobj", "give", "both fit the seeded “give” / “iobj” slot"),
     ],
-    ids=["object", "subject", "preposition", "any other slot"],
+    ids=["object", "subject", "preposition", "adjective complement", "noun complement", "other"],
 )
 def test_seeded_evidence_names_the_slot_in_plain_words(relation, predicate, evidence):
     context = LocalContext(relation=relation, predicate=predicate)
