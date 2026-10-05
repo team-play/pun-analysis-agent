@@ -5,8 +5,9 @@ import {
 	waitFor,
 	within,
 } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
+import { punResult } from "./lib/chat/fixtures/analyze-results";
 import { createStubChatModelAdapter } from "./lib/chat/stub-chat-model-adapter";
 import { createFakeAsyncStorage } from "./lib/thread-list/fake-async-storage";
 import { createBrowserThreadListAdapter } from "./lib/thread-list/local-storage-thread-list-adapter";
@@ -256,5 +257,176 @@ describe("App", () => {
 		expect(await screen.findByText("Yesterday's pun talk")).toBeInTheDocument();
 		// ...but the active view is still a fresh, empty thread.
 		expect(screen.getByText("Got a pun for me?")).toBeInTheDocument();
+	});
+
+	describe("export and reset", () => {
+		const writeText = vi.fn<(text: string) => Promise<void>>();
+
+		beforeEach(() => {
+			writeText.mockReset().mockResolvedValue(undefined);
+			Object.defineProperty(navigator, "clipboard", {
+				value: { writeText },
+				configurable: true,
+			});
+		});
+
+		afterEach(() => {
+			Reflect.deleteProperty(navigator, "clipboard");
+		});
+
+		const sidebarItems = () =>
+			document.querySelectorAll('[data-slot="aui_thread-list-item"]');
+		const copyButtons = () =>
+			screen.queryAllByRole("button", { name: "Copy as JSON" });
+		/** Copy is disabled until the reply has finished, so wait for that. */
+		const copyOpenThread = async () => {
+			const button = await screen.findByRole("button", {
+				name: "Copy as JSON",
+			});
+			await waitFor(() => expect(button).toBeEnabled());
+			fireEvent.click(button);
+			await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+			return JSON.parse(writeText.mock.calls[0][0]);
+		};
+
+		it("copies the open thread's live messages, with the analyze_pun result verbatim, not the saved copy", async () => {
+			const storage = createFakeAsyncStorage();
+			const setItem = vi.spyOn(storage, "setItem");
+			render(
+				<App
+					chatModelAdapter={createStubChatModelAdapter()}
+					threadListAdapter={createBrowserThreadListAdapter(storage)}
+				/>,
+			);
+			await screen.findByText("Got a pun for me?");
+			await sendMessage("got a good pun for me?");
+			await screen.findByText(/found one/i, {}, { timeout: 3000 });
+
+			// Once the finished reply is saved, change the saved copy: an export
+			// read from storage would then differ from what's on screen.
+			const messagesKey = await waitFor(() => {
+				const call = setItem.mock.calls.findLast(
+					([key, value]) =>
+						key.includes(":messages:") && /found one/i.test(value),
+				);
+				expect(call).toBeDefined();
+				return (call as [string, string])[0];
+			});
+			const saved = (await storage.getItem(messagesKey)) as string;
+			await storage.setItem(
+				messagesKey,
+				saved.replaceAll("got a good pun for me?", "tampered"),
+			);
+
+			const exported = await copyOpenThread();
+			expect(exported.threadId).toEqual(expect.any(String));
+			expect(new Date(exported.exportedAt).toISOString()).toBe(
+				exported.exportedAt,
+			);
+			expect(exported.messages).toEqual([
+				{
+					role: "user",
+					content: [{ type: "text", text: "got a good pun for me?" }],
+				},
+				{
+					role: "assistant",
+					content: [
+						{
+							type: "text",
+							text: expect.stringMatching(/let me take a look/i),
+						},
+						expect.objectContaining({
+							type: "tool-call",
+							toolName: "analyze_pun",
+							result: punResult,
+						}),
+						{ type: "text", text: expect.stringMatching(/found one/i) },
+					],
+				},
+			]);
+			expect(
+				await screen.findByRole("button", { name: "Copied" }),
+			).toBeInTheDocument();
+		});
+
+		it("copies a Phase 1 thread as text-only parts", async () => {
+			renderApp();
+			await screen.findByText("Got a pun for me?");
+			await sendMessage("hello there");
+			await screen.findByText(/stubbed backend/i, {}, { timeout: 3000 });
+
+			const { messages } = await copyOpenThread();
+			const parts = messages.flatMap(
+				(message: { content: { type: string }[] }) => message.content,
+			);
+			expect(parts.map((part: { type: string }) => part.type)).toEqual([
+				"text",
+				"text",
+			]);
+		});
+
+		it("resets to the greeting via New Thread, keeping the previous thread in the sidebar", async () => {
+			renderApp();
+			await screen.findByText("Got a pun for me?");
+			await sendMessage("hello there");
+			await screen.findByText(/stubbed backend/i, {}, { timeout: 3000 });
+			expect(copyButtons()).toHaveLength(1);
+
+			fireEvent.click(screen.getByRole("button", { name: "New Thread" }));
+
+			expect(await screen.findByText("Got a pun for me?")).toBeInTheDocument();
+			expect(screen.queryByText("hello there")).not.toBeInTheDocument();
+			expect(sidebarItems()).toHaveLength(1);
+			// The previous thread is no longer the open one, so it can't be copied.
+			expect(copyButtons()).toHaveLength(0);
+
+			// ...and its saved messages are intact when reopened.
+			fireEvent.click(
+				sidebarItems()[0].querySelector(
+					'[data-slot="aui_thread-list-item-trigger"]',
+				) as HTMLElement,
+			);
+			expect(await screen.findByText("hello there")).toBeInTheDocument();
+			expect(await screen.findByText(/stubbed backend/i)).toBeInTheDocument();
+		});
+
+		it("disables Copy as JSON while a reply is streaming", async () => {
+			renderApp();
+			await screen.findByText("Got a pun for me?");
+			await sendMessage("a slow pun please");
+
+			await screen.findByRole("button", { name: "Stop generating" });
+			await waitFor(() =>
+				expect(
+					screen.getByRole("button", { name: "Copy as JSON" }),
+				).toBeDisabled(),
+			);
+
+			fireEvent.click(screen.getByRole("button", { name: "Stop generating" }));
+			await waitFor(() =>
+				expect(
+					screen.getByRole("button", { name: "Copy as JSON" }),
+				).toBeEnabled(),
+			);
+		});
+
+		it("offers Copy as JSON only on the open thread's entry", async () => {
+			renderApp();
+			await screen.findByText("Got a pun for me?");
+			await sendMessage("hello there");
+			await screen.findByText(/stubbed backend/i, {}, { timeout: 3000 });
+			fireEvent.click(screen.getByRole("button", { name: "New Thread" }));
+			await screen.findByText("Got a pun for me?");
+			await sendMessage("hello again");
+			await waitFor(() => expect(sidebarItems()).toHaveLength(2));
+
+			const withCopy = [...sidebarItems()].filter((item) =>
+				within(item as HTMLElement).queryByRole("button", {
+					name: "Copy as JSON",
+				}),
+			);
+			expect(withCopy).toHaveLength(1);
+			expect(withCopy[0]).toHaveAttribute("data-active");
+		});
 	});
 });

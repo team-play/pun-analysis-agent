@@ -10,6 +10,8 @@ import {
 } from "@assistant-ui/react";
 import {
 	ArchiveIcon,
+	CheckIcon,
+	ClipboardCopyIcon,
 	Loader2Icon,
 	MoreHorizontalIcon,
 	PencilIcon,
@@ -27,9 +29,12 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { TooltipIconButton } from "@/components/assistant-ui/elements/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { exportThread } from "@/lib/chat/export-thread";
 import { cn } from "@/lib/utils";
 
 export const ThreadList: FC = () => {
@@ -281,6 +286,9 @@ const ThreadListSkeleton: FC = () => {
 
 export const ThreadListItem: FC = () => {
 	const isRunning = useAuiState((s) => s.threadListItem.isRunning);
+	const isActive = useAuiState(
+		(s) => s.threads.mainThreadId === s.threadListItem.id,
+	);
 	const [isRenaming, setIsRenaming] = useState(false);
 	const triggerRef = useRef<HTMLButtonElement>(null);
 	const restoreFocusRef = useRef(false);
@@ -304,10 +312,13 @@ export const ThreadListItem: FC = () => {
 					}}
 				/>
 			) : (
+				// The open entry clears room for both the copy and "more" buttons.
+				// `!` because the hover/focus `pe-9` variants are more specific than
+				// `group-data-active:` (Tailwind wraps `[data-active]` in `:where()`).
 				<ThreadListItemPrimitive.Trigger
 					ref={triggerRef}
 					data-slot="aui_thread-list-item-trigger"
-					className="focus-visible:ring-ring/50 flex h-full min-w-0 flex-1 items-center rounded-md px-2.5 text-start text-sm outline-none group-hover:pe-9 group-has-focus-visible:pe-9 group-has-data-[state=open]:pe-9 group-data-active:pe-9 focus-visible:ring-1"
+					className="focus-visible:ring-ring/50 flex h-full min-w-0 flex-1 items-center rounded-md px-2.5 text-start text-sm outline-none group-hover:pe-9 group-has-focus-visible:pe-9 group-has-data-[state=open]:pe-9 group-data-active:pe-16! focus-visible:ring-1"
 				>
 					{isRunning && (
 						<Loader2Icon
@@ -325,8 +336,45 @@ export const ThreadListItem: FC = () => {
 					{isRunning && <span className="sr-only">Running</span>}
 				</ThreadListItemPrimitive.Trigger>
 			)}
+			{isActive && !isRenaming && <ThreadListItemCopy disabled={isRunning} />}
 			<ThreadListItemMore onRename={() => setIsRenaming(true)} />
 		</ThreadListItemPrimitive.Root>
+	);
+};
+
+/**
+ * Copies the open thread to the clipboard as JSON for Data/Eval (TASK-15).
+ * Only the open thread's entry gets it: that's the one thread whose messages
+ * are loaded in the runtime, and the export reads those live messages, not
+ * the copy saved in localStorage. Disabled while a reply is streaming, so an
+ * export never holds a half-finished reply that reads as a complete one.
+ */
+const ThreadListItemCopy: FC<{ disabled: boolean }> = ({ disabled }) => {
+	const aui = useAui();
+	const { isCopied, copyToClipboard } = useCopyToClipboard();
+
+	const copy = () => {
+		const { id, remoteId } = aui.threadListItem().getState();
+		const { messages } = aui.thread().getState();
+		const exported = exportThread(messages, remoteId ?? id, new Date());
+		copyToClipboard(JSON.stringify(exported, null, 2));
+	};
+
+	return (
+		<TooltipIconButton
+			tooltip={isCopied ? "Copied" : "Copy as JSON"}
+			side="right"
+			data-slot="aui_thread-list-item-copy"
+			className="absolute end-8 top-1/2 -translate-y-1/2"
+			disabled={disabled}
+			onClick={copy}
+		>
+			{isCopied ? (
+				<CheckIcon className="size-3.5" />
+			) : (
+				<ClipboardCopyIcon className="size-3.5" />
+			)}
+		</TooltipIconButton>
 	);
 };
 
