@@ -1,11 +1,11 @@
 ---
 id: TASK-52
 title: 'Backend: harden analyze_pun''s authenticated call to Inference'
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-10-02 10:04'
-updated_date: '2026-10-05 09:33'
+updated_date: '2026-10-05 10:58'
 labels: []
 milestone: m-4
 dependencies:
@@ -66,6 +66,8 @@ Architectural review: no blocking issues; fixed contracts.md's fallback-cause li
 Code review: added tests for reusing one IdTokenClient and retrying a failed client creation (mutation-checked), an already-aborted signal, the auth reason in the message, a history test in chat.test.ts for results without probabilities, and isolated the probabilities-on-undetermined test. Backend: 205 tests pass, tsc clean, Biome and actionlint clean.
 
 Finalization evidence (2026-10-05, branch claude/task-52-ab6208, PR #104): pnpm test 205/205; per-AC test runs by name (client reuse/retry, onCloudRun, cause=auth + reason in message, 17 inference-fetch URL/token/origin tests, 7 probabilities tests incl. chat history and UNDETERMINED probabilities: null). AC7: ran the step's script under bash -e with a stand-in gcloud: failing lookup rc=1, empty URL rc=1, URL present rc=0 and url= written to GITHUB_OUTPUT. pnpm why: backend's google-auth-library resolves to firebase-admin's 11.1.0. Not exercised: the real deploy and a real Cloud Run token fetch, which run on merge to main.
+
+Post-merge (2026-10-05): PR #104 merged as d10bcaf. Deploy Backend run 37292036378 succeeded: 'Resolve private Inference service', the Cloud Run deploy, and both smoke tests passed. Production logs since the deploy show no analyze_pun calls yet, so no Cloud Run token fetch has been observed; no cause=auth warnings either. First real analyze_pun call should show an authenticated /analyze request on pun-agent-inference.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
