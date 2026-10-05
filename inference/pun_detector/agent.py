@@ -5,7 +5,7 @@ import threading
 
 from selection import select_senses
 
-from .features import validate_text
+from .features import FeatureExtractor, validate_text
 from .model import PunDetector
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def undetermined():
 class PunAnalysis:
     """Serialize requests because the detector keeps mutable embedding caches."""
 
-    def __init__(self, detector=None, selector=None):
+    def __init__(self, detector, selector=None):
         self.detector = detector
         self.selector = selector or select_with_detector
         self.lock = threading.Lock()
@@ -35,12 +35,6 @@ class PunAnalysis:
         validate_text(text)
         with self.lock:
             try:
-                if self.detector is None:
-                    import wn
-
-                    # wn connections must also work when a later request uses a new worker.
-                    wn.config.allow_multithreading = True
-                    self.detector = PunDetector()
                 prediction = self.detector.predict(text)
             except Exception:
                 logger.exception("Pun detection failed")
@@ -65,6 +59,30 @@ class PunAnalysis:
             except Exception:
                 logger.exception("Local sense selection failed; handing off to backend")
             return result
+
+
+# A homographic pun WordNet explains (the Dockerfile checks the same result), so
+# warming up also runs, and checks, sense selection.
+WARM_UP_TEXT = "The baker needed more dough."
+
+
+def load_analysis():
+    """Build the service's analysis and run it once, so no request pays for loading.
+
+    The first prediction is what loads the embedding model and fills the detector's
+    caches. A broken detector or sense selection raises instead of degrading to the
+    undetermined or llm_fallback result, which it would then do for every request,
+    so a broken deploy stops at startup.
+    """
+    import wn
+
+    # wn connections must also work when a later request uses a new worker.
+    wn.config.allow_multithreading = True
+    analysis = PunAnalysis(PunDetector(extractor=FeatureExtractor()))
+    result = analysis.analyze(WARM_UP_TEXT)
+    if result["sense_source"] != "wordnet":
+        raise RuntimeError(f"Warm-up analysis failed (see any logged error): {result}")
+    return analysis
 
 
 def select_with_detector(text, ranked_pairs, extractor):

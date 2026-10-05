@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-09-27 15:25'
-updated_date: '2026-10-04 20:57'
+updated_date: '2026-10-05 09:14'
 labels: []
 milestone: m-4
 dependencies:
@@ -78,4 +78,6 @@ From TASK-47 (2026-09-29): gemini-3.1-flash-lite now runs at thinkingLevel MEDIU
 From TASK-19 (2026-09-28): scoring uses fastembed (onnxruntime), not sentence-transformers, so there's no torch. The ~87 MB all-MiniLM-L6-v2 model is baked into the image (no runtime download) and loads lazily on the first embed call; importing scoring adds ~0.3 s. Scoring isn't wired into /analyze until TASK-21, so a cold-start measurement before then won't include it.
 
 From PR #85's architectural review (2026-10-03, on TASK-16): Inference runs one instance with concurrency 1, and PunAnalysis serializes requests behind a lock, so parallel analyze_pun calls queue: they start their INFERENCE_TIMEOUT_MS clocks together, and the Nth waits about N x one call's latency (worse after a cold start; Cloud Run may also answer 429 when no instance is free). Measure 2-3 parallel calls, not just one, before setting the timeout.
+
+From TASK-51's architectural review (2026-10-05): once TASK-51 lands, Inference loads the detector and analyzes one warm-up pun at startup, before uvicorn binds its port. A cold start (scale from zero) therefore includes the whole load plus that warm-up prediction, and Cloud Run's default TCP startup probe holds the waking request until it finishes; it all still counts against INFERENCE_TIMEOUT_MS. Measure the cold start only after TASK-51 is deployed. The embedding model no longer loads lazily on the first /analyze (the earlier note from TASK-19 is stale), and packages/timeouts/index.js's comment that the cold start can't be measured until /analyze answers (TASK-16) is stale too. With --max-instances=1 --concurrency=1, requests that arrive during startup wait for the whole load plus warm-up: also measure parallel analyze_pun calls and TASK-53's /health ping followed by an analyze_pun (Backend maps a 429 or timeout to the undetermined result, so this degrades rather than errors).
 <!-- SECTION:NOTES:END -->

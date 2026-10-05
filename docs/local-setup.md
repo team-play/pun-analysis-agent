@@ -90,9 +90,9 @@ gcloud artifacts repositories set-cleanup-policies pun-agent --project=pun-agent
 
 [`deploy-inference.yml`](../.github/workflows/deploy-inference.yml) builds [`inference/Dockerfile`](../inference/Dockerfile) on every pull request that touches `inference/` (build only). On pushes to `main` it first runs the inference tests (via [`test-python.yml`](../.github/workflows/test-python.yml), the same workflow `test.yml` calls), then pushes the image to Artifact Registry, deploys it to Cloud Run and smoke-tests it, authenticating with the same `GCP_SA_KEY`. It needs no other GitHub secret.
 
-Unlike Backend, the service is **private**: Cloud Run itself rejects any request without a Google-signed ID token from an identity allowed to invoke it. Backend's runtime service account is the only one granted `roles/run.invoker` on the service; project-level admins, including the CI deployer, can invoke it through their project roles. So you can't `curl` the deployed `/analyze` anonymously, and Backend's call to it carries an ID token for its runtime service account ([`backend/src/tools/inference-fetch.ts`](../backend/src/tools/inference-fetch.ts)). Every deploy re-applies Backend's invoker grant (a no-op once present), so a recreated service or a grant removed by hand is restored rather than leaving every Backend call to degrade to the undetermined result. The deploy then smoke-tests both sides: an anonymous request must get a 403, and a request with the deployer's own ID token must succeed. It checks `/openapi.json`, which only proves the service is reachable: the image build already checks a real prediction (below).
+Unlike Backend, the service is **private**: Cloud Run itself rejects any request without a Google-signed ID token from an identity allowed to invoke it. Backend's runtime service account is the only one granted `roles/run.invoker` on the service; project-level admins, including the CI deployer, can invoke it through their project roles. So you can't `curl` the deployed `/analyze` anonymously, and Backend's call to it carries an ID token for its runtime service account ([`backend/src/tools/inference-fetch.ts`](../backend/src/tools/inference-fetch.ts)). Every deploy re-applies Backend's invoker grant (a no-op once present), so a recreated service or a grant removed by hand is restored rather than leaving every Backend call to degrade to the undetermined result. The deploy then smoke-tests both sides: an anonymous request must get a 403, and a request with the deployer's own ID token must succeed. It checks `/health`, which only answers once startup has loaded the detector (see "Inference" below); the image build already checks a real prediction (below).
 
-The image keeps `uv` in its build stage only and starts `uvicorn` straight from the venv. `uv run` in the image would re-check the lockfile on every container start, which fetches `en-core-web-sm`'s metadata from GitHub (the container exits if it can't), so each Cloud Run cold start would depend on GitHub. The build stage also downloads sense scoring's embedding model (`all-MiniLM-L6-v2`, via `fastembed`) into `/fastembed_cache`, and the runtime sets `HF_HUB_OFFLINE=1`, so a cold start never fetches it from HuggingFace. The last two build steps run as the runtime user: one looks up a word in WordNet and Wiktionary and embeds it, and the other runs the pun detector on a known pun. So a broken data path or a missing detector resource fails the build (on pull requests too) instead of deploying: the smoke test never touches that data, a Wiktionary failure only logs and returns no senses at runtime, and a detector failure only returns the undetermined result.
+The image keeps `uv` in its build stage only and starts `uvicorn` straight from the venv. `uv run` in the image would re-check the lockfile on every container start, which fetches `en-core-web-sm`'s metadata from GitHub (the container exits if it can't), so each Cloud Run cold start would depend on GitHub. The build stage also downloads sense scoring's embedding model (`all-MiniLM-L6-v2`, via `fastembed`) into `/fastembed_cache`, and the runtime sets `HF_HUB_OFFLINE=1`, so a cold start never fetches it from HuggingFace. The last two build steps run as the runtime user: one looks up a word in WordNet and Wiktionary and embeds it, and the other runs the pun detector on a known pun. So a broken data path or a missing detector resource fails the build (on pull requests too) instead of deploying: the smoke test's `/health` only proves the detector loaded (it never exercises Wiktionary or sense selection), a Wiktionary failure only logs and returns no senses at runtime, and a detector that can't load would otherwise only show up when the deploy's new revision fails to start.
 
 One-time GCP setup it relies on, alongside Backend's:
 
@@ -108,7 +108,7 @@ To call the deployed service yourself, your own account needs `roles/run.invoker
 
 ```bash
 curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
-  https://<pun-agent-inference URL>/openapi.json
+  https://<pun-agent-inference URL>/health
 ```
 
 ## Inference (`inference/`)
@@ -127,7 +127,11 @@ uv run ruff format .
 uv run uvicorn main:app --reload
 ```
 
-The dev server serves `POST /analyze` at `http://localhost:8000`. The pun detector needs only the WordNet data and embedding model above; without them it can't load, and every `/analyze` returns the undetermined result, with the reason in the server log.
+The dev server serves `GET /health` and `POST /analyze` at `http://localhost:8000`. At startup it loads the pun detector and analyzes one known pun, so the embedding model and caches are warm before the first request; if detection or sense selection gets that pun wrong, startup fails; it only starts accepting connections once that's done. The detector needs only the WordNet data and embedding model above; without them startup fails, with the reason in the log, and the server never accepts connections (under `--reload` the reloader keeps waiting for a file change; without it the server exits). With `--reload`, every save repeats that load. `/health` answers without running a prediction, so it is a cheap check that the server is up and the detector loaded:
+
+```bash
+curl localhost:8000/health
+```
 
 ## Backend (`backend/`)
 

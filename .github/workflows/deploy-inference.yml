@@ -123,7 +123,7 @@ jobs:
       - if: env.DEPLOY == 'true'
         name: Smoke-test that an unauthenticated request is refused
         run: |
-          status=$(curl --silent --output /dev/null --write-out '%{http_code}' "$URL/openapi.json")
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' "$URL/health")
           if [ "$status" != 403 ]; then
             echo "::error::An unauthenticated request returned $status, expected 403"
             exit 1
@@ -133,12 +133,13 @@ jobs:
 
       # The deployer can invoke the service through its project-level
       # roles/run.admin. The image build already checks a real classifier result;
-      # this smoke test checks authenticated service reachability.
+      # /health only answers once startup has loaded the detector, so this checks
+      # that the revision started and is reachable with a token.
       - if: env.DEPLOY == 'true'
         name: Smoke-test the deployed service with an ID token
         run: |
           token=$(gcloud auth print-identity-token --audiences="$URL")
           curl --fail --silent --show-error --output /dev/null \
-            -H "Authorization: Bearer $token" "$URL/openapi.json"
+            -H "Authorization: Bearer $token" "$URL/health"
         env:
           URL: ${{ steps.deploy.outputs.url }}
