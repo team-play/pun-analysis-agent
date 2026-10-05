@@ -44,6 +44,8 @@ No local Firebase login is required to develop `frontend/` day-to-day; this secr
 
 [`deploy-backend.yml`](../.github/workflows/deploy-backend.yml) builds [`backend/Dockerfile`](../backend/Dockerfile) on every pull request that touches the backend (build only, so a broken image fails the PR). It also runs on changes to `packages/timeouts/**`, which the image is built with. On pushes to `main` it first runs the backend tests and the shared timeouts' tests (via [`test-js.yml`](../.github/workflows/test-js.yml)), then also pushes the image to Artifact Registry, deploys it to Cloud Run and smoke-tests `/health`, authenticating with the same `GCP_SA_KEY`. It needs no other GitHub secret: the Gemini key never passes through CI.
 
+Each deploy reads Inference's URL from the `pun-agent-inference` service and sets it as Backend's `INFERENCE_URL`, so **Inference has to be deployed first**: in a fresh project, or if the Inference service is deleted, Backend's deploy fails at that step (with an error saying so) rather than deploying a Backend that can't start. Once Inference exists, the two deploy independently.
+
 One-time GCP setup it relies on (already done, see TASK-13's notes):
 
 | Resource | Where | Notes |

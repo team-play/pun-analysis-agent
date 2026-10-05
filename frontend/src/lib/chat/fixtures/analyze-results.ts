@@ -41,8 +41,8 @@ export const notAPunResult: AnalyzeResult = {
 
 /**
  * Inference couldn't judge the text (or couldn't be reached). Without
- * `probabilities`, like Backend's own undetermined result and the recorded
- * streams; Inference sends it as null.
+ * `probabilities`, like results saved before the field existed and the
+ * recorded streams; Inference and Backend send it as null.
  */
 export const undeterminedResult: AnalyzeResult = {
 	is_pun: null,
