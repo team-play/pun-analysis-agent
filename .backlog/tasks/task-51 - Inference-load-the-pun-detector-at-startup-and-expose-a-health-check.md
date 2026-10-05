@@ -1,11 +1,11 @@
 ---
 id: TASK-51
 title: 'Inference: load the pun detector at startup and expose a health check'
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-10-02 10:04'
-updated_date: '2026-10-05 09:06'
+updated_date: '2026-10-05 09:15'
 labels: []
 milestone: m-4
 dependencies:
@@ -27,18 +27,18 @@ PR 85 (TASK-16) loads the detector lazily inside the first /analyze request, und
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The detector and its resources load once at service startup, before the service accepts requests; a load failure stops startup instead of degrading every request to the undetermined result
-- [ ] #2 `GET /health` answers 200 only once the detector is loaded, without running a prediction, and docs/contracts.md documents it
-- [ ] #3 `test_main.py` injects a fake analysis and checks that blank and over-`MAX_CHARS` text get 422, determined and undetermined results serialize to the /analyze shape, and a result that breaks `AnalyzeResponse` gets 500
-- [ ] #4 `PunAnalysis` has tests with a fake detector and selector: a homophonic pun skips sense selection, a selector failure leaves `sense_source` as llm_fallback, and a detection failure returns the undetermined result
-- [ ] #5 docs/local-setup.md describes startup loading and the health check
+- [x] #1 The detector and its resources load once at service startup, before the service accepts requests; a load failure stops startup instead of degrading every request to the undetermined result
+- [x] #2 `GET /health` answers 200 only once the detector is loaded, without running a prediction, and docs/contracts.md documents it
+- [x] #3 `test_main.py` injects a fake analysis and checks that blank and over-`MAX_CHARS` text get 422, determined and undetermined results serialize to the /analyze shape, and a result that breaks `AnalyzeResponse` gets 500
+- [x] #4 `PunAnalysis` has tests with a fake detector and selector: a homophonic pun skips sense selection, a selector failure leaves `sense_source` as llm_fallback, and a detection failure returns the undetermined result
+- [x] #5 docs/local-setup.md describes startup loading and the health check
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
-- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -62,4 +62,12 @@ Revised in implementation: tests patch main.load_analysis and go through the rea
 Correction (2026-10-03, while doing TASK-58): the note above is wrong about memory. Production never calls candidates.get_model() (only tests do), so Inference loads one spaCy pipeline, the detector's. Only features.py's comment ('Existing extractor disables the parser') is wrong. TASK-58 keeps it that way: selection.py takes a parsed Doc from its caller instead of loading a pipeline. If startup loading wants one shared pipeline, FeatureExtractor can use candidates.get_model(), since the settings are identical.
 
 From TASK-58's code review: selection re-embeds what the detector already embedded. score_senses embeds the sentence once per candidate, and gloss_similarity re-embeds glosses, while the detector's FeatureExtractor.vectors already caches the sentence and every WordNet gloss. When moving loading to startup, select_with_detector could pass an embed that reads that cache first.
+
+2026-10-05 validation: uv run pytest (111 passed), ruff clean. Real uvicorn: startup ~2s locally, /health 200 {status: ok}, first /analyze 0.1s and returns wordnet for the warm-up pun from a worker thread; with WN_DATA_DIR empty, 'Application startup failed' and exit 3 before binding the port. Dockerfile check command run locally (passes); the image build itself wasn't run locally (Docker daemon down), CI builds it on the PR. AC #4's tests already existed from PR #90 (test_pun_analysis.py). Per Yai's decision, startup also fails when the warm-up pun isn't explained by WordNet (broken sense selection), not only when detection fails. Limitation: a missing wn allow_multithreading would not fail startup (the warm-up runs on the thread that opened wn's connection); test_loading_warms_the_analysis_up_on_a_real_prediction asserts the flag instead. Code review and architectural review done by subagents; all findings applied; architectural notes on cold-start measurement added to TASK-32. Out of scope, discussed for a follow-up: a cache-first embed for sense selection (reuse FeatureExtractor.vectors, cap it, log hit rates).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Inference now loads the pun detector and analyzes a known pun in a FastAPI lifespan before uvicorn binds its port, so no request pays for loading and a broken detector or sense selection stops startup instead of degrading every request. Added GET /health (no prediction) for Backend's warm-up ping, documented in contracts.md and local-setup.md; the deploy smoke tests and Dockerfile check use the new loading path. Tests cover the 500 on a contract-breaking result, /health, startup failure, and warm-up failures. Verified with pytest (111 passed), ruff, and real uvicorn runs (healthy startup and a startup that fails without WordNet data).
+<!-- SECTION:FINAL_SUMMARY:END -->
