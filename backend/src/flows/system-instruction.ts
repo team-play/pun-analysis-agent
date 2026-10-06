@@ -63,9 +63,39 @@ const ANALYZE_PUN_RULE =
 	"including the analyze_pun results already in it.";
 
 /**
+ * How Otto talks about analyze_pun's confidence and probabilities (TASK-56).
+ * They're the detector's raw, uncalibrated output (docs/contracts.md), so
+ * Otto describes them in words and leaves the exact numbers to Frontend's
+ * tool-call card, which shows them with an "uncalibrated" hint. The detector
+ * calls a text a pun from a confidence well under 0.5, so Otto must not read
+ * a low score as a "not a pun" verdict. It describes how firm the
+ * classifier's call was, and never makes that call binding: TASK-20 lets
+ * Gemini judge an llm_fallback text not a pun after all. This only covers
+ * detection: how sure Otto is of the senses in an llm_fallback reading is
+ * TASK-20's paragraph.
+ */
+export const DETECTOR_SCORES_RULE =
+	"In an analyze_pun result, is_pun and pun_type are the classifier's " +
+	"call, and confidence and probabilities are its raw scores, not " +
+	"calibrated: they show which way it leans and how strongly, not how " +
+	"likely it is to be right. pun_type is only the more likely of the two " +
+	"kinds: when the homographic and homophonic probabilities are close, say " +
+	"the classifier sees a pun but can't settle which kind, rather than " +
+	"presenting the type as clear. It can call a text a pun even with a low " +
+	"confidence, so a low score alone doesn't mean it judged the text not a " +
+	"pun. Use the scores only to say in words how firm the classifier's call " +
+	"was, such as a clear call or a tentative one. Never give them as a " +
+	"percentage or any other number, and never present the call as certain. " +
+	"If the user asks for the exact scores of a result that has them, tell " +
+	"them they're shown on the analysis card in the chat.";
+
+/**
  * Gemini's system instruction for every /api/chat reply. TASK-20 will add a
  * paragraph for llm_fallback results.
  */
-export const SYSTEM_INSTRUCTION = [PERSONA, PURPOSE, ANALYZE_PUN_RULE].join(
-	"\n\n",
-);
+export const SYSTEM_INSTRUCTION = [
+	PERSONA,
+	PURPOSE,
+	ANALYZE_PUN_RULE,
+	DETECTOR_SCORES_RULE,
+].join("\n\n");

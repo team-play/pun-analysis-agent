@@ -6,6 +6,7 @@ import { logger } from "genkit/logging";
 import { type MockModel, mockModel } from "genkit/testing";
 import { createChatFlow } from "../../src/flows/chat.ts";
 import {
+	DETECTOR_SCORES_RULE,
 	PERSONA,
 	PURPOSE,
 	SYSTEM_INSTRUCTION,
@@ -292,9 +293,10 @@ test("chatFlow gives the model Backend's system instruction", async () => {
 	});
 });
 
-// Deliberately couples to the paragraphs, not their wording: rewording Otto
-// or the scope rules passes, but dropping either from SYSTEM_INSTRUCTION fails.
-test("chatFlow's system instruction includes Otto's persona and the pun-analysis purpose", async () => {
+// Deliberately couples to the paragraphs, not their wording: rewording Otto,
+// the scope rules or the score guidance passes, but dropping any of them from
+// SYSTEM_INSTRUCTION fails.
+test("chatFlow's system instruction includes Otto's persona, the pun-analysis purpose and the score guidance", async () => {
 	model.respondWith("ok");
 
 	await chatFlow({ messages: [{ role: "user", content: "Hi" }] });
@@ -302,6 +304,10 @@ test("chatFlow's system instruction includes Otto's persona and the pun-analysis
 	const systemText = model.lastRequest?.messages[0]?.content[0]?.text;
 	assert.ok(systemText?.includes(PERSONA), "persona missing");
 	assert.ok(systemText?.includes(PURPOSE), "purpose missing");
+	assert.ok(
+		systemText?.includes(DETECTOR_SCORES_RULE),
+		"score guidance missing",
+	);
 });
 
 // Kept, a client's system message would come after Backend's, and the real

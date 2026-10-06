@@ -1,0 +1,54 @@
+{
+	"The past, the present and the future walked into a bar. It was tense.": {
+		"is_pun": true,
+		"pun_type": "homographic",
+		"words_involved": ["tense"],
+		"explanation": "“tense” can mean “in or of a state of physical or nervous tension” or “pronounced with relatively tense tongue muscles (e.g., the vowel sound in ‘beat’)”; the sentence supports both because both definitions are about equally close to the sentence's meaning. This is a proposed reading, not proof.",
+		"confidence": 0.9789173234623717,
+		"probabilities": {
+			"non_pun": 0.02108267653762822,
+			"homographic": 0.893893234484314,
+			"homophonic": 0.08502408897805772
+		},
+		"sense_source": "wordnet"
+	},
+	"There's no place like home.": {
+		"is_pun": false,
+		"pun_type": null,
+		"words_involved": [],
+		"explanation": "",
+		"confidence": 0.00011801888340453112,
+		"probabilities": {
+			"non_pun": 0.9998819811165955,
+			"homographic": 0.00010534306571721778,
+			"homophonic": 1.267581768731334e-5
+		},
+		"sense_source": null
+	},
+	"The nudist defended himself by citing his Constitutional right to bare arms.": {
+		"is_pun": true,
+		"pun_type": "homographic",
+		"words_involved": ["arms"],
+		"explanation": "",
+		"confidence": 0.992645937403646,
+		"probabilities": {
+			"non_pun": 0.007354062596353907,
+			"homographic": 0.5007376953169881,
+			"homophonic": 0.491908242086658
+		},
+		"sense_source": "llm_fallback"
+	},
+	"If they ever have a contest for the best looking mannequin, there will be stiff competition.": {
+		"is_pun": true,
+		"pun_type": "homographic",
+		"words_involved": ["competition"],
+		"explanation": "",
+		"confidence": 0.3393275911108662,
+		"probabilities": {
+			"non_pun": 0.6606724088891338,
+			"homographic": 0.17797612817832437,
+			"homophonic": 0.1613514629325418
+		},
+		"sense_source": "llm_fallback"
+	}
+}
