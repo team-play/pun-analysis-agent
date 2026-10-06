@@ -1,0 +1,402 @@
+{
+	"ranAt": "2026-10-06T01:05:16.890Z",
+	"prompts": {
+		"clear pun": "Is this a pun? The past, the present and the future walked into a bar. It was tense.",
+		"clear non-pun": "Is this a pun? There's no place like home.",
+		"class split": "Is this a pun? The nudist defended himself by citing his Constitutional right to bare arms.",
+		"tentative": "Is this a pun? If they ever have a contest for the best looking mannequin, there will be stiff competition.",
+		"asks for a percentage": "Is this a pun, and how sure is the classifier, as a percentage? The nudist defended himself by citing his Constitutional right to bare arms."
+	},
+	"results": [
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "clear pun",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The past, the present and the future walked into a bar. It was tense.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! The classifier makes a clear call that this is a homographic pun. \n\nThe word that carries the cleverness is **tense**. It plays on two different meanings:\n1. A state of nervous anxiety or awkwardness among the people in the bar.\n2. The grammatical categories of past, present, and future.\n\nBecause the words \"past,\" \"present,\" and \"future\" set up a grammatical theme, the punchline uses \"tense\" to bridge grammar and the atmosphere in the room, all using the same spelling and pronunciation."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "clear pun",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The past, the present and the future walked into a bar. It was tense.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! I'm floating on my back in the river, taking a moment to look at this one. The classifier is quite clear that this is a homographic pun, meaning the word \"tense\" is written the same way but carries two different meanings. \n\nIn this joke, the word \"tense\" plays on two concepts simultaneously:\n1. Grammatical tense: The sentence introduces the past, present, and future, which are the primary tenses in grammar.\n2. Emotional tension: The second meaning refers to a state of nervous strain or anxiety, which is a common way to describe an awkward atmosphere in a bar.\n\nBy using a word that fits both the grammatical setup and the social context of the scene, the joke creates a double meaning."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "clear non-pun",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "There's no place like home.",
+					"matched": true
+				}
+			],
+			"reply": "That one isn't a pun. It's a famous line from *The Wizard of Oz* expressing affection for one's own house, but it relies on literal meanings rather than a double meaning or wordplay."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "clear non-pun",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "There's no place like home.",
+					"matched": true
+				}
+			],
+			"reply": "The sentence \"There's no place like home\" is not considered a pun. It is a well-known idiom that functions as a statement of fact or sentiment rather than a play on words. A pun requires a word or phrase to hold two distinct meanings simultaneously—often one literal and one figurative—to create humor or cleverness. Since this sentence doesn't rely on that kind of double meaning, it remains a standard expression. Do you have another sentence you would like me to look at?"
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "class split",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! \n\nYes, that is a pun. It relies on the word \"bare,\" which sounds identical to \"bear\" in the phrase \"bearing arms\" from the Second Amendment. \n\nThe two meanings playing off each other here are:\n1. The right to keep and bear (carry) firearms or weapons.\n2. The nudist's literal lack of clothing, leaving his physical arms bare (naked). \n\nBecause it plays on the double meaning of the sound-alike words \"bear\" and \"bare,\" it's a homophonic pun, even though our classifier saw the probabilities for the two types as quite close."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "class split",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That’s punny! I’m floating on my back in the water right now to think about this one because it’s a great example.\n\nYes, that is definitely a pun. The classifier sees a clear pun here but had a hard time deciding between it being homographic or homophonic, which makes sense because it plays with both sound and spelling. \n\nThe pun revolves around the word \"bare\" versus \"bear.\" It plays on the legal phrase \"bear arms\"—which refers to the Second Amendment right to carry weapons—and the physical description of \"bare arms,\" which, for a nudist, simply means having one's shoulders and arms exposed without clothing. Since \"bare\" and \"bear\" sound identical, it’s a classic homophonic pun."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "tentative",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "If they ever have a contest for the best looking mannequin, there will be stiff competition.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! The classifier makes a tentative call that this is a homographic pun, meaning it plays on two different meanings of the same spelling. \n\nThe heavy lifting here is done by the phrase \"stiff competition.\" A mannequin is a rigid, stiff statue made of plastic or fiberglass, and at the same time, \"stiff competition\" is a common idiom meaning a very tough, uncompromising contest between participants."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "tentative",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "If they ever have a contest for the best looking mannequin, there will be stiff competition.",
+					"matched": true
+				}
+			],
+			"reply": "That is indeed a pun, and I am happy to crack it open for you! That's punny!\n\nThis is a homographic pun centering on the word \"stiff.\" It plays on two different meanings simultaneously:\n\n1.  **Rigid or inflexible:** This describes the physical nature of a mannequin, which is made of hard, immovable materials.\n2.  **Intense or difficult:** This describes the nature of the \"stiff competition,\" meaning a contest that is challenging or tough to win.\n\nBy using \"stiff\" in a context where both meanings apply, the sentence creates a clever double meaning. I’m just floating here on my back, admiring how neatly that word bridges the two ideas together."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "asks for a percentage",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! \n\nThe classifier leans toward this being a homographic pun with a very high confidence. It sees a play on the word \"bare,\" which sounds identical to \"bear\" in \"bear arms,\" but because the words are spelled differently, it can't quite settle between homophonic and homographic. To answer your other question, I can't give you the exact percentages, but you can find those raw scores right on the analysis card! \n\nThe two meanings at play are human limbs (\"bare arms\" as in exposed shoulders and skin) and weapons (\"bear arms\" as in the Second Amendment right to carry firearms)."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "asks for a percentage",
+			"run": 1,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! I’m floating on my back in the river while looking over this one, and the classifier is quite certain that it is indeed a pun. Because the probabilities for homographic and homophonic types are very close, the classifier recognizes this as a pun but finds it tricky to settle on which specific category it falls into.\n\nThe play on words centers on \"bare\" and \"bear.\" In the context of a nudist, \"bare\" refers to being uncovered or unclothed, specifically referring to the skin of their arms. This sounds exactly like \"bear,\" as in the phrase \"bear arms,\" which historically refers to carrying weapons under the Second Amendment. By swapping these two words, the sentence creates a clever double meaning between the literal limbs of the nudist and the constitutional right to carry firearms.\n\nRegarding your question about percentages, please check the analysis card provided in the chat to see the exact scores the classifier used for its evaluation."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "clear pun",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The past, the present and the future walked into a bar. It was tense.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! The classifier leans strongly toward calling this a homographic pun, with just a tiny bit of doubt. \n\nThe word carrying the joke is \"tense.\" It plays on two meanings: first, the grammatical terms for time (past, present, and future tenses), and second, a state of nervous strain or awkwardness in the bar."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "clear pun",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The past, the present and the future walked into a bar. It was tense.",
+					"matched": true
+				}
+			],
+			"reply": "I'm floating on my back to ponder this one, and yes, that is a pun. It relies on the word \"tense,\" which is a homographic pun because it uses two different meanings for the same spelled word.\n\nThe first meaning refers to grammatical tenses, which is what the past, present, and future are. The second meaning describes a situation where there is emotional strain or discomfort—the kind of atmosphere you might find in a bar when those three concepts walk into it. That's punny!"
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "clear non-pun",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "There's no place like home.",
+					"matched": true
+				}
+			],
+			"reply": "That line isn't a pun. It's a famous idiom from *The Wizard of Oz* expressing that nowhere is as comfortable or special as one's own house, without playing on multiple meanings of any words."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "clear non-pun",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "There's no place like home.",
+					"matched": true
+				}
+			],
+			"reply": "I've considered your sentence while floating on my back in the river, and the classifier finds that \"There's no place like home\" is not a pun. A pun works by using a word or phrase that has two different meanings—or sounds like another word—to create clever wordplay. This sentence is a well-known idiom expressing a sentiment about the comfort of one's own home, rather than a twist on the meanings of the words themselves."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "class split",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! \n\nYes, that is definitely a pun. The classifier makes a very clear call on this one, though it's pretty evenly split between the two types. \n\nThe word carrying the joke is **\"arms.\"** It plays on two different meanings:\n1. **The physical limbs of the body**, which a nudist doesn't cover up.\n2. **Weapons**, as in the Second Amendment right to \"bear arms.\"\n\nIt's a homographic pun because both meanings use the exact same spelling and pronunciation."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "class split",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That’s punny! This is a clear example of a pun, though the classifier found the distinction between homographic and homophonic types a bit tricky to settle on because it plays on both the words \"bare/bear\" and the multiple meanings of \"arms.\"\n\nIt is primarily a homophonic pun, which means it uses two words that sound the same but have different meanings. The words involved are \"bare\" and \"bear.\" It plays on the constitutional \"right to bear arms\"—referring to the legal right to possess weapons—and the literal state of a nudist having naked, or \"bare,\" arms. I’m floating on my back in the water to think about how clever that phrasing is."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "tentative",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "If they ever have a contest for the best looking mannequin, there will be stiff competition.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! The classifier makes a tentative call that this is a homographic pun. \n\nThe word that carries the punchline is \"stiff.\" It plays on two different meanings at the same time:\n1. Rigid and inflexible, which describes the actual physical material of a mannequin.\n2. Fierce or intense, as in a tough or \"stiff\" competition. \n\nThe humor comes from the literal rigidity of mannequins meeting the idiom for a high-stakes contest."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "tentative",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "If they ever have a contest for the best looking mannequin, there will be stiff competition.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! I was floating on my back in the river thinking about this one. My analysis tool suggests this is a pun, though it's a bit of a tentative call. \n\nThe humor relies on the word \"stiff,\" which acts as a homographic pun here. It plays on two different meanings: first, \"stiff competition\" refers to intense or difficult rivalry, and second, \"stiff\" refers to the physical rigidity of a mannequin. Even though the tool pointed toward \"competition,\" \"stiff\" is the word that creates the double meaning by bridging those two contexts."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "asks for a percentage",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! \n\nThe classifier leans toward this being a pun with a high level of confidence, though it doesn't give percentages. As for your question about the exact scores, they're shown on the analysis card in the chat. \n\nThis is a homographic pun, meaning it plays on two meanings of the same-spelled word: \"bare arms\" as in unclad limbs, versus \"bearing arms\" as in the right to carry weapons protected by the Constitution. The word carrying the double meaning is \"arms.\""
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "asks for a percentage",
+			"run": 2,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! You have a homophonic pun here, as the humor relies on the words \"bare\" and \"bear,\" which sound identical when spoken but have different meanings and spellings. \n\nIn this case, the pun plays on the phrase \"right to bear arms\"—referring to the legal right to possess weapons—and the literal, \"bare\" or unclothed state of a nudist. I'll just float here on my back for a moment to admire how that wordplay lands. The classifier's call that this is a pun was very firm, though please note that I don't provide scores as percentages or specific numbers; you can find the exact scores on the analysis card provided in the chat."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "clear pun",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The past, the present and the future walked into a bar. It was tense.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! The classifier makes a clear call that this is a homographic pun. \n\nThe heavy lifting here is done by the word \"tense.\" It plays on two different meanings: first, an atmosphere of strain or awkwardness fitting for a bar scene, and second, the grammatical terms for past, present, and future time. Because the spelling and pronunciation are the same while the meanings are entirely different, it's a homographic pun."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "clear pun",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The past, the present and the future walked into a bar. It was tense.",
+					"matched": true
+				}
+			],
+			"reply": "This is a homographic pun. While I'm floating on my back to think about the wordplay, I see the term \"tense\" is the one carrying the pun. It plays on two different meanings: the grammatical sense of verb tenses (past, present, and future) and the state of being nervous or anxious in a social setting. That's punny!"
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "clear non-pun",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "There's no place like home.",
+					"matched": true
+				}
+			],
+			"reply": "The classifier leans toward \"There's no place like home\" not being a pun, so it treats the line literally as the familiar idiom meaning your own home is the most comfortable place to be. It doesn't play on multiple meanings of a word or phrase the way a pun does."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "clear non-pun",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "There's no place like home.",
+					"matched": true
+				}
+			],
+			"reply": "That sentence is not a pun. It is a famous idiom, often associated with *The Wizard of Oz*, used to express that one's own home is the best place to be. It lacks the double meaning or wordplay required for a pun, as there is no specific word being used to play on two different senses or sounds simultaneously. Would you like to share another sentence for me to look at?"
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "class split",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! The classifier makes a very clear call that this is a homographic pun, though it's pretty evenly split on whether it's homographic or homophonic since \"bare\" and \"bear\" sound identical even if they are spelled differently here. \n\nThe word that carries the pun is **arms**. It plays on two meanings:\n1. The human limbs, which a nudist exposes since they wear no clothes.\n2. Weapons, as in the Second Amendment right to keep and bear arms."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "class split",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! I was floating on my back to think about this one, and it's clear the classifier is very confident this is a pun, even if it had a tough time choosing between homographic and homophonic types.\n\nIt's actually quite clever because it plays on two different words. First, there is the homophonic play between \"bare\" and \"bear.\" In the context of the Constitution, the phrase is \"right to bear arms,\" meaning to carry weapons. By swapping \"bear\" for \"bare,\" the sentence shifts the meaning to being uncovered or naked.\n\nSecond, it plays on the word \"arms.\" One meaning relates to weapons, while the other refers to the limbs on a person's body. Together, these layers turn a serious legal concept into a funny image of a nudist."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "tentative",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "If they ever have a contest for the best looking mannequin, there will be stiff competition.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! The classifier makes a tentative call that this is a homographic pun, which means it plays on a word spelled and pronounced the same way in both contexts. \n\nThe word that carries the joke is \"stiff.\" The two meanings at play are:\n1. Rigid and unbending, describing the physical material of a mannequin.\n2. Fierce or intense, describing a high-stakes contest. \n\nBecause mannequins are literally stiff mannequins made of plastic or fiberglass, the phrase \"stiff competition\" creates a clever double meaning."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "tentative",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "If they ever have a contest for the best looking mannequin, there will be stiff competition.",
+					"matched": true
+				}
+			],
+			"reply": "That is indeed a pun, and I'll just float here on my back for a moment while I explain why. That's punny!\n\nThe wordplay here relies on the word \"stiff,\" which is a homographic pun. A homographic pun uses a word that is spelled the same way but carries two different meanings in the same context. In this case, \"stiff\" refers to the physical rigidity of a mannequin, which is literally stiff, while also referring to the idiom \"stiff competition,\" which describes a contest that is intense or difficult to win. By putting those two meanings together, the joke creates a clever double play on how the mannequins are both physically stiff and the participants in a very stiff competition."
+		},
+		{
+			"model": "gemini-3.5-flash-lite",
+			"case": "asks for a percentage",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! \n\nThe classifier leans toward this being a pun with a very high confidence, though no call is ever certain. As for your question about exact numbers, the raw scores are shown on the analysis card in the chat rather than as a percentage. \n\nThis one plays on the word \"arms.\" It bridges two different meanings: the limbs of the human body (which a nudist is showing off by not wearing sleeves) and weapons (as in the Second Amendment right to bear arms). Because the spelling and pronunciation of \"arms\" stay the same while the meaning shifts, it's a homographic pun."
+		},
+		{
+			"model": "gemini-3.1-flash-lite",
+			"case": "asks for a percentage",
+			"run": 3,
+			"failure": null,
+			"toolCalls": [
+				{
+					"text": "The nudist defended himself by citing his Constitutional right to bare arms.",
+					"matched": true
+				}
+			],
+			"reply": "That's punny! Floating on my back to think about this one, I can tell you that the classifier is quite certain that this is a pun, though it struggled to settle on the specific type because the probabilities for a homographic and a homophonic pun were nearly identical.\n\nIn this case, it is a homophonic pun, meaning it relies on words that sound the same but have different meanings. The pun hinges on the word \"bare/bear.\" It plays on the Second Amendment right to \"bear arms,\" which refers to carrying weapons, and the literal \"bare arms,\" which refers to the exposed limbs of a person wearing no clothes. As for the confidence level of the classifier, I cannot provide you with a specific percentage, but you can see the strength of that call reflected in the analysis card above."
+		}
+	]
+}

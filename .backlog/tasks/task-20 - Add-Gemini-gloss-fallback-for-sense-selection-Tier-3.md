@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Andi-Cast'
 created_date: '2026-09-20 10:04'
-updated_date: '2026-10-04 20:58'
+updated_date: '2026-10-06 01:22'
 labels:
   - wsd
 milestone: m-6
@@ -55,4 +55,6 @@ Split with TASK-12, which owns the system instruction's structure and scope/redi
 From TASK-12's review: the undetermined-result guidance ("If is_pun is null, the classifier couldn't judge the text: decide yourself.") currently lives in analyze_pun's tool description (backend/src/tools/analyze-pun.ts), not in backend/src/flows/system-instruction.ts. When adding the llm_fallback/undetermined paragraph to the system instruction, move or merge that sentence so the guidance lives in one place.
 
 2026-10-04, while assigning to @Andi-Cast: llm_fallback results already reach Gemini in production, with no guidance yet. Since PR #85, inference/pun_detector/agent.py sets sense_source "llm_fallback" on every is_pun:true result before sense selection, and returns early for anything not homographic. So every homophonic pun arrives as llm_fallback with an empty explanation and an empty words_involved (not the suspected word this task's description assumes), and homographic puns land there whenever select_senses finds no confident pair. Today only analyze_pun's tool description says anything (the is_pun-null sentence in backend/src/tools/analyze-pun.ts); backend/src/flows/system-instruction.ts still has the "TASK-20 will add a paragraph" placeholder. AC #2's guidance therefore has to cover an empty words_involved, where Gemini also picks the word.
+
+2026-10-06, from TASK-56's review: DETECTOR_SCORES_RULE (backend/src/flows/system-instruction.ts) says the scores 'show which way it leans', but the detector calls is_pun from p_pun >= ~0.32 (choose_label in inference/pun_detector/model.py), so a pun call can come with 0.66 non_pun; TASK-56's run 1 had replies saying the classifier 'leans toward' a pun on such a result. Deferred here because this task rewrites the neighbouring paragraph and needs its own live check: reword it (e.g. a higher confidence means a firmer call; the classifier calls a pun from a confidence well under one half) and re-run docs/experiments/task-56/check.mjs alongside this task's spot-checks. See docs/experiments/task-56/README.md.
 <!-- SECTION:NOTES:END -->
