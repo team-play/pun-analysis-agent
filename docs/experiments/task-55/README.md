@@ -53,6 +53,8 @@ The diagnostics show why nothing flipped:
 - `inference/pyproject.toml` and `uv.lock` are back to `main`'s: the detector adds no Python dependencies.
 - [`retag_artifact.py`](retag_artifact.py) rewrote only `detector.npz`'s metadata. `features.encoder` now names the ONNX encoder, so `PunDetector`'s configuration check still rejects a mismatched artifact, and `encoder_history` records the torch encoder and revision it was trained with, the ONNX revision checked here (`qdrant/all-MiniLM-L6-v2-onnx@8f518e88`), and this folder. The script checks that every array is unchanged, and they were also compared byte for byte with the committed originals.
 - fastembed doesn't pin a model revision, so the ONNX revision is recorded rather than enforced, as it already was for sense scoring. To catch drift anyway, the Dockerfile's last check asserts the baker sentence's confidence is within 10⁻⁴ of the 0.94911 measured here.
+
+Superseded by [TASK-68](../task-68/README.md): `scoring.py` now pins the export to `d1395466`, the shipped weights were checked on it, and `detector.npz` records it as `encoder_revision` in place of `encoder_history.runs_on`.
 - The detector embeds in batches of 8 (`EMBED_BATCH_SIZE`); see the memory section below. Batch size only changes padding, and the results above are from batches of 8.
 
 ## Image and memory

@@ -122,22 +122,6 @@ def saved_splits(rows, path):
     return result
 
 
-def encoder_revision():
-    """The ONNX export fastembed resolved, which it doesn't pin.
-
-    The export changes upstream: TASK-55 checked 8f518e88, and d1395466 (30 September
-    2026) changed its padding. fastembed has no public accessor, but its model directory
-    is the Hugging Face snapshot, named by commit hash.
-    """
-    scoring.default_embed(["load the model"])
-    path = Path(scoring._embedder.model._model_dir)
-    # Without Hugging Face, fastembed falls back to a tarball from another source, which
-    # isn't either snapshot; refuse rather than record its directory name as a revision.
-    if not re.fullmatch(r"[0-9a-f]{40}", path.name):
-        raise RuntimeError(f"fastembed loaded {path}, not a Hugging Face snapshot")
-    return path.name
-
-
 def threshold_for(y, probabilities, classes):
     p = probabilities[:, classes != "non_pun"].sum(axis=1)
     gold = y != "non_pun"
@@ -186,7 +170,8 @@ def train(dataset, output, splits_path):
     # The deployed fastembed (ONNX) encoder, so the artifact's recorded configuration is
     # the one it was trained on and PunDetector's configuration check stays meaningful.
     config = {"schema": SCHEMA, "encoder": ENCODER, "lexicon": LEXICON}
-    revision = encoder_revision()
+    # Pinned in scoring, so it's also the export features are computed with below.
+    revision = scoring.EMBEDDING_REVISION
     cache = output / "features.npz"
     signature = json.dumps(
         {"dataset": fingerprint, "features": config, "encoder_revision": revision}, sort_keys=True
