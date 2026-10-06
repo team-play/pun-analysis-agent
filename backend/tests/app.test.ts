@@ -1,11 +1,16 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { mock, test } from "node:test";
 
 // These tests exercise the real app, whose /api/chat reaches live Gemini
 // unless App Check stops it. So make sure a developer's own APP_CHECK=off
 // (or GEMINI_API_KEY) can't turn a rejected request into a real call:
 // config.ts reads APP_CHECK at import, hence the import after this.
 delete process.env.APP_CHECK;
+// Stands in for Inference for the whole file, so no test here reaches the
+// network and the warm-up test below counts every ping any of them sent.
+const inferenceFetch = mock.method(globalThis, "fetch", async () =>
+	Response.json({ status: "ok" }),
+);
 const { app } = await import("../src/app.ts");
 
 test("GET /health returns ok", async () => {
@@ -82,4 +87,22 @@ test("POST /api/chat on the real app rejects a request with no App Check token (
 		body: JSON.stringify({ messages: [{ role: "user", content: "hi" }] }),
 	});
 	assert.equal(res.status, 401);
+});
+
+// The Inference warm-up (TASK-53) is registered after App Check, so a
+// request App Check rejects can't start one of Inference's cold starts.
+// Moving the warm-up in front of App Check makes this fail, whichever of
+// this file's rejected requests sent the ping: the stub counts them all.
+// app.warmup.test.ts checks the other half, that the warm-up is wired in.
+test("POST /api/chat on the real app doesn't ping Inference for a request App Check rejects", async () => {
+	const res = await app.request("/api/chat", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ messages: [{ role: "user", content: "hi" }] }),
+	});
+	assert.equal(res.status, 401);
+	const pings = inferenceFetch.mock.calls.filter(({ arguments: [url] }) =>
+		String(url).endsWith("/health"),
+	);
+	assert.equal(pings.length, 0);
 });

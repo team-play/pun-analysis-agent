@@ -7,6 +7,7 @@ import { createChatFlow } from "./flows/chat.ts";
 import { ai, chatModels } from "./genkit.ts";
 import { createJsonLogSink } from "./logging.ts";
 import { appCheck } from "./middleware/app-check.ts";
+import { warmInference } from "./middleware/inference-warmup.ts";
 import { createChatHandler } from "./routes/chat.ts";
 import { createAnalyzePunTool } from "./tools/analyze-pun.ts";
 import { createInferenceFetch } from "./tools/inference-fetch.ts";
@@ -37,10 +38,19 @@ if (config.appCheckEnforced) {
 }
 
 // The same transport locally and on Cloud Run, where it adds an ID token.
+const inferenceFetch = createInferenceFetch(config.inferenceUrl, {
+	onCloudRun: config.onCloudRun,
+});
+
+// After App Check, so only requests that passed it can start one of
+// Inference's cold starts.
+app.use(
+	"/api/chat",
+	warmInference({ fetch: inferenceFetch, inferenceUrl: config.inferenceUrl }),
+);
+
 const analyzePun = createAnalyzePunTool(ai, {
-	fetch: createInferenceFetch(config.inferenceUrl, {
-		onCloudRun: config.onCloudRun,
-	}),
+	fetch: inferenceFetch,
 	inferenceUrl: config.inferenceUrl,
 });
 const chatFlow = createChatFlow(ai, chatModels, [analyzePun]);
