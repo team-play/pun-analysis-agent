@@ -1,0 +1,94 @@
+{
+	"startedAt": "2026-10-06T13:05:04.428Z",
+	"url": "https://pun-agent-inference-rlm5dfjheq-ue.a.run.app",
+	"text": "The baker needed more dough.",
+	"denseTexts": [
+		"The bank and the bark. The pitch and the club. The seal and the draft. The bark and the bat. The bat and the court. The bear and the bank. The bolt and the bear. The bow and the crane. The club and the pitch. The court and the bolt. The crane and the date. The date and the seal. The deck and the bow. The draft and the deck. The bank and the bark. The pitch and the club. The seal and the draft. The bark and the bat. The bat and the court. The bear and the bank. The bolt and the bear. The bow and the crane. The club and the pitch. The court and the bolt. The crane and the date. The date and the seal. The deck and the bow. The draft and the deck. The bank and the bark. The pitch and the club. The seal and the draft. The bark and the bat. The bat and the court. The bear and the bank. The bolt and the bear. The bow and the crane. The club and the pitch. The court and the bolt. The crane and the date. The date and the seal. The deck and the bow. The draft and the deck. The bank and the bark. The pitch and the club. The seal and the draft. The bark and the bat. The bat and the court. The bear and the bank. The bolt and the bear. The bow and the crane. The club and the pitch. The court and the bolt. The crane and the date. The date and the seal. The deck and the bow. The draft and the deck. The bank and the bark. The pitch and the club. The seal and the draft. The bark and the bat. The bat and the court. The bear and the bank. The bolt and the bear. The bow and the crane. The club and the pitch. The court and the bolt. The crane and the date. The date and the seal. The deck and the bow. The draft and the deck. The bank and the bark. The pitch and the club. The seal and the draft. The bark and the bat. The bat and the court. The bear and the bank. The bolt and the bear. The bow and the crane. The club and the pitch. The court and the bolt. The crane and the date. The date and the seal. The deck and the bow. The draft and the deck. The bank and the bark. The pitch and the clu",
+		"The fair and the fire. The fan and the jam. The file and the match. The fire and the fly. The fly and the key. The foot and the fair. The grave and the foot. The ground and the lead. The jam and the fan. The key and the grave. The lead and the letter. The letter and the file. The light and the ground. The match and the light. The fair and the fire. The fan and the jam. The file and the match. The fire and the fly. The fly and the key. The foot and the fair. The grave and the foot. The ground and the lead. The jam and the fan. The key and the grave. The lead and the letter. The letter and the file. The light and the ground. The match and the light. The fair and the fire. The fan and the jam. The file and the match. The fire and the fly. The fly and the key. The foot and the fair. The grave and the foot. The ground and the lead. The jam and the fan. The key and the grave. The lead and the letter. The letter and the file. The light and the ground. The match and the light. The fair and the fire. The fan and the jam. The file and the match. The fire and the fly. The fly and the key. The foot and the fair. The grave and the foot. The ground and the lead. The jam and the fan. The key and the grave. The lead and the letter. The letter and the file. The light and the ground. The match and the light. The fair and the fire. The fan and the jam. The file and the match. The fire and the fly. The fly and the key. The foot and the fair. The grave and the foot. The ground and the lead. The jam and the fan. The key and the grave. The lead and the letter. The letter and the file. The light and the ground. The match and the light. The fair and the fire. The fan and the jam. The file and the match. The fire and the fly. The fly and the key. The foot and the fair. The grave and the foot. The ground and the lead. The jam and the fan. The key and the grave. The lead and the letter. The letter and the file. The light and the ground. The match and the light. The fair and the fire. The fan a",
+		"The mine and the note. The mold and the pound. The nail and the rose. The note and the palm. The palm and the punch. The park and the mine. The plant and the park. The play and the race. The pound and the mold. The punch and the plant. The race and the ring. The ring and the nail. The rock and the play. The rose and the rock. The mine and the note. The mold and the pound. The nail and the rose. The note and the palm. The palm and the punch. The park and the mine. The plant and the park. The play and the race. The pound and the mold. The punch and the plant. The race and the ring. The ring and the nail. The rock and the play. The rose and the rock. The mine and the note. The mold and the pound. The nail and the rose. The note and the palm. The palm and the punch. The park and the mine. The plant and the park. The play and the race. The pound and the mold. The punch and the plant. The race and the ring. The ring and the nail. The rock and the play. The rose and the rock. The mine and the note. The mold and the pound. The nail and the rose. The note and the palm. The palm and the punch. The park and the mine. The plant and the park. The play and the race. The pound and the mold. The punch and the plant. The race and the ring. The ring and the nail. The rock and the play. The rose and the rock. The mine and the note. The mold and the pound. The nail and the rose. The note and the palm. The palm and the punch. The park and the mine. The plant and the park. The play and the race. The pound and the mold. The punch and the plant. The race and the ring. The ring and the nail. The rock and the play. The rose and the rock. The mine and the note. The mold and the pound. The nail and the rose. The note and the palm. The palm and the punch. The park and the mine. The plant and the park. The play and the race. The pound and the mold. The punch and the plant. The race and the ring. The ring and the nail. The rock and the play. The rose and the rock. The mine and the note. The mold "
+	],
+	"samples": [
+		{
+			"scenario": "parallel-dense",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T13:25:04.764Z",
+					"ms": 22416,
+					"status": 200
+				},
+				{
+					"sentAt": "2026-10-06T13:25:04.795Z",
+					"ms": 24542,
+					"status": 200
+				},
+				{
+					"sentAt": "2026-10-06T13:25:04.795Z",
+					"ms": 23427,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T13:25:25.624373Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd860708ed40232888ce47c9753748333e25e402cac32d227405f81bf8545064827cf49bd864ee2f344d84ee416ba3cc1063680231e1819adfce9329fd8170129a6c4001bfc96a23fbf77af2c2288db0b228393a9bb1ad16"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T13:25:04.915713Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "1.115614s",
+						"instanceId": "0010dd860708ed40232888ce47c9753748333e25e402cac32d227405f81bf8545064827cf49bd864ee2f344d84ee416ba3cc1063680231e1819adfce9329fd8170129a6c4001bfc96a23fbf77af2c2288db0b228393a9bb1ad16"
+					},
+					{
+						"at": "2026-10-06T13:25:04.917132Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "1.513230680s",
+						"instanceId": "0010dd860708ed40232888ce47c9753748333e25e402cac32d227405f81bf8545064827cf49bd864ee2f344d84ee416ba3cc1063680231e1819adfce9329fd8170129a6c4001bfc96a23fbf77af2c2288db0b228393a9bb1ad16"
+					},
+					{
+						"at": "2026-10-06T13:25:04.920949Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "1.049140699s",
+						"instanceId": "0010dd860708ed40232888ce47c9753748333e25e402cac32d227405f81bf8545064827cf49bd864ee2f344d84ee416ba3cc1063680231e1819adfce9329fd8170129a6c4001bfc96a23fbf77af2c2288db0b228393a9bb1ad16"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "unassisted-dense",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T13:47:00.722Z",
+					"ms": 16531,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T13:47:15.689278Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd8607633492a3edfa8f198e4e9553bda21c6ceba9839645baf9030bbcde6d5b83a20ad9fbbfd10e40b41b3c82dd6faa137b7eed57d29fbc63b249ad4a3ce33e45ef9df58b93635045274916aeba85424a07aaf4e98e36c9"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T13:47:00.791487Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "16.136242845s",
+						"instanceId": "0010dd8607633492a3edfa8f198e4e9553bda21c6ceba9839645baf9030bbcde6d5b83a20ad9fbbfd10e40b41b3c82dd6faa137b7eed57d29fbc63b249ad4a3ce33e45ef9df58b93635045274916aeba85424a07aaf4e98e36c9"
+					}
+				]
+			},
+			"coldStart": true
+		}
+	]
+}

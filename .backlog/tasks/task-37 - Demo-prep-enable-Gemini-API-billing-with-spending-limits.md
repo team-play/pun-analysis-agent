@@ -5,7 +5,7 @@ status: To Do
 assignee:
   - '@yaitorr'
 created_date: '2026-09-27 20:47'
-updated_date: '2026-10-04 20:57'
+updated_date: '2026-10-06 13:53'
 labels: []
 dependencies:
   - TASK-38
@@ -64,4 +64,6 @@ TASK-38 outcome (2026-09-28, @yaisiel.torres): production switched to gemini-fla
 From TASK-45 (2026-09-29): AC #6 is out of date. The ladder is now gemini-3.5-flash-lite -> gemini-3.1-flash-lite -> gemini-3.8-flash (gemini-flash-lite-latest and gemini-2.5-flash-lite are gone), and Flash at the head of the ladder was tried and reverted: three stalls on the top rung spend the whole RETRY_BUDGET_MS, failing the reply before it steps down. Revisit AC #6 before starting.
 
 2026-09-29 (TASK-32): the stall-limit re-check for Flash is now TASK-50 (TASK-32 AC #4 covers the Flash-Lite rungs only). The limit lives in packages/timeouts/index.js, not stall-guard.ts. To repeat the measurement after a ladder change, use docs/experiments/task-32/measure.mjs (its MODELS list is hard-coded). Also relevant to the demo's reliability: gemini-3.1-flash-lite answered 503 (UNAVAILABLE, high demand) to 26 of its 73 attempts on 2026-09-29. These are capacity failures, not quota, so billing may not remove them.
+
+2026-10-06 (TASK-32): INFERENCE_TIMEOUT_MS is now 24 s (was 20 s), measured from Inference's cold start (docs/experiments/task-32, 11 cold starts, 6-22 s). So MAX_SILENCE_MS is 54 s and FRONTEND_SILENCE_LIMIT_MS is 79 s (was 75 s), raised in the same change since Frontend doesn't enforce it yet; RETRY_BUDGET_MS is 68 s (was 80 s). Earlier numbers in these notes are superseded.
 <!-- SECTION:NOTES:END -->

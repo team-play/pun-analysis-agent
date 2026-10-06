@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-09-27 15:25'
-updated_date: '2026-10-06 00:54'
+updated_date: '2026-10-06 13:53'
 labels: []
 milestone: m-4
 dependencies:
@@ -30,17 +30,17 @@ TASK-9 added INFERENCE_TIMEOUT_MS (backend/src/tools/analyze-pun.ts) with a prov
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Inference's cold start on Cloud Run is measured on the deployed service (time to first successful /analyze after scale-to-zero), over several runs, with the method recorded
-- [ ] #2 INFERENCE_TIMEOUT_MS is set from that measurement with its margin explained next to the constant
-- [ ] #3 docs/contracts.md records the measured value and drops the 'provisional and unmeasured' wording, and updates the maximum silence between /api/chat events (MODEL_STALL_LIMIT_MS + INFERENCE_TIMEOUT_MS) that Frontend's limit (TASK-28) is set against
+- [x] #1 Inference's cold start on Cloud Run is measured on the deployed service (time to first successful /analyze after scale-to-zero), over several runs, with the method recorded
+- [x] #2 INFERENCE_TIMEOUT_MS is set from that measurement with its margin explained next to the constant
+- [x] #3 docs/contracts.md records the measured value and drops the 'provisional and unmeasured' wording, and updates the maximum silence between /api/chat events (MODEL_STALL_LIMIT_MS + INFERENCE_TIMEOUT_MS) that Frontend's limit (TASK-28) is set against
 - [x] #4 MODEL_STALL_LIMIT_MS (packages/timeouts/index.js) is checked against measured Gemini silences (time to first chunk, longest gap between chunks, last chunk to call end), per model call, over TASK-38's prompt set, for the ladder's Flash-Lite models (gemini-3.5-flash-lite, gemini-3.1-flash-lite) with the settings production gives them; the measurement and method are recorded, and the value is not lowered below 30 s until gemini-3.8-flash is measured too (follow-up task). Amended 2026-09-29 by @yaisiel.torres: was every model production can run.
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
-- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -54,6 +54,8 @@ AC #1-#3 wait on TASK-16 (/analyze raises NotImplementedError; a cold start that
 5. README with method, results and the margin reasoning; MODEL_STALL_LIMIT_MS's comment and docs/contracts.md cite the Flash-Lite numbers; the value stays at 30 s until Flash is measured.
 6. Follow-up task for measuring gemini-3.8-flash; inform TASK-28, TASK-37 and TASK-43/45 with the results.
 7. Code review + architectural review subagents; docs drift check.
+
+AC #1-#3 (2026-10-06, decided with @yaitorr): docs/experiments/task-32/cold-start.mjs times POST /analyze (ID token fetched first; send to full body, as Backend's AbortSignal.timeout covers) after Cloud Run scales Inference to zero on its own (20 min idle, no forced redeploy). Scenarios: (a) one unassisted /analyze x5, (b) 3 parallel /analyze x2, (c) /health ping then /analyze 5 s later x2. Each sample counts only if Cloud Run logs show a new instance starting for it. Margin: ~1.5x the worst unassisted cold start; 20 s stays if that's <= 13.3 s. The last of several parallel calls after a cold start may degrade to undetermined.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -82,4 +84,12 @@ From PR #85's architectural review (2026-10-03, on TASK-16): Inference runs one 
 From TASK-51's architectural review (2026-10-05): once TASK-51 lands, Inference loads the detector and analyzes one warm-up pun at startup, before uvicorn binds its port. A cold start (scale from zero) therefore includes the whole load plus that warm-up prediction, and Cloud Run's default TCP startup probe holds the waking request until it finishes; it all still counts against INFERENCE_TIMEOUT_MS. Measure the cold start only after TASK-51 is deployed. The embedding model no longer loads lazily on the first /analyze (the earlier note from TASK-19 is stale), and packages/timeouts/index.js's comment that the cold start can't be measured until /analyze answers (TASK-16) is stale too. With --max-instances=1 --concurrency=1, requests that arrive during startup wait for the whole load plus warm-up: also measure parallel analyze_pun calls and TASK-53's /health ping followed by an analyze_pun (Backend maps a 429 or timeout to the undetermined result, so this degrades rather than errors).
 
 From TASK-53's architectural review: Backend now pings Inference's GET /health on /api/chat (at most every 5 min, after App Check, not awaited). It starts the cold start only by Gemini's first turn (~3-7 s), and not at all when Inference was reclaimed inside the window or the last ping failed. So size INFERENCE_TIMEOUT_MS from an unassisted cold start (AC #1), not from a warmed one.
+
+2026-10-06: AC #1-#3. cold-start.mjs measured 11 cold starts on revision pun-agent-inference-00015-k8j after 20-min idle scale-to-zero, each confirmed by an 'Application startup complete' log line in its window (runs/cold-start-2026-10-06T*.json). Waking request 6-22 s, median 10.6 s; one 20.7 s startup. Dense 2,000-char texts add ~1-1.5 s; parallel calls queue one analysis each; after the /health ping, /analyze waited 1.7-4.3 s; laptop adds 0.2-0.8 s over Cloud Run's latency. Decided with @yaisiel.torres: INFERENCE_TIMEOUT_MS 24 s (covers every single call measured, ~1.5x the typical slow cold start; a rare slow unassisted cold start may degrade to undetermined, which Gemini handles per TASK-20). FRONTEND_SILENCE_LIMIT_MS 75 -> 79 s in the same change (Frontend doesn't enforce it yet, TASK-28); RETRY_BUDGET_MS 80 -> 68 s, still two full-stall retries. CPU/cpu-boost pinning in deploy-inference.yml suggested by architectural review; declined by @yaisiel.torres. Reviews: code-review subagent (fixed overhead range, median, startup-log timing comment, instanceId on request logs, log-read failure handling, fileURLToPath) and architectural subagent (added dense-text cold scenarios, token wording, retry-budget headroom note; deploy-order claim verified: frontend/ reads no silence constant). Tests: timeouts 7/7, backend 222/222, frontend 171/171. Docs drift: README.md, project-spec.md, local-setup.md, AGENTS.md checked; none describe these values.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Measured Inference's Cloud Run cold start on the deployed service (11 confirmed cold starts, 6-22 s, median 10.6 s; docs/experiments/task-32/cold-start.mjs and README) and set INFERENCE_TIMEOUT_MS to 24 s with its reasoning next to the constant; FRONTEND_SILENCE_LIMIT_MS raised to 79 s to match MAX_SILENCE_MS 54 s. contracts.md records the measured value and drops 'provisional and unmeasured' for it. AC #4 (Flash-Lite silences) was done 2026-09-29. Verified with packages/timeouts relationship tests (fail at 24/75, pass at 24/79), backend and frontend suites, and code + architectural review subagents. Close once the Backend deploy is verified.
+<!-- SECTION:FINAL_SUMMARY:END -->
