@@ -231,3 +231,7 @@ docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint:1.7.12 -color
 - Skip it for one commit with `git commit --no-verify` or `LEFTHOOK=0 git commit`.
 - The hook lives in the repo's shared `.git/hooks`, so every worktree uses it; whichever checkout last ran `pnpm install` is the one whose Lefthook it calls. Branches without `lefthook.yml` commit normally.
 - If you stage only part of a file, the unstaged part is kept out of the commit, but an unstaged edit right next to lines the formatter rewrites can be put back a line or two off. Check `git diff` afterwards in that case.
+
+## Reproduce detector training (TASK-54)
+
+From `inference/`, after the setup above (`uv sync` and the WordNet download), run `uv run python scripts/train_detector.py --verify-reference ../docs/experiments/pun-detector/prototype-1/report.json`. It reuses the committed split IDs and the same fastembed model `/analyze` uses. Generated weights, feature cache and reports go to ignored `inference/training-output/`; deployed weights remain unchanged. See [the reproduction guide](experiments/pun-detector/reproduction.md) for what it verifies and the presentation results. scikit-learn, the only training-specific package, is a dev dependency and isn't installed in the production image.
