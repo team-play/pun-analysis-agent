@@ -2,7 +2,7 @@ import { INFERENCE_TIMEOUT_MS } from "@pun-agent/timeouts";
 import type { Genkit } from "genkit";
 import { z } from "genkit";
 import { logger } from "genkit/logging";
-import { InferenceAuthError } from "./inference-fetch.ts";
+import { InferenceAuthError, networkErrorCode } from "./inference-fetch.ts";
 
 const analyzeResultFields = z.object({
 	is_pun: z.boolean().nullable(),
@@ -119,15 +119,6 @@ type InferenceFailure =
 // DOMException of this name (an Error subclass on Node).
 const isTimeout = (err: unknown) =>
 	err instanceof Error && err.name === "TimeoutError";
-
-/**
- * The network error behind fetch's generic "fetch failed" TypeError (e.g.
- * ECONNREFUSED, ENOTFOUND), which the logger doesn't record by itself.
- */
-const networkErrorCode = (err: unknown) =>
-	err instanceof Error && err.cause instanceof Error && "code" in err.cause
-		? err.cause.code
-		: undefined;
 
 /**
  * Logs why Inference couldn't be used and returns the undetermined result.

@@ -21,6 +21,8 @@
  * How long analyze_pun waits for Inference, covering its Cloud Run cold
  * start. Provisional and unmeasured: the cold start can't be measured until
  * /analyze answers (TASK-16), so this is a guess until TASK-32 measures it.
+ * Backend's warm-up ping (TASK-53) often starts the cold start a few seconds
+ * early, but not always, so this still has to cover a whole one without it.
  */
 export const INFERENCE_TIMEOUT_MS = 20_000;
 

@@ -28,6 +28,15 @@ const idTokenHeaders = (audience: string) => {
 	};
 };
 
+/**
+ * The network error behind fetch's generic "fetch failed" TypeError (e.g.
+ * ECONNREFUSED, ENOTFOUND), which the logger doesn't record by itself.
+ */
+export const networkErrorCode = (err: unknown) =>
+	err instanceof Error && err.cause instanceof Error && "code" in err.cause
+		? err.cause.code
+		: undefined;
+
 /** `promise`, or a rejection with the signal's reason if it aborts first. */
 const unlessAborted = <T>(promise: Promise<T>, signal?: AbortSignal | null) =>
 	signal
