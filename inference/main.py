@@ -4,6 +4,9 @@ from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 
 from pun_detector.agent import PunAnalysis, load_analysis
@@ -30,6 +33,17 @@ def get_analysis(request: Request) -> PunAnalysis:
 
 
 AnalysisDep = Annotated[PunAnalysis, Depends(get_analysis)]
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_without_input(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    # FastAPI's default 422 body, minus each error's `input`: the caller already has its own
+    # text, and echoing it back fails on text UTF-8 can't encode (a lone surrogate), turning
+    # the 422 into a 500.
+    errors = [{k: v for k, v in error.items() if k != "input"} for error in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
 
 
 class AnalyzeRequest(BaseModel):

@@ -82,6 +82,40 @@ def test_analyze_rejects_empty_blank_and_overlong_text(monkeypatch, text):
     assert response.status_code == 422
 
 
+# Raw JSON, since `json=` can't encode a lone surrogate. Backend can send one:
+# JSON.stringify writes it as this escape.
+LONE_SURROGATE_BODY = '{"text": "a\\ud800"}'
+
+
+@pytest.mark.parametrize(
+    "body",
+    [LONE_SURROGATE_BODY, '{"text": ""}', '{"text": "   "}', '{"text": 5}', "{}", '{"text": "x"'],
+    ids=["lone surrogate", "empty", "blank", "non-string text", "missing text", "malformed JSON"],
+)
+def test_analyze_answers_422_without_echoing_the_input(monkeypatch, body):
+    # FastAPI's default 422 echoes each error's input, and a lone surrogate in it can't be
+    # encoded as UTF-8, which turned the 422 into a 500.
+    with serve(monkeypatch, FixedAnalysis(undetermined())) as client:
+        response = client.post(
+            "/analyze", content=body, headers={"Content-Type": "application/json"}
+        )
+
+    assert response.status_code == 422
+    errors = response.json()["detail"]
+    assert errors
+    assert all("input" not in error for error in errors)
+
+
+def test_a_422_still_says_which_rule_the_text_broke(monkeypatch):
+    with serve(monkeypatch, FixedAnalysis(undetermined())) as client:
+        response = client.post("/analyze", json={"text": "x" * 2001})
+
+    [error] = response.json()["detail"]
+    assert error["type"] == "string_too_long"
+    assert error["loc"] == ["body", "text"]
+    assert "input" not in error
+
+
 def test_health_answers_without_running_a_prediction(monkeypatch):
     analysis = FixedAnalysis(undetermined())
 
