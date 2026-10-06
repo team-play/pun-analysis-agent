@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-10-06 01:16'
-updated_date: '2026-10-06 02:11'
+updated_date: '2026-10-06 02:13'
 labels:
   - pun-classifier
 milestone: m-6
@@ -44,7 +44,7 @@ fastembed does not pin model revisions, so the inference image (and local runs a
 <!-- DOD:BEGIN -->
 - [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
 - [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
 ## Implementation Plan
