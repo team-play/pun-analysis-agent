@@ -3,11 +3,11 @@ id: TASK-20
 title: >-
   Backend: Gemini supplies the senses when /analyze returns llm_fallback (Tier
   3)
-status: In Progress
+status: Done
 assignee:
   - '@Andi-Cast'
 created_date: '2026-09-20 10:04'
-updated_date: '2026-10-06 01:38'
+updated_date: '2026-10-06 08:34'
 labels:
   - wsd
 milestone: m-6
@@ -44,9 +44,9 @@ Split with TASK-12, which owns the system instruction's structure and scope/redi
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
-- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
-- [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
+- [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
+- [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
 ## Implementation Plan
@@ -71,4 +71,12 @@ Tests (backend/tests/flows/chat.test.ts): the instruction includes FALLBACK_RULE
 Live spot-check (AC #5), docs/experiments/task-20 (check.mjs, README, runs/): Backend's chat flow in-process on gemini-3.5-flash-lite (pinned), 5 cases (homographic right guess, wrong guess banker->interest, homophonic with no words, undetermined, detector false positive), 3 runs of 3 wordings, 30 requests on 2026-10-06 after Andi checked the day's usage. Every run: the model replaced the wrong guess with the right word, found homophonic sound-alikes itself, decided undetermined texts without crediting the tool, and never mentioned field names. Saying the reading is its own varied (1/4, 4/4, 2/4 pun replies) and the false positive was caught in run 1 only; with one reply per case the wordings can't be told apart. Shipped run 3's wording (verdict check first), plus one untested change from the review: homophonic puns reach llm_fallback without a dictionary lookup, so the reason given is "didn't explain it from its dictionaries", not "couldn't confirm". AC #2 is met as written (two senses presented as Gemini's own reading, or "not a pun"), but how consistently it hedges and catches false positives could still be improved if the eval shows it matters: a comparison worth acting on needs several replies per case and wording (~90 requests over several days). Detector false positives are better caught by the detector itself.
 
 Review (AGENTS.md code + architectural, independent subagent): no contract, topology or isolation problems; contracts.md's llm_fallback/undetermined hand-off stays true, no conflict with TASK-56 or TASK-12. Fixed: per-result guidance assertions (deleting either half of FALLBACK_RULE now fails a test), the homophonic reason, Biome formatting of the run files, and the script's stand-in results (imports UNDETERMINED_ANALYZE_RESULT; README notes they omit probabilities). Out of scope, noted: Frontend's card labels every llm_fallback result "Senses supplied by Gemini, at lower confidence", even when Otto concludes the text isn't a pun.
+
+Closing check (2026-10-06): merged in #108 as 802a5c3. Deploy Backend run 37400551984 on 802a5c3 succeeded. DoD #1/#2: the code + architectural review subagent pass is recorded above. DoD #3: README.md, project-spec.md, local-setup.md, AGENTS.md, contracts.md and design/sense-selection.md already describe the llm_fallback/undetermined hand-off as shipped (Backend's system instruction acts on it, Gemini judges undetermined text itself); no drift, no follow-up commit needed.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Backend's system instruction gains FALLBACK_RULE: on sense_source "llm_fallback" Gemini checks the text really is a pun, works out the pun word and its two meanings (or sound-alikes) itself, and presents that as its own reading; on is_pun null it decides itself without crediting the tool. The undetermined sentence moved here from analyze_pun's tool description so the guidance lives in one place; inference/ stays LLM-free. Verified with Genkit mockModel tests (exactly two model requests and one Inference call per tool-using turn, per-result guidance and unchanged tool output in the second request; 207 backend tests pass) and a 30-request live spot-check on pinned gemini-3.5-flash-lite (docs/experiments/task-20). Merged in #108, deployed by Deploy Backend run 37400551984. Open for later: how consistently Gemini hedges and catches detector false positives needs several replies per case to measure.
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -3,11 +3,11 @@ id: TASK-68
 title: >-
   Inference: pin the ONNX encoder revision and re-check the shipped detector on
   it
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-10-06 01:16'
-updated_date: '2026-10-06 02:13'
+updated_date: '2026-10-06 08:34'
 labels:
   - pun-classifier
 milestone: m-6
@@ -68,4 +68,12 @@ Revision after review: step 4 deletes train_detector.encoder_revision() (the tra
 Pinned qdrant/all-MiniLM-L6-v2-onnx@d1395466 in scoring.py (snapshot_download + fastembed specific_model_path); Dockerfile bakes it with hf download --revision; image's offline check fails the build on a mismatch (verified by building with 8f518e88 in the Dockerfile only). docs/experiments/task-68: shipped weights reproduce 605/605 stored predictions on the pin; diagnostic vs 8f518e88 has max class-probability gap 0.0 (fastembed 0.8.1 overrides tokenizer padding, the only file that changed). detector.npz retagged (metadata only, arrays byte-identical): encoder_revision added, runs_on removed. Image 350,913,628 -> 350,913,264 B; ready 2.6-3.0 s -> 2.6-2.8 s; first reply unchanged. 159 tests pass; both new tests mutation-checked.
 
 Validation: 161 pytest pass (no network), ruff + biome + mermaid clean. AC1: Dockerfile bakes d1395466 by full hash with hf download; runtime HF_HUB_OFFLINE; build with 8f518e88 in Dockerfile only fails (OfflineModeIsEnabled); test_dockerfile_bakes_the_pinned_export. AC2: default_embed/trainer/compare.py all resolve scoring.EMBEDDING_REVISION; compare.py loaded d1395466. AC3: docs/experiments/task-68/results.json 605/605. AC4: test_artifact_was_checked_on_the_pinned_encoder_revision, mutation-checked. AC5: image 350,913,628 -> 350,913,534 B; ready 2.6-3.0 -> 2.6-2.8 s; first reply 0.13-0.16 -> 0.13-0.15 s. Code review + architectural review subagents: no serious defects; fixed allow_patterns test gap, test comment reason, README byte breakdown and failure wording, cold-start progress-bar log noise (HF_HUB_DISABLE_PROGRESS_BARS=1), documented Hugging Face as the only model source now. Doc drift fixed in reproduction.md, local-setup.md, task-55 README (to go in a separate docs commit).
+
+Closing check (2026-10-06): merged in #123 as 5e7be70. Deploy Inference run 37403439103 on 5e7be70 succeeded, so the image's build-time checks (including the offline check that the baked export matches scoring.EMBEDDING_REVISION) passed in CI. Registry: inference image 5e7be70 is 350,909,673 B, in line with the ~350.9 MB measured locally (AC #5).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Pinned the detector's ONNX encoder to qdrant/all-MiniLM-L6-v2-onnx@d1395466 in scoring.py (snapshot_download + fastembed specific_model_path); the Dockerfile bakes the same revision and its offline check fails the build on a mismatch, and local runs and train_detector resolve the pin through scoring.py. The shipped detector.npz reproduces all 605 of prototype-1's stored test predictions on the pin (docs/experiments/task-68); its metadata now records encoder_revision, and a no-network test fails if it diverges from the pin. Image size and cold start unchanged. Verified with 161 pytest (both new tests mutation-checked), code + architectural review subagents, and Deploy Inference run 37403439103 on 5e7be70 (#123).
+<!-- SECTION:FINAL_SUMMARY:END -->
