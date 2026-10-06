@@ -12,7 +12,7 @@ export const punResult: AnalyzeResult = {
 	pun_type: "homographic",
 	words_involved: ["dough"],
 	explanation:
-		'"Dough" plays on its literal sense (bread dough) and its slang sense (money) — a baker "not making enough dough" reads as both a baking and a financial complaint.',
+		"“dough” can mean “a flour mixture stiff enough to knead or roll” or “informal terms for money”; the sentence supports both because both fit as the object of “need”. This is a proposed reading, not proof.",
 	confidence: 0.94,
 	probabilities: { homographic: 0.81, homophonic: 0.13, non_pun: 0.06 },
 	sense_source: "wordnet",
