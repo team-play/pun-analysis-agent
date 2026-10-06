@@ -117,7 +117,7 @@ describe("App", () => {
 			fireEvent.click(await findCard("Pun (homographic), Pun score 94%"));
 
 			const word = await screen.findByText("dough", { selector: "mark" });
-			const explanation = await screen.findByText(/its slang sense \(money\)/, {
+			const explanation = await screen.findByText(/informal terms for money/, {
 				selector: "p",
 			});
 			const probabilities = screen.getByRole("list", {
