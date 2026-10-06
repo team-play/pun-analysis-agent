@@ -59,6 +59,44 @@ test("POSTs the text to Inference's /analyze and returns its result", async () =
 	assert.equal(warn.mock.callCount(), 0);
 });
 
+// The limit is written out rather than imported, and Inference's
+// tests/test_main.py pins the same 2,000, so changing it on one side alone
+// fails a test (docs/contracts.md).
+const withinLimit = {
+	"2,000 characters": "x".repeat(2000),
+	// 4,000 UTF-16 code units, but 2,000 characters to Inference's len().
+	"2,000 emoji": "😀".repeat(2000),
+};
+for (const [name, text] of Object.entries(withinLimit)) {
+	test(`sends text of ${name} to Inference`, async () => {
+		const fetch = mock.fn<typeof globalThis.fetch>(async () =>
+			Response.json(PUN_ANALYZE_RESULT),
+		);
+		const analyzePun = buildTool(fetch);
+
+		assert.deepEqual(await analyzePun({ text }), PUN_ANALYZE_RESULT);
+		assert.equal(fetch.mock.callCount(), 1);
+	});
+}
+
+const overLimit = {
+	"2,001 characters": "x".repeat(2001),
+	"2,001 emoji": "😀".repeat(2001),
+};
+for (const [name, text] of Object.entries(overLimit)) {
+	test(`returns the undetermined result for text of ${name}, without calling Inference`, async () => {
+		const fetch = mock.fn<typeof globalThis.fetch>(async () =>
+			Response.json(PUN_ANALYZE_RESULT),
+		);
+		const analyzePun = buildTool(fetch);
+
+		assert.deepEqual(await analyzePun({ text }), UNDETERMINED_ANALYZE_RESULT);
+		assert.equal(fetch.mock.callCount(), 0);
+		assert.equal(loggedCause(), "too_long");
+		assert.equal(warn.mock.calls[0]?.arguments[1].characters, 2001);
+	});
+}
+
 // Each has at least one null field, so these fail Genkit's output
 // validation if the schema says .optional() where the contract says null.
 const nullableResults: Record<string, AnalyzeResult> = {

@@ -212,8 +212,7 @@ test("an Inference failure in analyze_pun is one WARNING entry with its cause as
 
 	assert.deepEqual(onlyEntry(), {
 		severity: "WARNING",
-		message:
-			"analyze_pun: Inference call failed, returning the undetermined result",
+		message: "analyze_pun: returning the undetermined result",
 		cause: "non_2xx",
 		status: 502,
 	});
