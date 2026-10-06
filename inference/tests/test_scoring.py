@@ -1,5 +1,10 @@
-import pytest
+import re
+from pathlib import Path
 
+import pytest
+from fastembed import TextEmbedding
+
+import scoring
 from scoring import (
     MARGIN_THRESHOLD,
     PunSignal,
@@ -299,3 +304,59 @@ def test_adjective_senses_use_gloss_distance():
     close = fake_embed_from({READY_PREPARED.gloss: [1.0, 0.0], READY_WILLING.gloss: [1.0, 0.1]})
     scored = [lesk(READY_PREPARED, 0.6), lesk(READY_WILLING, 0.55)]
     assert pun_margin(scored, close) is None
+
+
+def test_default_embed_loads_the_pinned_export_revision(monkeypatch, tmp_path):
+    # fastembed would load whatever export is newest; default_embed must fetch the pinned
+    # commit and hand fastembed that directory instead (TASK-68). No network: both fakes.
+    downloads, loads = [], []
+
+    def fake_snapshot_download(repo_id, *, revision, cache_dir, allow_patterns):
+        downloads.append((repo_id, revision, cache_dir, allow_patterns))
+        return f"/snapshots/{revision}"
+
+    class FakeTextEmbedding:
+        def __init__(self, model_name, *, specific_model_path):
+            loads.append((model_name, specific_model_path))
+
+        def embed(self, texts, batch_size):
+            return [[1.0, 0.0] for _ in texts]
+
+    monkeypatch.setenv("FASTEMBED_CACHE_PATH", str(tmp_path))
+    monkeypatch.setattr(scoring, "snapshot_download", fake_snapshot_download)
+    monkeypatch.setattr(scoring, "TextEmbedding", FakeTextEmbedding)
+    monkeypatch.setattr(scoring, "_embedder", None)
+
+    scoring.default_embed(["a"])
+    scoring.default_embed(["b"])
+
+    revision = scoring.EMBEDDING_REVISION
+    assert downloads == [(scoring.EMBEDDING_SOURCE, revision, tmp_path, ["*.json", "model.onnx"])]
+    assert loads == [(scoring.EMBEDDING_MODEL, f"/snapshots/{revision}")]
+
+
+def test_pinned_export_is_a_full_commit_of_fastembeds_own_source():
+    # Only a full commit hash lets huggingface_hub skip asking the Hub what a revision
+    # points to; a branch or short hash would need the network on every load, and fail
+    # in the offline image. And the export must be the one fastembed's description of
+    # EMBEDDING_MODEL (pooling, dimension, model file) was written for.
+    (description,) = [
+        m for m in TextEmbedding.list_supported_models() if m["model"] == scoring.EMBEDDING_MODEL
+    ]
+
+    assert re.fullmatch(r"[0-9a-f]{40}", scoring.EMBEDDING_REVISION)
+    assert description["sources"]["hf"] == scoring.EMBEDDING_SOURCE
+    assert description["model_file"] in scoring.EMBEDDING_FILES
+
+
+def test_dockerfile_bakes_the_pinned_export():
+    # The image runs offline, so its build fails on a mismatch too, but only in the
+    # Docker CI job; this catches it in pytest.
+    dockerfile = (Path(scoring.__file__).parent / "Dockerfile").read_text()
+    (command,) = re.findall(r"hf download (.*?) --quiet", dockerfile, flags=re.DOTALL)
+    words = command.replace("\\\n", " ").split()
+
+    assert words[0] == scoring.EMBEDDING_SOURCE
+    assert words[words.index("--revision") + 1] == scoring.EMBEDDING_REVISION
+    included = [words[i + 1].strip('"') for i, w in enumerate(words) if w == "--include"]
+    assert included == scoring.EMBEDDING_FILES

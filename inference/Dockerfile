@@ -20,20 +20,26 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev
 ENV WN_DATA_DIR=/wn_data
 RUN .venv/bin/python -m wn download oewn:2025 && rm -rf /wn_data/downloads
-# The embedding model too: fastembed would otherwise fetch it from HuggingFace
-# into /tmp (in-memory on Cloud Run) on every cold start. Must match
-# scoring.EMBEDDING_MODEL; the offline check below fails the build if not.
+# The embedding model too: it would otherwise be fetched from HuggingFace into
+# /tmp (in-memory on Cloud Run) on every cold start. The export, revision and
+# files must match scoring.EMBEDDING_SOURCE, EMBEDDING_REVISION and
+# EMBEDDING_FILES; the offline check below fails the build if not, and so does
+# tests/test_scoring.py. Written out here rather than read from scoring.py so
+# this layer's cache survives edits to scoring.py.
 ENV FASTEMBED_CACHE_PATH=/fastembed_cache
-RUN .venv/bin/python -c "from fastembed import TextEmbedding; TextEmbedding('sentence-transformers/all-MiniLM-L6-v2')" \
+RUN .venv/bin/hf download qdrant/all-MiniLM-L6-v2-onnx \
+        --revision d13954661f83248295ba75c1ed411eef3b7b936e \
+        --include "*.json" --include model.onnx --cache-dir /fastembed_cache --quiet \
     && chmod -R a+rX /fastembed_cache
 
 # Same base as the build stage, which the venv's python symlink points into.
 FROM python:3.12-slim
 RUN useradd --system --no-create-home app
 WORKDIR /app
-# HF_HUB_OFFLINE: load the baked-in model only, never download at runtime.
+# HF_HUB_OFFLINE: load the baked-in model only, never download at runtime. Its
+# cache lookup would otherwise print a progress bar to every cold start's logs.
 ENV PATH=/app/.venv/bin:$PATH WN_DATA_DIR=/wn_data \
-    FASTEMBED_CACHE_PATH=/fastembed_cache HF_HUB_OFFLINE=1
+    FASTEMBED_CACHE_PATH=/fastembed_cache HF_HUB_OFFLINE=1 HF_HUB_DISABLE_PROGRESS_BARS=1
 COPY --from=build /app/.venv .venv
 COPY --from=build /wn_data /wn_data
 COPY --from=build /fastembed_cache /fastembed_cache
@@ -52,9 +58,9 @@ assert get_wiktionary_senses(word), 'no Wiktionary senses: check data/wiktionary
 from scoring import default_embed; \
 assert len(default_embed(['interest'])[0]) == 384, 'embedding model: check FASTEMBED_CACHE_PATH'"
 # And the pun detector end to end, loaded as service startup loads it, on the same
-# baked-in data and embedding model. fastembed doesn't pin the model's revision, so
-# a confidence far from the one docs/experiments/task-55 recorded means the
-# detector's inputs drifted.
+# baked-in data and embedding model. The model's revision is pinned, so a
+# confidence far from the one docs/experiments/task-55 and task-68 recorded means
+# the detector's inputs drifted some other way (spaCy, WordNet, fastembed itself).
 RUN python -c "from pun_detector.agent import load_analysis; \
 result = load_analysis().analyze('The baker needed more dough.'); \
 assert result['is_pun'] is True and result['probabilities'], result; \

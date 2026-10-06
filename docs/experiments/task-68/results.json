@@ -1,0 +1,29 @@
+{
+	"gate": {
+		"max_changed_predictions": 0
+	},
+	"passed": true,
+	"checks": {
+		"pinned_revision_loaded": true,
+		"predictions_unchanged": true
+	},
+	"pinned_revision": "qdrant/all-MiniLM-L6-v2-onnx@d13954661f83248295ba75c1ed411eef3b7b936e",
+	"loaded_revision": "d13954661f83248295ba75c1ed411eef3b7b936e",
+	"texts": 605,
+	"matches_stored_predictions": 605,
+	"changed": [],
+	"diagnostics": {
+		"previous_revision": "qdrant/all-MiniLM-L6-v2-onnx@8f518e882455312b086101e60691f5e6e2f05c3c",
+		"predictions_differing_from_previous": 0,
+		"embedded_texts_compared": 9916,
+		"min_cosine": 0.9999998807907104,
+		"max_class_probability_gap": 0.0,
+		"baker_confidence": {
+			"dockerfile_expects": 0.94911,
+			"pinned": 0.9491107502634648,
+			"previous": 0.9491107502634648
+		},
+		"pinned_seconds": 10.6,
+		"previous_seconds": 10.4
+	}
+}

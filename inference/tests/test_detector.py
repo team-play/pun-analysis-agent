@@ -290,7 +290,7 @@ def test_trained_artifact_loads_in_the_runtime_detector(tmp_path, monkeypatch):
             return self.extract_many([text])[0]
 
     monkeypatch.setattr(train_detector, "FeatureExtractor", FakeExtractor)
-    monkeypatch.setattr(train_detector, "encoder_revision", lambda: "rev-1")
+    monkeypatch.setattr(train_detector.scoring, "EMBEDDING_REVISION", "rev-1")
     output = tmp_path / "out"
     train_detector.train(dataset, output, splits)
 
@@ -307,6 +307,6 @@ def test_trained_artifact_loads_in_the_runtime_detector(tmp_path, monkeypatch):
     train_detector.train(dataset, output, splits)
     assert constructed == []
     # Features cached under another encoder revision or configuration are refused.
-    monkeypatch.setattr(train_detector, "encoder_revision", lambda: "rev-2")
+    monkeypatch.setattr(train_detector.scoring, "EMBEDDING_REVISION", "rev-2")
     with pytest.raises(ValueError, match="stale"):
         train_detector.train(dataset, output, splits)

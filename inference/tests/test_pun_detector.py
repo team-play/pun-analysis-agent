@@ -1,5 +1,6 @@
 import numpy as np
 
+import scoring
 from pun_detector import features
 from pun_detector.model import PunDetector
 
@@ -11,7 +12,16 @@ def test_artifact_matches_the_encoder_the_detector_runs_on():
     detector = PunDetector()
 
     assert detector.metadata["features"]["encoder"] == features.ENCODER
-    assert detector.metadata["encoder_history"]["equivalence"] == "docs/experiments/task-55"
+    assert detector.metadata["encoder_history"]["equivalence"] == [
+        "docs/experiments/task-55",
+        "docs/experiments/task-68",
+    ]
+
+
+def test_artifact_was_checked_on_the_pinned_encoder_revision():
+    # Only docs/experiments/task-68 shows these weights work on this export: re-pinning
+    # scoring.EMBEDDING_REVISION means re-running that check (or retraining) first.
+    assert PunDetector().metadata["encoder_revision"] == scoring.EMBEDDING_REVISION
 
 
 def test_onnx_embed_returns_unit_length_float32_rows_in_order(monkeypatch):

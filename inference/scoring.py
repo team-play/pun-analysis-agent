@@ -15,6 +15,8 @@ from typing import Literal
 import numpy as np
 import numpy.typing as npt
 from fastembed import TextEmbedding
+from fastembed.common.utils import define_cache_dir
+from huggingface_hub import snapshot_download
 
 from senses import Sense
 
@@ -201,11 +203,38 @@ def has_pun_tension(signal: PunSignal | None, threshold: float = MARGIN_THRESHOL
     return signal is not None and signal.margin <= threshold
 
 
-# Baked into the image at build time (Dockerfile), which must name the same model.
+# fastembed's description of this model (pooling, normalization, dimension). The
+# weights it loads come from EMBEDDING_SOURCE at EMBEDDING_REVISION instead.
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+# fastembed downloads the newest commit of this export and can't take a revision, so
+# default_embed fetches this commit and hands fastembed its directory. Upstream has
+# changed the export once already. Shipped detector.npz was checked on this commit in
+# docs/experiments/task-68 and records it as its encoder_revision. The Dockerfile bakes
+# the same export, commit and files; its offline check fails the build if they differ.
+EMBEDDING_SOURCE = "qdrant/all-MiniLM-L6-v2-onnx"
+EMBEDDING_REVISION = "d13954661f83248295ba75c1ed411eef3b7b936e"
+# The files fastembed itself would fetch for this model.
+EMBEDDING_FILES = ["*.json", "model.onnx"]
 
 _embedder: TextEmbedding | None = None
 _embedder_lock = threading.Lock()
+
+
+def _pinned_model_dir() -> str:
+    """The pinned export's snapshot in fastembed's cache (FASTEMBED_CACHE_PATH).
+
+    Downloaded from the Hub on first use. After that, huggingface_hub (1.33 and later;
+    the floor in pyproject.toml) reads the cached snapshot and its file listing without
+    contacting the Hub, because the revision is a full commit hash. That keeps the image
+    (HF_HUB_OFFLINE) and warm local caches offline. A cache filled some other way, with no
+    listing under trees/, needs one run with network access.
+    """
+    return snapshot_download(
+        EMBEDDING_SOURCE,
+        revision=EMBEDDING_REVISION,
+        cache_dir=define_cache_dir(),
+        allow_patterns=EMBEDDING_FILES,
+    )
 
 
 def default_embed(texts: list[str], batch_size: int = 256) -> list[npt.NDArray[np.float32]]:
@@ -222,5 +251,5 @@ def default_embed(texts: list[str], batch_size: int = 256) -> list[npt.NDArray[n
     if _embedder is None:
         with _embedder_lock:
             if _embedder is None:
-                _embedder = TextEmbedding(EMBEDDING_MODEL)
+                _embedder = TextEmbedding(EMBEDDING_MODEL, specific_model_path=_pinned_model_dir())
     return list(_embedder.embed(texts, batch_size=batch_size))
