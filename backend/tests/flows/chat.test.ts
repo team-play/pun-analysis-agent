@@ -7,6 +7,7 @@ import { type MockModel, mockModel } from "genkit/testing";
 import { createChatFlow } from "../../src/flows/chat.ts";
 import {
 	DETECTOR_SCORES_RULE,
+	FALLBACK_RULE,
 	PERSONA,
 	PURPOSE,
 	SYSTEM_INSTRUCTION,
@@ -14,9 +15,11 @@ import {
 import {
 	type AnalyzeResult,
 	createAnalyzePunTool,
+	UNDETERMINED_ANALYZE_RESULT,
 } from "../../src/tools/analyze-pun.ts";
 import {
 	answeringWith,
+	LLM_FALLBACK_ANALYZE_RESULT,
 	PUN_ANALYZE_RESULT,
 } from "../fixtures/analyze-results.ts";
 import { buildMockChatFlow } from "../helpers/build-mock-chat-flow.ts";
@@ -293,10 +296,9 @@ test("chatFlow gives the model Backend's system instruction", async () => {
 	});
 });
 
-// Deliberately couples to the paragraphs, not their wording: rewording Otto,
-// the scope rules or the score guidance passes, but dropping any of them from
-// SYSTEM_INSTRUCTION fails.
-test("chatFlow's system instruction includes Otto's persona, the pun-analysis purpose and the score guidance", async () => {
+// Deliberately couples to the paragraphs, not their wording: rewording one
+// passes, but dropping any of them from SYSTEM_INSTRUCTION fails.
+test("chatFlow's system instruction includes Otto's persona, the pun-analysis purpose, the score guidance and the fallback guidance", async () => {
 	model.respondWith("ok");
 
 	await chatFlow({ messages: [{ role: "user", content: "Hi" }] });
@@ -308,6 +310,7 @@ test("chatFlow's system instruction includes Otto's persona, the pun-analysis pu
 		systemText?.includes(DETECTOR_SCORES_RULE),
 		"score guidance missing",
 	);
+	assert.ok(systemText?.includes(FALLBACK_RULE), "fallback guidance missing");
 });
 
 // Kept, a client's system message would come after Backend's, and the real
@@ -391,6 +394,57 @@ test("chatFlow runs analyze_pun when the model calls it, streaming the call and 
 		content: [{ toolResponse }],
 	});
 });
+
+// Results that leave the explanation to Gemini (TASK-20), each with the part
+// of FALLBACK_RULE that says what to do with it.
+const resultsGeminiExplains: Record<
+	string,
+	{ result: AnalyzeResult; guidance: RegExp }
+> = {
+	"an llm_fallback result": {
+		result: LLM_FALLBACK_ANALYZE_RESULT,
+		guidance: /sense_source "llm_fallback"/,
+	},
+	"the undetermined result": {
+		result: UNDETERMINED_ANALYZE_RESULT,
+		guidance: /is_pun is null/,
+	},
+};
+for (const [name, { result, guidance }] of Object.entries(
+	resultsGeminiExplains,
+)) {
+	test(`chatFlow gives the model ${name} unchanged, with its guidance, in Genkit's usual two requests`, async () => {
+		let inferenceCalls = 0;
+		const { model, chatFlow } = buildMockChatFlow(genkit({}), {
+			analyzeFetch: async () => {
+				inferenceCalls++;
+				return Response.json(result);
+			},
+		});
+		model.respondWith((request) =>
+			request.messages.at(-1)?.role === "tool"
+				? { text: "Here's my own reading." }
+				: { toolRequests: [toolRequest] },
+		);
+
+		await chatFlow({
+			messages: [{ role: "user", content: "Is 'I lost interest' a pun?" }],
+		});
+
+		// The tool call, then the answer: falling back costs no extra model
+		// or Inference calls.
+		assert.equal(model.requestCount, 2);
+		assert.equal(inferenceCalls, 1);
+		const messages = model.lastRequest?.messages;
+		assert.match(messages?.[0]?.content[0]?.text ?? "", guidance);
+		assert.deepEqual(messages?.at(-1), {
+			role: "tool",
+			content: [
+				{ toolResponse: { name: "analyze_pun", ref: "0", output: result } },
+			],
+		});
+	});
+}
 
 // Genkit's response.text is only the last model turn's text. Frontend
 // replaces what it shows with `result`, so text from before the tool call

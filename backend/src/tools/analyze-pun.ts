@@ -211,8 +211,7 @@ export function createAnalyzePunTool(
 				"Checks whether a piece of text is a pun, using a dedicated pun " +
 				"classifier and word-sense lookup. Call it once for each new text " +
 				"the user wants analyzed, not again for follow-up questions about " +
-				"a text already analyzed. If is_pun is null, the classifier " +
-				"couldn't judge the text: decide yourself.",
+				"a text already analyzed.",
 			inputSchema: analyzePunInputSchema,
 			outputSchema: analyzeResultSchema,
 		},

@@ -12,6 +12,21 @@ export const PUN_ANALYZE_RESULT: AnalyzeResult = {
 	sense_source: "wordnet",
 };
 
+/**
+ * A pun Inference's dictionaries couldn't explain (docs/contracts.md's
+ * llm_fallback hand-off), so Gemini supplies the senses. As in production,
+ * words_involved is the detector's guess, here the wrong word: the pun is
+ * on "interest".
+ */
+export const LLM_FALLBACK_ANALYZE_RESULT: AnalyzeResult = {
+	is_pun: true,
+	pun_type: "homographic",
+	words_involved: ["banker"],
+	explanation: "",
+	confidence: 0.93,
+	sense_source: "llm_fallback",
+};
+
 /** A stand-in for Inference that answers every /analyze call with `result`. */
 export const answeringWith =
 	(result: AnalyzeResult): typeof fetch =>

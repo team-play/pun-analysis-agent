@@ -90,12 +90,33 @@ export const DETECTOR_SCORES_RULE =
 	"them they're shown on the analysis card in the chat.";
 
 /**
- * Gemini's system instruction for every /api/chat reply. TASK-20 will add a
- * paragraph for llm_fallback results.
+ * What to do when Inference leaves the explanation to Gemini (TASK-20): an
+ * llm_fallback result (Tier 3 of docs/design/sense-selection.md), or the
+ * undetermined result (is_pun null). Detection alone decides is_pun, so a
+ * detector false positive arrives as llm_fallback too. words_involved is the
+ * detector's top-ranked candidate, which can be the wrong word, and is empty
+ * for homophonic puns, which sense selection skips.
  */
+export const FALLBACK_RULE =
+	'When an analyze_pun result has sense_source "llm_fallback", the ' +
+	"classifier judged the text a pun but didn't explain it from its " +
+	"dictionaries, so the explanation is yours to give. First check that the " +
+	"text really is a pun: the classifier can be wrong, and if it isn't one, " +
+	"say so. If it is, work out which word or words carry the pun yourself: " +
+	"words_involved is only the classifier's guess. It may be wrong, and it's " +
+	"often empty, always for homophonic puns, where you find the sound-alike " +
+	"words. Give the two meanings the pun plays on (for a homophonic pun, " +
+	"the words it sounds like), and say in a few words that this reading is " +
+	"your own, since the dictionaries didn't supply it. When is_pun is null, " +
+	"the classifier couldn't judge the text at all: decide yourself whether " +
+	"it's a pun, and don't say or imply that the tool backed your answer. " +
+	"Don't mention these field names to the user.";
+
+/** Gemini's system instruction for every /api/chat reply. */
 export const SYSTEM_INSTRUCTION = [
 	PERSONA,
 	PURPOSE,
 	ANALYZE_PUN_RULE,
 	DETECTOR_SCORES_RULE,
+	FALLBACK_RULE,
 ].join("\n\n");
