@@ -1,11 +1,11 @@
 ---
 id: TASK-39
 title: 'Inference image: download WordNet in its own Docker stage'
-status: In Progress
+status: Done
 assignee:
   - '@Andi-Cast'
 created_date: '2026-09-28 09:46'
-updated_date: '2026-10-06 01:36'
+updated_date: '2026-10-06 02:05'
 labels: []
 dependencies:
   - TASK-14
@@ -54,6 +54,10 @@ Measured locally (BuildKit, Docker 28.4.0, arm64), building a scratch copy of th
 Caveat: in CI the saving holds while the GitHub Actions cache still has main's last build (an entry is dropped after 7 days unused, or when the repo's caches pass 10 GB, shared with Backend) and python:3.12-slim hasn't changed upstream; otherwise every layer is rebuilt. The base image stays unpinned on purpose, so it keeps getting security updates. docs/local-setup.md updated: the registry size note, the Docker repo row, and the WN_VERSION rule ("when you bump wn in uv.lock, update WN_VERSION too").
 
 Review (AGENTS.md, independent subagent): no blockers. Fixed: the stale local-setup.md lines and the missing WN_VERSION rule, the CI caveats, Wiktionary copied before WordNet (a wn bump would otherwise re-upload Wiktionary's 29 MB), and two comments. Architectural review: no contract or topology change, no new service or deploy target; CI builds the same Dockerfile with no target or build args. TASK-70 filed for the embedding model, which is still re-downloaded in the build stage.
+
+PR review (Yai, #119): approved with three comments, all fixed in 9ea5006. local-setup.md keeps a worst-case sentence: three kept deploys that each changed dependencies still take ~640 MB (down from ~930 MB), over the free tier. A comment says the wordnet stage pins wn but deliberately not its dependencies. The WN_VERSION check uses `if` instead of `&& ||`, so a probe that fails shows only its traceback, not an empty version; checked in dash (python:3.12-slim's /bin/sh) and with --build-arg WN_VERSION=9.9.9, which now prints "uv.lock installs wn 1.1.1 but WN_VERSION is 9.9.9".
+
+Merged in #119 as c5e165b. Deploy Inference run 37401890216 on c5e165b succeeded, including both build-time checks and both smoke tests (an anonymous request is refused; /health answers with an ID token). In the build log only the new wordnet stage ran (23.8 s); the uv sync and Wiktionary steps were restored from main's CI cache, not re-run. So this first deploy stores a new WordNet layer once, and later dependency-only deploys reuse it. The serving revision wasn't checked: gcloud isn't installed locally.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
