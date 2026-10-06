@@ -19,12 +19,21 @@
 
 /**
  * How long analyze_pun waits for Inference, covering its Cloud Run cold
- * start. Provisional and unmeasured: the cold start can't be measured until
- * /analyze answers (TASK-16), so this is a guess until TASK-32 measures it.
- * Backend's warm-up ping (TASK-53) often starts the cold start a few seconds
- * early, but not always, so this still has to cover a whole one without it.
+ * start. Backend's warm-up ping (TASK-53) often starts the cold start a few
+ * seconds early, but not always, so this has to cover a whole one without it.
+ *
+ * Measured on the deployed service (TASK-32, docs/experiments/task-32):
+ * over 11 cold starts after Inference scaled to zero on its own, the request
+ * that woke it took 6-22 s, 10.6 s at the median. 24 s covers every single
+ * call measured and is about 1.5x the typical slow cold start (about 16 s),
+ * not the slowest: one instance took 20.7 s to start, and the last of three
+ * parallel 2,000-character calls behind it took 24.5 s. Such a rare case is
+ * allowed to degrade to the undetermined result, which Gemini handles
+ * (TASK-20). Too short and ordinary cold starts degrade too; too long and a
+ * dead Inference holds every pun question up for this long, and the retry
+ * budget below shrinks.
  */
-export const INFERENCE_TIMEOUT_MS = 20_000;
+export const INFERENCE_TIMEOUT_MS = 24_000;
 
 /**
  * How long one model call may go without sending anything, whether before
@@ -116,7 +125,7 @@ export const FRONTEND_SILENCE_MARGIN_MS = 15_000;
  * that lengthening Backend's silence without raising this fails
  * tests/relationships.test.js instead of quietly moving Frontend's limit.
  */
-export const FRONTEND_SILENCE_LIMIT_MS = 75_000;
+export const FRONTEND_SILENCE_LIMIT_MS = 79_000;
 
 /**
  * The longest a reply can spend waiting, not counting retries: every model

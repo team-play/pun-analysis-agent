@@ -1,0 +1,180 @@
+{
+	"startedAt": "2026-10-06T08:45:15.365Z",
+	"url": "https://pun-agent-inference-rlm5dfjheq-ue.a.run.app",
+	"text": "The baker needed more dough.",
+	"samples": [
+		{
+			"scenario": "unassisted",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T09:05:15.947Z",
+					"ms": 15865,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T09:05:31.528162Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd860756de669ccdd509ed4a268fc9ec72070c6369371db509f458aafee2ec519320da997d5dbdd394824158fdc87237c1d30943d9bc625b97e1b210b25176a19a1df9ecf158ca431bd0faca7a8c410877fbc543e1adbeb4"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T09:05:16.027235Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "15.400742283s"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "parallel",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T09:27:03.098Z",
+					"ms": 15599,
+					"status": 200
+				},
+				{
+					"sentAt": "2026-10-06T09:27:03.099Z",
+					"ms": 15690,
+					"status": 200
+				},
+				{
+					"sentAt": "2026-10-06T09:27:03.099Z",
+					"ms": 15793,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T09:27:18.459378Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd8607dbd12220813d2a4dfb282c0df28daa9b1a6dcc86cbc7d101c82b2a804d99e9eb1b5faa98229919f72cfeb509224da3542548ed36e46d2d14edf44e4512f78819b237226250a4d36e5d2424ab03c323670c4e5e014c"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T09:27:03.159129Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "0.100673602s"
+					},
+					{
+						"at": "2026-10-06T09:27:03.159338Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "0.096635479s"
+					},
+					{
+						"at": "2026-10-06T09:27:03.162057Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "15.401790836s"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "unassisted",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T09:48:50.264Z",
+					"ms": 10614,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T09:49:00.652484Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd8607e19fd1e91f2bb8b32f1c0d926d21dc5a18638080c2102ee402a0e183bf90205afd7c5954d86ac5f938fafaf0396b31dcff0c56b753784c2ffcafc01fe2d6f519729a84fd43d10754bc0f115f74da26242cc4e34051"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T09:48:50.346943Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "10.129008910s"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "after-health-ping",
+			"health": {
+				"sentAt": "2026-10-06T10:10:32.196Z",
+				"ms": 9188,
+				"status": 200
+			},
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T10:10:37.199Z",
+					"ms": 4274,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T10:10:41.240982Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd8607eda1d280c8dc9efe0ac853b779bba6bd583e9075407890c2eb798d8fc574c3e7b4568bdfc11b9559e516f3cd7b13ab2285d87d11ca13e120a72bbb49aa676e3db9962f65005d8e1df1a5a10925596694a3dc0c6931"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T10:10:32.270874Z",
+						"path": "/health",
+						"status": 200,
+						"latency": "8.358909481s"
+					},
+					{
+						"at": "2026-10-06T10:10:37.246618Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "0.158900763s"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "unassisted",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T10:32:12.726Z",
+					"ms": 9729,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T10:32:22.214422Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd8607c3efed606c7d340b1e1a9623dffa178b28d86732731247d17600e31632c9b37d5d8637fa8a655905fb5e8aae6e22f0cbb3580d61742f9a5bf74c4190c75301f9eb1f941b418ef7475035428468343afa496530b18b"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T10:32:12.785507Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "9.424082581s"
+					}
+				]
+			},
+			"coldStart": true
+		}
+	]
+}

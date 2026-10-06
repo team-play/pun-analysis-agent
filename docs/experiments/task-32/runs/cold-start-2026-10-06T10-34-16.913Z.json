@@ -1,0 +1,152 @@
+{
+	"startedAt": "2026-10-06T10:34:16.913Z",
+	"url": "https://pun-agent-inference-rlm5dfjheq-ue.a.run.app",
+	"text": "The baker needed more dough.",
+	"samples": [
+		{
+			"scenario": "parallel",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T10:54:17.504Z",
+					"ms": 6159,
+					"status": 200
+				},
+				{
+					"sentAt": "2026-10-06T10:54:17.515Z",
+					"ms": 6374,
+					"status": 200
+				},
+				{
+					"sentAt": "2026-10-06T10:54:17.516Z",
+					"ms": 6253,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T10:54:23.399807Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd86073be1d10b0456ee1a4d73759dc70d78c9690c56b02c898a6e0602c2fe505a8dd7df91391e0ae0958c61bf98aa61d35f83879b9ab8d4efb85becdd06836a439282826a485c42dc4f34ce1c429da70ef7a4b3570d4e44"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T10:54:17.576664Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "5.800516615s"
+					},
+					{
+						"at": "2026-10-06T10:54:17.576987Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "0.112406760s"
+					},
+					{
+						"at": "2026-10-06T10:54:17.577114Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "0.121685190s"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "unassisted",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T11:15:55.275Z",
+					"ms": 9642,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T11:16:04.679184Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd8607ea7a07fa5a555ca46af67e2677bf54f28b74f86a6263f7fad59a0e5a5eff615b48f8f66118f4e2df255d754a9be136738715c45ed87b6f13c504d8fccd0516008da186f2e719ec457d04a4d2f3c941d52c56dd1501"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T11:15:55.329417Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "9.315998246s"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "after-health-ping",
+			"health": {
+				"sentAt": "2026-10-06T11:37:36.283Z",
+				"ms": 6590,
+				"status": 200
+			},
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T11:37:41.287Z",
+					"ms": 1729,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T11:37:42.824779Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd8607672547fee31a1fea4b04cc2b402f3ac67ed31675f9199c77933a67febcbce7853291efbabb0f97a69d8ab5918e58a98e73d40024db7834de3e2e919bdb920e0e05345208af68ea6e622f798d2e2a31cef2d93a8130"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T11:37:36.339856Z",
+						"path": "/health",
+						"status": 200,
+						"latency": "6.370863749s"
+					},
+					{
+						"at": "2026-10-06T11:37:41.328589Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "0.145971064s"
+					}
+				]
+			},
+			"coldStart": true
+		},
+		{
+			"scenario": "unassisted",
+			"analyze": [
+				{
+					"sentAt": "2026-10-06T11:59:14.327Z",
+					"ms": 11510,
+					"status": 200
+				}
+			],
+			"logs": {
+				"startups": [
+					{
+						"at": "2026-10-06T11:59:25.643715Z",
+						"revision": "pun-agent-inference-00015-k8j",
+						"instanceId": "0010dd86078b8a26e0bc5a939c46d2a83e4165d8e520c8d7a232f8786824e5f75c85450d9681b66b7edd03b35c6716731d38c8667f8235ae18c39a231295cf5d463f1bf4333c30c59e19d03a8b6b21ab3c898705893417b18333"
+					}
+				],
+				"requests": [
+					{
+						"at": "2026-10-06T11:59:14.393087Z",
+						"path": "/analyze",
+						"status": 200,
+						"latency": "11.241431781s"
+					}
+				]
+			},
+			"coldStart": true
+		}
+	]
+}
