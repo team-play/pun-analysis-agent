@@ -1,0 +1,76 @@
+{
+	"ranAt": "2026-10-06T00:26:52.407Z",
+	"model": "gemini-3.5-flash-lite",
+	"results": [
+		{
+			"name": "homographic, right guess",
+			"text": "Why did the scarecrow win an award? He was outstanding in his field.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["outstanding"],
+				"explanation": "",
+				"confidence": 0.96,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a homographic pun. The word carrying the double meaning is \"outstanding.\" \n\nIt plays on two different meanings:\n1. Being exceptionally good or winning an award.\n2. Literally standing out physically in an open area of land—which is, of course, exactly where a scarecrow spends its time. \n\nMy dictionaries couldn't quite confirm both definitions side-by-side here, but this reading is my own."
+		},
+		{
+			"name": "homographic, wrong guess",
+			"text": "I used to be a banker but I lost interest.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["banker"],
+				"explanation": "",
+				"confidence": 1,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is definitely a pun, specifically a homographic one. It plays on the word \"interest.\" The first meaning is financial interest—the money a bank pays or charges on accounts and loans. The second meaning is personal interest or curiosity—the feeling of wanting to pay attention to something. \n\nSince the dictionaries didn't have this exact phrasing handy, I cracked this one open myself like a shellfish on a rock. The humor comes from how a banker's whole job revolves around financial interest, so \"losing interest\" can mean quitting the profession *and* literally having no money left to earn or pay!"
+		},
+		{
+			"name": "homophonic, no words",
+			"text": "A bicycle can't stand on its own because it is two tired.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homophonic",
+				"words_involved": [],
+				"explanation": "",
+				"confidence": 0.9,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is definitely a pun—specifically, a homophonic one. The words carrying the punchline are **\"two tired.\"** \n\nIt plays on two different meanings that sound identical:\n1. **\"Too tired,\"** meaning exhausted or lacking energy, which is why a person (or a bicycle personified) can't stand.\n2. **\"Two tired,\"** meaning possessing a pair of tires, which is the literal physical state of a bicycle. \n\n*(Note: My dictionaries didn't have this one in stock, so I cracked open this reading myself like a shellfish on a rock!)*"
+		},
+		{
+			"name": "undetermined",
+			"text": "Time flies like an arrow; fruit flies like a banana.",
+			"result": {
+				"is_pun": null,
+				"pun_type": null,
+				"words_involved": [],
+				"explanation": "",
+				"confidence": null,
+				"sense_source": null
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is indeed a pun—specifically, a homographic pun that relies on changing grammatical structures, often called a zeugma or antanaclasis. \n\nThe word carrying the clever shift in meaning is **\"like.\"** \n\nHere are the two ways the sentence plays on it:\n1. In the first half (*\"Time flies like an arrow\"*), \"flies\" is a verb meaning to move swiftly, and \"like\" is a preposition meaning \"in the manner of.\" Time moves the way an arrow shoots through the air.\n2. In the second half (*\"fruit flies like a banana\"*), the grammar completely flips. \"Fruit flies\" becomes a noun phrase (the tiny insects), and \"like\" becomes a verb meaning to enjoy eating. The insects enjoy a tasty banana!"
+		},
+		{
+			"name": "detector false positive",
+			"text": "We had a picnic on the river bank.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["picnic"],
+				"explanation": "",
+				"confidence": 0.97,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nThis is a homographic pun, where a single spelling has two different meanings. Although the dictionaries couldn't quite confirm both definitions for the context here, this reading is my own. The pun relies on the word \"bank.\" On one hand, it refers to the sloping land alongside the river where you might spread out a blanket for lunch. On the other hand, a \"bank\" is a financial institution, which sets up a playful double meaning as if you were eating your meal right on top of a pile of money!"
+		}
+	]
+}

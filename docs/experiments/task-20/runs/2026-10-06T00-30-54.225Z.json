@@ -1,0 +1,76 @@
+{
+	"ranAt": "2026-10-06T00:30:54.225Z",
+	"model": "gemini-3.5-flash-lite",
+	"results": [
+		{
+			"name": "homographic, right guess",
+			"text": "Why did the scarecrow win an award? He was outstanding in his field.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["outstanding"],
+				"explanation": "",
+				"confidence": 0.96,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a homographic pun. The word carrying the double meaning is \"outstanding.\" \n\nIt plays on two different meanings here:\n1. Being exceptionally good or winning recognition (winning an award).\n2. Literally standing out physically in an open area of land (a crop field where a scarecrow is placed)."
+		},
+		{
+			"name": "homographic, wrong guess",
+			"text": "I used to be a banker but I lost interest.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["banker"],
+				"explanation": "",
+				"confidence": 1,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a pun, specifically a homographic pun. The word carrying the double meaning is \"interest.\" \n\nIt plays on two different meanings of the word:\n1. The money paid for the use of borrowed money (which a banker deals with).\n2. A feeling of curiosity or concern about something (which you lose when you quit your job)."
+		},
+		{
+			"name": "homophonic, no words",
+			"text": "A bicycle can't stand on its own because it is two tired.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homophonic",
+				"words_involved": [],
+				"explanation": "",
+				"confidence": 0.9,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a pun, specifically a homophonic one. The words carrying it are \"two tired,\" which sound just like \"too tired\" (exhausted). It plays on two meanings: having two physical tires on the bicycle, and being too tired to stand up. My dictionaries couldn't confirm this one, so that analysis is my own!"
+		},
+		{
+			"name": "undetermined",
+			"text": "Time flies like an arrow; fruit flies like a banana.",
+			"result": {
+				"is_pun": null,
+				"pun_type": null,
+				"words_involved": [],
+				"explanation": "",
+				"confidence": null,
+				"sense_source": null
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a classic pun, though it's also a famous example of what linguists call a garden-path sentence because it cleverly tricks your brain on the first reading. \n\nThe cleverness relies on a double meaning of the word **\"likes\"** (or how the phrase \"like an arrow\" functions versus \"like a banana\"). \n\nIn the first half—*\"Time flies like an arrow\"*—the words work like this:\n1. **Time** is the subject.\n2. **Flies** is the verb (meaning *move quickly*).\n3. **Like an arrow** is a simile describing *how* time moves.\n\nIn the second half—*\"fruit flies like a banana\"*—the grammatical structure shifts completely, creating the pun:\n1. **Fruit flies** is now the subject (referring to the tiny insects).\n2. **Like** is now the verb (meaning *enjoy eating*).\n3. **A banana** is the direct object (what the insects enjoy).\n\nSo, \"flies\" goes from being a verb in the first clause to part of a noun in the second, and \"like\" goes from a preposition of comparison to a verb of preference!"
+		},
+		{
+			"name": "detector false positive",
+			"text": "We had a picnic on the river bank.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["picnic"],
+				"explanation": "",
+				"confidence": 0.97,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a pun, and it's a homographic one, meaning it uses a single word with two different spellings or meanings that look identical. The word carrying the pun is actually **bank** rather than picnic. \n\nIt plays on two meanings of the word \"bank\":\n1. The sloping land alongside a body of water, like a river.\n2. A financial institution where people keep their money.\n\nSince my built-in dictionaries couldn't quite pin down the double meaning on this one, I figured it out myself!"
+		}
+	]
+}

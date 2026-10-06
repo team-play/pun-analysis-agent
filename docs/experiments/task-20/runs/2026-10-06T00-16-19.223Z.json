@@ -1,0 +1,76 @@
+{
+	"ranAt": "2026-10-06T00:16:19.223Z",
+	"model": "gemini-3.5-flash-lite",
+	"results": [
+		{
+			"name": "homographic, right guess",
+			"text": "Why did the scarecrow win an award? He was outstanding in his field.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["outstanding"],
+				"explanation": "",
+				"confidence": 0.96,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is definitely a pun, and it's a homographic pun because it uses a single word—\"outstanding\"—that has two different meanings. \n\nThe humor comes from the phrase \"outstanding in his field\":\n1. **Literal meaning:** The scarecrow is literally standing out in the middle of a farmer's crop field.\n2. **Figurative meaning:** Someone who is \"outstanding\" is exceptionally good at what they do, making them worthy of an award. \n\nThe double meaning of \"outstanding\" bridges the gap between a scarecrow's actual job and the praise that a human award winner would receive!"
+		},
+		{
+			"name": "homographic, wrong guess",
+			"text": "I used to be a banker but I lost interest.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["banker"],
+				"explanation": "",
+				"confidence": 1,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a pun, specifically a homographic one. Even though the tool couldn't pull a dictionary match for it, the word carrying the humor here is \"interest.\" \n\nIt plays on two different meanings of that single word:\n1. The financial return or percentage paid on money kept in a bank, which is a fitting subject for a banker.\n2. The feeling of curiosity, enthusiasm, or concern for something, meaning the person literally stopped caring about their career."
+		},
+		{
+			"name": "homophonic, no words",
+			"text": "A bicycle can't stand on its own because it is two tired.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homophonic",
+				"words_involved": [],
+				"explanation": "",
+				"confidence": 0.9,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a homophonic pun. It plays on the sound-alike phrase **\"two tired\"** and **\"too tired.\"** \n\nHere is how it works:\n1. **\"Two tired\"** literalizes the bicycle's physical components—a standard bike has two wheels, or tires.\n2. **\"Too tired\"** uses the idiom for exhaustion, as if the bicycle is simply too worn out to stand up."
+		},
+		{
+			"name": "undetermined",
+			"text": "Time flies like an arrow; fruit flies like a banana.",
+			"result": {
+				"is_pun": null,
+				"pun_type": null,
+				"words_involved": [],
+				"explanation": "",
+				"confidence": null,
+				"sense_source": null
+			},
+			"toolCalls": 1,
+			"reply": "That's punny! \n\nYes, that is a classic homographic pun, though it works through a clever shift in grammar rather than just a double-meaning word. \n\nThe pivot point of the joke is the word **\"likes\"** (or how the word \"like\" functions). In the first half, *\"Time flies like an arrow,\"* \"like\" is a preposition meaning \"in the manner of\"—time moves swiftly, the way an arrow shoots through the air. \n\nIn the second half, *\"fruit flies like a banana,\"* the structure tricks your brain into reading it the exact same way, but it suddenly shifts: \"fruit flies\" becomes the subject (the little bugs), and \"like\" becomes a verb meaning \"enjoy eating.\""
+		},
+		{
+			"name": "detector false positive",
+			"text": "We had a picnic on the river bank.",
+			"result": {
+				"is_pun": true,
+				"pun_type": "homographic",
+				"words_involved": ["picnic"],
+				"explanation": "",
+				"confidence": 0.97,
+				"sense_source": "llm_fallback"
+			},
+			"toolCalls": 1,
+			"reply": "That isn't actually a pun! While the word \"bank\" has two different meanings—the side of a river and a financial institution—simply using one of those meanings in a sentence doesn't make a pun. For a pun to work, the sentence has to actively play on both meanings at the same time, usually for a humorous or clever effect. In this sentence, you're just sitting by the water, so only the river meaning is being used."
+		}
+	]
+}
