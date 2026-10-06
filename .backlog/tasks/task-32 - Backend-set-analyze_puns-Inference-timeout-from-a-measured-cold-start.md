@@ -1,11 +1,11 @@
 ---
 id: TASK-32
 title: 'Backend: set analyze_pun''s Inference timeout from a measured cold start'
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-09-27 15:25'
-updated_date: '2026-10-06 13:53'
+updated_date: '2026-10-06 17:27'
 labels: []
 milestone: m-4
 dependencies:
@@ -86,6 +86,8 @@ From TASK-51's architectural review (2026-10-05): once TASK-51 lands, Inference 
 From TASK-53's architectural review: Backend now pings Inference's GET /health on /api/chat (at most every 5 min, after App Check, not awaited). It starts the cold start only by Gemini's first turn (~3-7 s), and not at all when Inference was reclaimed inside the window or the last ping failed. So size INFERENCE_TIMEOUT_MS from an unassisted cold start (AC #1), not from a warmed one.
 
 2026-10-06: AC #1-#3. cold-start.mjs measured 11 cold starts on revision pun-agent-inference-00015-k8j after 20-min idle scale-to-zero, each confirmed by an 'Application startup complete' log line in its window (runs/cold-start-2026-10-06T*.json). Waking request 6-22 s, median 10.6 s; one 20.7 s startup. Dense 2,000-char texts add ~1-1.5 s; parallel calls queue one analysis each; after the /health ping, /analyze waited 1.7-4.3 s; laptop adds 0.2-0.8 s over Cloud Run's latency. Decided with @yaisiel.torres: INFERENCE_TIMEOUT_MS 24 s (covers every single call measured, ~1.5x the typical slow cold start; a rare slow unassisted cold start may degrade to undetermined, which Gemini handles per TASK-20). FRONTEND_SILENCE_LIMIT_MS 75 -> 79 s in the same change (Frontend doesn't enforce it yet, TASK-28); RETRY_BUDGET_MS 80 -> 68 s, still two full-stall retries. CPU/cpu-boost pinning in deploy-inference.yml suggested by architectural review; declined by @yaisiel.torres. Reviews: code-review subagent (fixed overhead range, median, startup-log timing comment, instanceId on request logs, log-read failure handling, fileURLToPath) and architectural subagent (added dense-text cold scenarios, token wording, retry-budget headroom note; deploy-order claim verified: frontend/ reads no silence constant). Tests: timeouts 7/7, backend 222/222, frontend 171/171. Docs drift: README.md, project-spec.md, local-setup.md, AGENTS.md checked; none describe these values.
+
+2026-10-06: Closed after verifying the deploy. PR #125 merged as 10af4f5; Deploy Backend run 37503266705 and Deploy Frontend run 37503266383 succeeded, and Backend revision pun-agent-backend-00027-5nz (image backend:10af4f5) serves 100% of traffic, so analyze_pun now waits 24 s for Inference.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
