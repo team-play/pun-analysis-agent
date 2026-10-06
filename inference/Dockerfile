@@ -1,11 +1,24 @@
 # Build context is inference/:  docker build inference
 # What gets sent is trimmed by inference/.dockerignore.
 
+# The wn that creates WordNet's database in the wordnet stage. The runtime
+# reads that database with the wn uv.lock installs, so the two must match;
+# the build stage fails the build if they don't.
+ARG WN_VERSION=1.1.1
+
 FROM python:3.12-slim AS wiktionary
 
 ADD --checksum=sha256:62fedfc71c8afba3e4edd072ad07efbb314244deab41707cc15904df8cbd7338 \
     https://github.com/team-play/pun-analysis-agent/releases/download/wiktionary-data-2026-09-25/wiktionary.sqlite.gz /tmp/
 RUN python -c "import gzip, shutil; shutil.copyfileobj(gzip.open('/tmp/wiktionary.sqlite.gz'), open('/wiktionary.sqlite', 'wb'))"
+
+# WordNet gets its own stage too, apart from uv.lock, so a dependency bump
+# doesn't re-download it into a new layer that Artifact Registry stores again.
+FROM python:3.12-slim AS wordnet
+ARG WN_VERSION
+ENV WN_DATA_DIR=/wn_data
+RUN pip install --no-cache-dir --root-user-action=ignore "wn==${WN_VERSION}" \
+    && python -m wn download oewn:2025 && rm -rf /wn_data/downloads
 
 # uv only exists in this stage (uv's Docker guide). The runtime image starts
 # uvicorn straight from the venv: `uv run` would re-check the lockfile on
@@ -18,9 +31,11 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev
-ENV WN_DATA_DIR=/wn_data
-RUN .venv/bin/python -m wn download oewn:2025 && rm -rf /wn_data/downloads
-# The embedding model too: fastembed would otherwise fetch it from HuggingFace
+ARG WN_VERSION
+RUN locked="$(.venv/bin/python -c 'from importlib.metadata import version; print(version("wn"))')" \
+    && [ "$locked" = "$WN_VERSION" ] \
+    || { echo "uv.lock installs wn $locked but WN_VERSION is $WN_VERSION: set WN_VERSION at the top of this Dockerfile to match" >&2; exit 1; }
+# Bake in the embedding model: fastembed would otherwise fetch it from HuggingFace
 # into /tmp (in-memory on Cloud Run) on every cold start. Must match
 # scoring.EMBEDDING_MODEL; the offline check below fails the build if not.
 ENV FASTEMBED_CACHE_PATH=/fastembed_cache
@@ -34,10 +49,13 @@ WORKDIR /app
 # HF_HUB_OFFLINE: load the baked-in model only, never download at runtime.
 ENV PATH=/app/.venv/bin:$PATH WN_DATA_DIR=/wn_data \
     FASTEMBED_CACHE_PATH=/fastembed_cache HF_HUB_OFFLINE=1
-COPY --from=build /app/.venv .venv
-COPY --from=build /wn_data /wn_data
-COPY --from=build /fastembed_cache /fastembed_cache
+# Least likely to change first: once one step's cache misses, every later
+# step reruns, and a re-copied layer can get a new digest that Artifact
+# Registry stores again. The venv changes with every dependency bump.
 COPY --from=wiktionary /wiktionary.sqlite data/wiktionary.sqlite
+COPY --from=wordnet /wn_data /wn_data
+COPY --from=build /fastembed_cache /fastembed_cache
+COPY --from=build /app/.venv .venv
 COPY . .
 USER app
 # Fail the build (on every PR, not just at deploy) if the app can't read its
