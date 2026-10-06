@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@lecastro-tech'
 created_date: '2026-09-20 10:05'
-updated_date: '2026-10-04 20:45'
+updated_date: '2026-10-06 01:45'
 labels:
   - wsd
   - evaluation
@@ -35,7 +35,7 @@ docs/design/sense-selection.md leaves the Tier 1 margin threshold (when two cand
 ## Definition of Done
 <!-- DOD:BEGIN -->
 - [x] #1 Code review (test coverage + human-readable code) done per AGENTS.md's Code review section
-- [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
+- [x] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [x] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
 
@@ -59,6 +59,8 @@ PR #89 review (yaitorr, CHANGES_REQUESTED): threshold was tuned and reported on 
 2026-10-04 latest PR #89 review revision supersedes earlier calibration numbers and generalization claims. Both classes now use sentence-minimum embedding-Lesk margins with eligible/total coverage; dev 167/173 negative and 237/241 positive, test 170/173 and 239/241. Before recomputing corrected dev rates, set provisional flat-grid highest-recall rule with <=30% conditional sentence FP cap and smaller-threshold tie break. Original grid infeasible, extended downward on dev without changing cap; chose 0.01. Dev FP/recall 36/167 and65/237, test47/170 and78/239; all-sentence denominators also reported. Normalization .1 gives dev .293FP/.397recall and merits investigation rather than blanket rejection. Ranking omitted and selectional readings excluded; these are reading availability metrics, not end-to-end or word accuracy. Earlier full-data/test exposure disclosed. Pinned-value test removed; eight behavioral calibration tests added. Inference101/Eval38 tests and Ruff lint/format pass; independent review findings on cap chronology and LF fixed. Seven detailed reports with one-paragraph replies: eval/reports/pr-89-review/README.md. Leave task In Progress and all changes uncommitted pending user review.
 
 2026-10-04: User approved publishing the latest revision. Rechecked current files: 101 inference and 38 eval tests pass; both packages pass Ruff lint/format. Acceptance criteria verified by the completed dev/test calibration and documented counts. Independent review findings addressed. Review reports now record publication approval. No contract, service topology, isolation guarantee, dependency or deploy target changes; architecture review not applicable. README/project-spec/local-setup/AGENTS conventions remain aligned: calibration invocation unchanged. Earlier notes about awaiting user approval are historical and superseded by this authorization.
+
+2026-10-06 checklist audit: DoD #2 satisfied as not applicable, not as a claim that an architectural review was performed. Verified merged and approved PR #89 file scope: no changes to contracts.md, project-spec.md topology, engineering-practices.md isolation/phase order, dependency manifests, services, or deploy targets. Existing task notes already document this exemption. All acceptance criteria were already checked and status remains Done.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
