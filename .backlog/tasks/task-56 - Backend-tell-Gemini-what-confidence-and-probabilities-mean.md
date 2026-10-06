@@ -1,11 +1,11 @@
 ---
 id: TASK-56
 title: 'Backend: tell Gemini what confidence and probabilities mean'
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-10-02 10:04'
-updated_date: '2026-10-06 01:23'
+updated_date: '2026-10-06 01:32'
 labels: []
 milestone: m-4
 dependencies:
@@ -58,6 +58,8 @@ Run 1 (2026-10-06 00:55 UTC): gemini-3.5-flash-lite ignored the class-split sent
 Run 2 (2026-10-06 01:05 UTC): class split followed 3/3 on both models; tentative 3/3 (3.5) and 1/3 (3.1, accepted by Yai: the replies just don't mention the scores); asks-for-a-percentage 1/3 and 0/3, both pointing to the card but often dropping the split, and 3.1 twice calling the classifier 'quite certain'. Yai accepted run 2's wording. Full grading in docs/experiments/task-56/README.md. Also found: detector false positives on plain sentences (separate session) and an empty Gemini reply (TASK-67).
 
 Validation 2026-10-06: backend tests 205/205 pass (chat.test.ts fails if DETECTOR_SCORES_RULE is dropped from SYSTEM_INSTRUCTION); biome and ruff clean. Independent code review done: grading spot-checked against runs/*.json and matched; 429 stop verified; findings fixed (README states the percentage-case regression, grading clarifications, pacing comment, lint). Architectural review not needed: no change to contracts.md, topology, isolation or dependencies. Docs drift: README, project-spec, local-setup and AGENTS.md checked, none needed changes.
+
+Merged in #117 as 5496486. Deploy Backend run 37399256845 on 5496486 succeeded, including the /health and App Check smoke tests; pun-agent-backend-00025-s6g (image backend:5496486) serves 100% of traffic. Not re-checked live, to spare Gemini quota (decided with Yai 2026-10-06): the change is only the system-instruction text, and docs/experiments/task-56 already recorded both production Flash-Lite models following this exact wording. To spot a regression in production, look for a reply that gives confidence or probabilities as a number or percentage, or calls the classifier certain.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
