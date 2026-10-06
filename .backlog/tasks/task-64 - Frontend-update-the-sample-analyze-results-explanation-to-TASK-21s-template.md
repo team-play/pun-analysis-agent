@@ -1,11 +1,11 @@
 ---
 id: TASK-64
 title: 'Frontend: update the sample analyze result''s explanation to TASK-21''s template'
-status: In Progress
+status: Done
 assignee:
   - '@Andi-Cast'
 created_date: '2026-10-05 23:50'
-updated_date: '2026-10-06 01:03'
+updated_date: '2026-10-06 02:05'
 labels: []
 milestone: m-4
 dependencies:
@@ -44,6 +44,8 @@ From PR #106's review (Yai, 2026-10-05): `punResult` in frontend/src/lib/chat/fi
 
 <!-- SECTION:NOTES:BEGIN -->
 Done (2026-10-06): punResult.explanation is now the real output of main's Inference for "The baker needed more dough." (copied from load_analysis().analyze(), not retyped); words_involved ["dough"] and sense_source "wordnet" already matched. src/App.test.tsx found the explanation by "its slang sense (money)", a piece of the old string, so it now looks for "informal terms for money"; the description and AC #2 said no test depended on the string, and were corrected. 171 frontend tests pass; pnpm lint clean. A data and test-matcher change, so self-reviewed rather than by a subagent (AGENTS.md asks for one on non-trivial changes); no contract, topology or dependency change, and no docs mention the old string.
+
+Merged in #111 as 6b88788. Deploy Frontend run 37401585927 on 6b88788 succeeded, and main's Test run on 6b88788 passed. Nothing to check on the live site: the deployed build sets VITE_CHAT_ADAPTER=live, and punResult only appears in stub builds (local dev, CI and tests).
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
