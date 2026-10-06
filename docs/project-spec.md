@@ -37,6 +37,7 @@ sequenceDiagram
     participant INF as Inference (FastAPI)
 
     FE->>BE: POST /api/chat { messages }
+    BE-)INF: GET /health (warm-up, not awaited,<br/>at most every 5 minutes)
     BE->>Gemini: forward conversation via Genkit
     Gemini->>Gemini: decide whether pun analysis is needed
     alt pun analysis needed
@@ -82,10 +83,11 @@ This domain can work independently once the contract is agreed — no dependency
 - Implement the `analyze_pun` tool to call the Inference domain's `/analyze` endpoint
 - Handle streaming back to the frontend (Genkit's flow streaming)
 - Handle errors/timeouts (e.g. Cloud Run cold start on the Inference service) by returning the undetermined `/analyze` result defined in [`contracts.md`](contracts.md)
+- Warm Inference from `/api/chat` (`GET /health`) so its cold start overlaps Gemini's first turn; see [`contracts.md`](contracts.md)'s "Inference warm-up"
 
 **Contract exposed:** `/api/chat` — see [`contracts.md`](contracts.md).
 
-**Contract consumed:** Inference's `/analyze` schema — can build and test against a mocked response before Inference's real endpoint is live.
+**Contract consumed:** Inference's `/analyze` schema — can build and test against a mocked response before Inference's real endpoint is live — and its `GET /health`, for the warm-up only.
 
 **Design:** see [`engineering-practices.md`](engineering-practices.md) for the build order (a plain Gemini proxy before the `analyze_pun` tool) and for keeping this domain testable without live Gemini quota or a running Inference service.
 
@@ -126,6 +128,6 @@ The only hard dependencies across domains, besides the shared timeouts below:
 
 Frontend and Backend also share one piece of code: [`packages/timeouts`](../packages/timeouts/index.js), the timeouts of `/api/chat`'s waiting chain (from Frontend's App Check wait to Cloud Run's request timeout, which `deploy-backend.yml` sets from it). Both sides import it, its tests check the values still fit together, and changing one follows the deploy order in [`engineering-practices.md`](engineering-practices.md)'s "Shared timeouts".
 
-Deploying adds configuration links on top of those contracts, each documented in [`local-setup.md`](local-setup.md): the frontend build needs the backend's Cloud Run URL (`VITE_BACKEND_URL`), the backend's CORS allowlist names the frontend's origin (`backend/src/config.ts`), Firebase App Check ties the two to the same Firebase project (the frontend's Firebase config and reCAPTCHA key, and the backend's `firebaseProjectId`; see [`contracts.md`](contracts.md)), and the backend needs Inference's URL (`INFERENCE_URL`), resolved by its deployment workflow. Inference's Cloud Run service is private, so that call also needs a Google-signed ID token for Backend's runtime service account, which holds `roles/run.invoker` on the service (applied by [`deploy-inference.yml`](../.github/workflows/deploy-inference.yml)).
+Deploying adds configuration links on top of those contracts, each documented in [`local-setup.md`](local-setup.md): the frontend build needs the backend's Cloud Run URL (`VITE_BACKEND_URL`), the backend's CORS allowlist names the frontend's origin (`backend/src/config.ts`), Firebase App Check ties the two to the same Firebase project (the frontend's Firebase config and reCAPTCHA key, and the backend's `firebaseProjectId`; see [`contracts.md`](contracts.md)), and the backend needs Inference's URL (`INFERENCE_URL`), resolved by its deployment workflow. Inference's Cloud Run service is private, so those calls (`/analyze`, and the `/health` warm-up ping) also need a Google-signed ID token for Backend's runtime service account, which holds `roles/run.invoker` on the service (applied by [`deploy-inference.yml`](../.github/workflows/deploy-inference.yml)).
 
 Everything else — model choice, dataset selection, UI styling — is independently swappable within a domain without breaking another.

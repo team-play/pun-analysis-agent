@@ -25,7 +25,7 @@ The one piece of code Frontend and Backend share is [`packages/timeouts`](../pac
 
 ### Backend in isolation
 
-Backend has two external dependencies once Genkit is wired up: Gemini (via Genkit) and Inference's `/analyze` endpoint. Both need to be mockable so Backend's own tests don't require live Gemini quota or a running Inference Cloud Run service:
+Backend has two external dependencies once Genkit is wired up: Gemini (via Genkit) and Inference, through its `/analyze` endpoint and, for the warm-up ping only (see [`contracts.md`](contracts.md)), its `GET /health`. Both need to be mockable so Backend's own tests don't require live Gemini quota or a running Inference Cloud Run service:
 
 - The `analyze_pun` tool implementation should call Inference through an injectable client (a function parameter or small interface), so tests substitute a fixture response matching the `/analyze` schema in [`contracts.md`](contracts.md) instead of making a live HTTP call.
 - Genkit test doubles for the model call itself — check Genkit's own evaluation/testing harness first for a substitutable fake model responder before hand-rolling one.
