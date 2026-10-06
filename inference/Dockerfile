@@ -17,6 +17,9 @@ RUN python -c "import gzip, shutil; shutil.copyfileobj(gzip.open('/tmp/wiktionar
 FROM python:3.12-slim AS wordnet
 ARG WN_VERSION
 ENV WN_DATA_DIR=/wn_data
+# Only wn is pinned, not its dependencies: the database depends on wn's version
+# alone, and this stage rarely reruns. A bad upstream release could still fail
+# a build that has no cache.
 RUN pip install --no-cache-dir --root-user-action=ignore "wn==${WN_VERSION}" \
     && python -m wn download oewn:2025 && rm -rf /wn_data/downloads
 
@@ -33,8 +36,9 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --no-dev
 ARG WN_VERSION
 RUN locked="$(.venv/bin/python -c 'from importlib.metadata import version; print(version("wn"))')" \
-    && [ "$locked" = "$WN_VERSION" ] \
-    || { echo "uv.lock installs wn $locked but WN_VERSION is $WN_VERSION: set WN_VERSION at the top of this Dockerfile to match" >&2; exit 1; }
+    && if [ "$locked" != "$WN_VERSION" ]; then \
+        echo "uv.lock installs wn $locked but WN_VERSION is $WN_VERSION: set WN_VERSION at the top of this Dockerfile to match" >&2; exit 1; \
+    fi
 # Bake in the embedding model: fastembed would otherwise fetch it from HuggingFace
 # into /tmp (in-memory on Cloud Run) on every cold start. Must match
 # scoring.EMBEDDING_MODEL; the offline check below fails the build if not.
