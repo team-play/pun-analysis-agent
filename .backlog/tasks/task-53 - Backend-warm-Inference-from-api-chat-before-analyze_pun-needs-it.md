@@ -1,11 +1,11 @@
 ---
 id: TASK-53
 title: 'Backend: warm Inference from /api/chat before analyze_pun needs it'
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-10-02 10:04'
-updated_date: '2026-10-06 00:57'
+updated_date: '2026-10-06 01:27'
 labels: []
 milestone: m-4
 dependencies:
@@ -56,6 +56,8 @@ Inference scales to zero, so the first analyze_pun call after it has been idle w
 Implemented middleware/inference-warmup.ts (leading-edge throttle, timestamp at send) wired after App Check in app.ts with the shared inferenceFetch. Code + architectural reviews done. Fixes applied from them: corrected the reason for recording at send time (Inference is --max-instances=1 --concurrency=1, so extra pings would queue ahead of /analyze, not start instances); hang guards on never-answering tests; body-cancel and errorCode tests; positive wiring test (tests/app.warmup.test.ts, APP_CHECK=off + malformed body); networkErrorCode moved to inference-fetch.ts; docs (contracts, project-spec, engineering-practices, local-setup, timeouts comment) and a note on TASK-32 that INFERENCE_TIMEOUT_MS must cover an unassisted cold start. 216/216 backend tests pass; mutations of each design rule are caught.
 
 Window kept at 5 min (decided with Yai 2026-10-05): a shorter window would add pings competing with /analyze for Inference's single request slot and wake it more often, for a gain only when Cloud Run reclaims Inference inside the window. Validation: backend pnpm test 216/216, tsc and biome clean, packages/timeouts tests 7/7. Docs drift: README/AGENTS.md unaffected.
+
+Deploy verified 2026-10-06 after PR #110 (merge 1d2f087; Deploy Backend succeeded): one greeting chat on https://pun-agent.web.app (~1 Gemini request, no analyze_pun call) got a normal reply, and pun-agent-inference logged GET /health 200 from user agent node at 01:27:17Z, 6 s after the chat was sent, so the ping went out and its ID token was accepted. pun-agent-backend logged no warm-up warnings.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
