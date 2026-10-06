@@ -58,7 +58,23 @@ def test_analyze_answers_500_when_a_result_breaks_the_contract(monkeypatch, brea
     assert response.status_code == 500
 
 
-@pytest.mark.parametrize("text", ["", "   ", "x" * (main.MAX_CHARS + 1)])
+# The limit is written out rather than read from MAX_CHARS, and Backend's
+# tests/tools/analyze-pun.test.ts pins the same 2,000, so changing it on one side alone
+# fails a test (docs/contracts.md).
+@pytest.mark.parametrize("text", ["x" * 2000, "😀" * 2000], ids=["2,000 characters", "2,000 emoji"])
+def test_analyze_accepts_text_up_to_2000_characters(monkeypatch, text):
+    analysis = FixedAnalysis(undetermined())
+
+    with serve(monkeypatch, analysis) as client:
+        response = client.post("/analyze", json={"text": text})
+
+    assert response.status_code == 200
+    assert analysis.calls == [text]
+
+
+@pytest.mark.parametrize(
+    "text", ["", "   ", "x" * 2001], ids=["empty", "blank", "2,001 characters"]
+)
 def test_analyze_rejects_empty_blank_and_overlong_text(monkeypatch, text):
     with serve(monkeypatch, FixedAnalysis(undetermined())) as client:
         response = client.post("/analyze", json={"text": text})

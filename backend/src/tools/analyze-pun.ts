@@ -107,8 +107,13 @@ export const UNDETERMINED_ANALYZE_RESULT: AnalyzeResult = {
 	sense_source: null,
 };
 
-/** Why a call to Inference didn't produce a result, as logged. */
-type InferenceFailure =
+/**
+ * Why the tool returned the undetermined result, as logged: `too_long`
+ * (the text is over Inference's limit, so Inference wasn't called), or why
+ * the call to Inference didn't produce a result.
+ */
+type UndeterminedCause =
+	| "too_long"
 	| "timeout"
 	| "unreachable"
 	| "auth"
@@ -130,12 +135,12 @@ const undetermined = ({
 	err,
 	...fields
 }: {
-	cause: InferenceFailure;
+	cause: UndeterminedCause;
 	err?: unknown;
 	[field: string]: unknown;
 }): AnalyzeResult => {
 	logger.warn(
-		"analyze_pun: Inference call failed, returning the undetermined result",
+		"analyze_pun: returning the undetermined result",
 		{ cause, ...fields },
 		err,
 	);
@@ -144,7 +149,26 @@ const undetermined = ({
 
 export const ANALYZE_PUN_TOOL_NAME = "analyze_pun";
 
-/** What Gemini passes analyze_pun: the text to check. */
+/**
+ * The longest text Inference's /analyze accepts, in characters
+ * (inference/pun_detector/features.py's MAX_CHARS; docs/contracts.md).
+ */
+const ANALYZE_TEXT_MAX_CHARS = 2000;
+
+/**
+ * The text's length as Inference measures it: Python's len() counts code
+ * points, while `text.length` counts UTF-16 code units, so an emoji like
+ * 😀 is one character there and two here.
+ */
+const characterCount = (text: string) => [...text].length;
+
+/**
+ * What Gemini passes analyze_pun: the text to check. It has no length
+ * bound: Genkit rejects input that breaks this schema by failing the whole
+ * reply, and Frontend resends earlier calls against it (flows/chat.ts), so
+ * a bound would also reject threads that already hold a long call. The
+ * tool handles text over the limit itself.
+ */
 export const analyzePunInputSchema = z.object({
 	text: z.string().describe("The text to check, exactly as written."),
 });
@@ -164,9 +188,9 @@ export interface AnalyzePunToolOptions {
 /**
  * Registers the analyze_pun tool on `ai`: Gemini calls it with the text to
  * check, and gets back Inference's /analyze result, or the undetermined
- * result if Inference timed out, couldn't be reached or authenticated to,
- * answered non-2xx or answered with something that isn't an /analyze
- * result.
+ * result if the text is longer than Inference accepts, or Inference timed
+ * out, couldn't be reached or authenticated to, answered non-2xx or
+ * answered with something that isn't an /analyze result.
  */
 export function createAnalyzePunTool(
 	ai: Genkit,
@@ -193,6 +217,15 @@ export function createAnalyzePunTool(
 			outputSchema: analyzeResultSchema,
 		},
 		async ({ text }) => {
+			// Inference would answer 422; skipping the call keeps over-long text
+			// out of the non_2xx failures, which point at Inference itself.
+			// Blank text isn't checked here: it still reaches Inference, and its
+			// 422 is logged as non_2xx with status 422.
+			const characters = characterCount(text);
+			if (characters > ANALYZE_TEXT_MAX_CHARS) {
+				return undetermined({ cause: "too_long", characters });
+			}
+
 			let response: Response;
 			try {
 				response = await fetch(analyzeUrl, {
