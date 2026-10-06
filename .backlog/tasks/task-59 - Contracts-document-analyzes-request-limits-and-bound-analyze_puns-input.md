@@ -1,11 +1,11 @@
 ---
 id: TASK-59
 title: 'Contracts: document /analyze''s request limits and bound analyze_pun''s input'
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-10-03 21:30'
-updated_date: '2026-10-06 01:07'
+updated_date: '2026-10-06 01:23'
 labels: []
 milestone: m-4
 dependencies: []
@@ -55,10 +55,12 @@ AC #2 reworded with the user (2026-10-05): the original 'fails as invalid input'
 Implemented per plan. Mutation-checked: counting UTF-16 units, Backend limit 2001, Inference MAX_CHARS 2001 each fail a test. Code review + architectural review (subagents) found nothing blocking; applied: log field renamed length->characters, over-limit test runs for 'x' and emoji, contracts.md 'Limits' narrowed (missing/non-string/limit-breaking text -> 422; extra fields ignored), emoji wording, deploy order for limit changes (contracts.md + engineering-practices.md now 'three kinds'), line-125 summary points at the undetermined-cases list, handler comment says blank text still reaches Inference. Known, out of scope: a JSON lone surrogate in text gets 500 from Inference (FastAPI's 422 handler fails echoing it back) -> follow-up suggested.
 
 Docs drift check: README.md, project-spec.md, local-setup.md and AGENTS.md don't describe /analyze's limits or analyze_pun's log causes; no follow-up commit needed. contracts.md and engineering-practices.md were updated as part of the change. Validation: backend pnpm test 209/209, tsc, biome; inference pytest, ruff check + format.
+
+Merged in #112 as a4629ee (squash-merged by @yaitorr, no review rounds). Deploy Backend run 37398546847 and Deploy Inference run 37398547134 on a4629ee succeeded, including Backend's /health and App Check smoke tests. Not yet observed: since the deploy, Backend's only log entries are the rollout and the smoke test, so no analyze_pun call has run on the new revision. Look for jsonPayload.cause="too_long" (with jsonPayload.characters) on service pun-agent-backend when someone pastes a long text.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-Documented /analyze's request limits (non-blank, at most 2,000 code points, 422 otherwise) and the deploy order for changing them in docs/contracts.md and docs/engineering-practices.md. Backend's analyze_pun now skips Inference for text over 2,000 code points and returns the undetermined result logged as cause too_long, so a limit is no longer logged as a non_2xx outage and Gemini still judges the text. The input schema stays unbounded, because Genkit would fail the whole reply and resent history would be rejected. Both sides' tests pin the literal 2,000 at the boundary, including 2,000 emoji. Mutation-checked: UTF-16 counting and a limit of 2,001 on either side each fail a test. Code and architectural reviews done.
+Documented /analyze's request limits (non-blank, at most 2,000 code points, 422 otherwise) and the deploy order for changing them in docs/contracts.md and docs/engineering-practices.md. Backend's analyze_pun now skips Inference for text over 2,000 code points and returns the undetermined result logged as cause too_long, so a limit is no longer logged as a non_2xx outage and Gemini still judges the text. The input schema stays unbounded, because Genkit would fail the whole reply and resent history would be rejected. Both sides' tests pin the literal 2,000 at the boundary, including 2,000 emoji. Mutation-checked: UTF-16 counting and a limit of 2,001 on either side each fail a test. Code and architectural reviews done. Merged in #112 as a4629ee and deployed (Backend and Inference deploys succeeded).
 <!-- SECTION:FINAL_SUMMARY:END -->
