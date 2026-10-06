@@ -1,11 +1,11 @@
 ---
 id: TASK-65
 title: 'Inference: answer 422, not 500, when /analyze text holds a lone surrogate'
-status: In Progress
+status: Done
 assignee:
   - '@yaitorr'
 created_date: '2026-10-06 00:57'
-updated_date: '2026-10-06 01:07'
+updated_date: '2026-10-06 01:32'
 labels: []
 milestone: m-4
 dependencies: []
@@ -50,6 +50,8 @@ Found in TASK-59's code review (2026-10-05). A JSON body whose `text` escapes a 
 Done per plan. Test-first: the 5 new test cases failed before the handler existed (500 for the surrogate, input present for the rest). Code + architectural reviews: nothing significant; applied readability of the malformed-JSON case, empty/blank added to the no-echo test, contracts wording scoped to the 422. Probed: no 422 field (msg, ctx, loc) carries caller text. Out of scope, pre-existing: invalid UTF-8 bytes get FastAPI's 400 body-parse error (Backend and Eval can't send them); docs/design/sense-selection.md:70 says /analyze never returns 500, but a contract-breaking result does (pinned by test_analyze_answers_500_when_a_result_breaks_the_contract).
 
 Docs drift check: README.md, project-spec.md, local-setup.md and AGENTS.md don't describe Inference's error bodies; no follow-up commit needed. Validation: inference pytest 142 passed, ruff check + format.
+
+Merged in #113 as d03804d. Deploy Inference run 37398885193 on d03804d succeeded, including both smoke tests; pun-agent-inference-00013-5rk (image inference:d03804d) serves 100% of traffic. Checked in production 2026-10-06 with an ID token: POST /analyze with {"text":"a\ud800"} answered 422 (type string_unicode, no input echoed) instead of 500, and blank text still answered 422 (value_error, no input).
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
