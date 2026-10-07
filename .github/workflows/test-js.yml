@@ -18,6 +18,10 @@ on:
         description: Also run the package's production build
         type: boolean
         default: false
+      typecheck:
+        description: Also run the package's typecheck script
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -36,6 +40,8 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile --filter "$PACKAGE"
+      - if: inputs.typecheck
+        run: pnpm --filter "$PACKAGE" run typecheck
       - run: pnpm --filter "$PACKAGE" run test
       - if: inputs.build
         run: pnpm --filter "$PACKAGE" run build

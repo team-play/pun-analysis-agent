@@ -1,0 +1,12 @@
+// Type-checks everything Node runs, not just what `build` compiles:
+// tsconfig.json's rootDir/include cover only src/ (so dist/ is just the
+// server), and Node strips tests/ and scripts/ types without checking them.
+// noEmit: only for `pnpm run typecheck`, never for building.
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"rootDir": "."
+	},
+	"include": ["src", "tests", "scripts"]
+}

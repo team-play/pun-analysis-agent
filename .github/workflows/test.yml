@@ -16,16 +16,22 @@ jobs:
           # PR. VITE_CHAT_ADAPTER is unset, so this builds the stub.
           - package: frontend
             build: true
+            typecheck: false
           # deploy-backend.yml's image build already compiles the backend on
-          # every pull request that touches it.
+          # every pull request that touches it, but that build only covers
+          # src/. typecheck also covers tests/ and scripts/, which Node runs
+          # without checking their types.
           - package: backend
             build: false
+            typecheck: true
           - package: "@pun-agent/timeouts"
             build: false
+            typecheck: false
     uses: ./.github/workflows/test-js.yml
     with:
       package: ${{ matrix.package }}
       build: ${{ matrix.build }}
+      typecheck: ${{ matrix.typecheck }}
 
   # VITE_APP_CHECK=off (TASK-73) must only ever work under `pnpm dev`. Build
   # the worst case, a live bundle with the switch set, and fail if the skip's
