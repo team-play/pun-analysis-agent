@@ -133,6 +133,20 @@ describe("createLiveChatModelAdapter", () => {
 		expect(headersOf(1).get("X-Firebase-AppCheck")).toBe("second-token");
 	});
 
+	it("without a token getter, sends the request with no App Check header", async () => {
+		const fetchMock = mockFetch(new Response(recordedPhase1Stream));
+
+		const texts = await collectTexts(
+			createLiveChatModelAdapter(CHAT_URL).run(
+				runOptions([message("user", "hi")]),
+			) as AsyncGenerator<ChatModelRunResult>,
+		);
+
+		const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+		expect(new Headers(init.headers).has("X-Firebase-AppCheck")).toBe(false);
+		expect(texts.at(-1)).toBeTruthy();
+	});
+
 	it("yields the accumulated reply after every chunk, ending on the whole reply", async () => {
 		mockFetch(new Response(recordedPhase1Stream));
 

@@ -6,6 +6,8 @@ interface ImportMetaEnv {
 	readonly VITE_BACKEND_URL?: string;
 	/** App Check debug token for `pnpm dev` (docs/local-setup.md); dev only. */
 	readonly VITE_APPCHECK_DEBUG_TOKEN?: string;
+	/** `off` skips App Check in `pnpm dev` (docs/local-setup.md); dev only. */
+	readonly VITE_APP_CHECK?: string;
 }
 
 interface ImportMeta {

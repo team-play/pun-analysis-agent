@@ -60,10 +60,16 @@ jobs:
       # number, 203365930808); update it if those change.
       #
       # An unset VITE_CHAT_ADAPTER silently builds the stub, so the deploy also
-      # fails if the Backend URL didn't make it into the bundle.
+      # fails if the Backend URL didn't make it into the bundle. It also fails
+      # if the dev-only App Check skip did (TASK-73; test.yml checks the same
+      # on pull requests, but nothing makes this deploy wait for it).
       - run: |
           pnpm --filter frontend run build
           grep -rqF "$VITE_BACKEND_URL" frontend/dist/assets
+          if grep -rlF "VITE_APP_CHECK=off" frontend/dist; then
+            echo "::error::The App Check skip is in the production bundle."
+            exit 1
+          fi
         env:
           VITE_CHAT_ADAPTER: live
           VITE_BACKEND_URL: https://pun-agent-backend-203365930808.us-east1.run.app

@@ -78,24 +78,28 @@ const waitForAppCheckToken = (
  *
  * `getAppCheckToken` supplies the Firebase App Check token Backend requires
  * on every request; it's injected so tests need no Firebase or reCAPTCHA.
+ * Without it, requests go out with no token, which only a local Backend
+ * with `APP_CHECK=off` accepts (see getChatModelAdapter).
  */
 export const createLiveChatModelAdapter = (
 	chatUrl: string,
-	getAppCheckToken: () => Promise<string>,
+	getAppCheckToken?: () => Promise<string>,
 ): ChatModelAdapter => ({
 	async *run({ messages, abortSignal }: ChatModelRunOptions) {
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
 		// Failing before a response arrives (no App Check token, offline,
 		// Backend down, non-2xx).
-		const appCheckToken = await waitForAppCheckToken(
-			getAppCheckToken(),
-			abortSignal,
-		).catch((error: unknown) => failWith(NO_REPLY_MESSAGE, error));
+		if (getAppCheckToken) {
+			headers["X-Firebase-AppCheck"] = await waitForAppCheckToken(
+				getAppCheckToken(),
+				abortSignal,
+			).catch((error: unknown) => failWith(NO_REPLY_MESSAGE, error));
+		}
 		const response = await fetch(chatUrl, {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"X-Firebase-AppCheck": appCheckToken,
-			},
+			headers,
 			body: JSON.stringify({ messages: messages.map(toChatRequestMessage) }),
 			signal: abortSignal,
 		}).catch((error: unknown) => failWith(NO_REPLY_MESSAGE, error));
