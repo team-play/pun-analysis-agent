@@ -16,4 +16,4 @@ The actual, tool-agnostic setup instructions live in [`docs/agent-setup.md`](../
 
 ## Out of scope
 
-Google Cloud / `gcloud` / Firebase CLI setup and API key provisioning are handled separately by the project maintainer right now. If it comes up, point to the Secrets section of [`docs/local-setup.md`](../../../docs/local-setup.md) instead of attempting it here.
+A Gemini API key for local runs comes from the contributor's own AI Studio project: use the [`gemini-personal-project`](../gemini-personal-project/SKILL.md) skill for that, once the environment above is set up. Google Cloud / `gcloud` / Firebase CLI setup is still handled separately by the project maintainer; if it comes up, point to the Secrets section of [`docs/local-setup.md`](../../../docs/local-setup.md) instead of attempting it here.

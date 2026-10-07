@@ -33,6 +33,37 @@ jobs:
       build: ${{ matrix.build }}
       typecheck: ${{ matrix.typecheck }}
 
+  # VITE_APP_CHECK=off (TASK-73) must only ever work under `pnpm dev`. Build
+  # the worst case, a live bundle with the switch set, and fail if the skip's
+  # warning made it in: that means its import.meta.env.DEV gate stopped
+  # removing it (see frontend/src/lib/chat/get-chat-model-adapter.ts).
+  app-check-skip-not-shipped:
+    name: Frontend bundle has no App Check skip
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter frontend
+      - run: |
+          pnpm --filter frontend exec vite build
+          # The Backend URL is only inlined by the live adapter, so this proves
+          # the grep below reads a live bundle (and that frontend/dist exists).
+          grep -rqF "$VITE_BACKEND_URL" frontend/dist
+          if grep -rlF "VITE_APP_CHECK=off" frontend/dist; then
+            echo "::error::The App Check skip is in the production bundle."
+            exit 1
+          fi
+        env:
+          VITE_CHAT_ADAPTER: live
+          VITE_BACKEND_URL: http://localhost:8080
+          VITE_APP_CHECK: "off"
+
   test-python:
     uses: ./.github/workflows/test-python.yml
 

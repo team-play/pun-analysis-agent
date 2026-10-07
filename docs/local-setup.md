@@ -13,7 +13,21 @@ Working across Frontend and Backend at once? `pnpm dev` from the repo root runs 
 CI's deploy credential (`GCP_SA_KEY`) is a **GitHub organization Secret**, and the backend's production Gemini key lives in **GCP Secret Manager** (see "Backend deploy" below). Neither is something you can pull down as a member: GitHub only exposes secret values to Actions runners, and the Gemini secret is readable only by the backend's runtime service account.
 
 For local dev:
-- **Gemini**: get your own key from [Google AI Studio](https://aistudio.google.com/) under the AI Studio project shown as "pun-agent" (`gen-lang-client-0125403786`), not the GCP project `pun-agent`. That project has no billing, so its keys stay on Gemini's free tier; the free-tier limits are per project, so local keys share quota with production's.
+- **Gemini**: use a key from **your own** [Google AI Studio](https://aistudio.google.com/) project, not the team's. Gemini's free-tier limits are per project, not per key, so a key from the team's AI Studio project (shown as "pun-agent", `gen-lang-client-0125403786`) spends production's quota on every local run. Create a personal project, then bind its key with:
+
+  ```bash
+  pnpm --filter backend run setup:gemini
+  ```
+
+  The script reads the key from a hidden prompt (or a pipe, e.g. from a password manager's CLI), never from the command line. It checks the key by reading the model's metadata, not by generating anything, which doesn't count against your quota (checked in TASK-74), then writes `GEMINI_API_KEY` to `backend/.env.local`, keeping your other settings, and pins `GEMINI_MODEL` to a Flash-Lite model unless you've set one. The file is made readable only by you, except on native Windows, which ignores that. On native Windows, run it from PowerShell or Windows Terminal: Git Bash without `winpty` shows the key as you type. In Claude Code, the `gemini-personal-project` skill walks you through the AI Studio steps first.
+
+  A `GEMINI_API_KEY` or `GEMINI_MODEL` exported in your shell (e.g. in `~/.zshrc` for Gemini CLI) beats `backend/.env.local`, since Node's `--env-file` never overrides a variable that's already set. The script warns if it finds one; remove it from your shell profile.
+
+  Already have a local key from the team's project? Run the script with a key from your own project, then delete the old key in AI Studio (team project → **API Keys**) so it can't keep spending production's quota.
+
+  > **Keep billing off on that project.** A project with billing turned on gets charged for usage past the free tier. Without billing, it stops at the free-tier limits with a 429 instead. Don't click **Set up billing**, **Buy credits** or **Setup auto-reload** in AI Studio (labels as of October 2026; see [Google's billing page](https://ai.google.dev/gemini-api/docs/billing)).
+
+  The team's AI Studio project is for production (whose key lives in Secret Manager, see "Backend deploy" below) and for runs that must measure production's own quota.
 - **GCP / Cloud Run**: ask to be added to the shared GCP project's IAM, then `gcloud auth application-default login` with your own account — no key to copy.
 - If you genuinely can't self-serve a key (e.g. a service account credential someone else already created), ask that teammate to share the value out-of-band (1Password, DM) — never post it in Slack/GitHub/issues.
 
@@ -38,7 +52,7 @@ gcloud iam service-accounts keys create github-actions-deployer-key.json \
 
 Paste the contents into the `GCP_SA_KEY` secret, then delete the local file and revoke the old key (`gcloud iam service-accounts keys list`/`delete`) — it's a credential, not something to keep on disk or leave active once replaced.
 
-No local Firebase login is required to develop `frontend/` day-to-day; this secret only matters for the CI deploy step. (Chatting with a real Backend locally does need the team's App Check debug token; see "Frontend" below.)
+No local Firebase login is required to develop `frontend/` day-to-day; this secret only matters for the CI deploy step. (Chatting with a real Backend locally needs either the team's App Check debug token or App Check switched off on both sides; see "Frontend" below.)
 
 ### Backend deploy (CI only)
 
@@ -142,12 +156,12 @@ Node/TypeScript + [Hono](https://hono.dev/) (a lightweight, TypeScript-first web
 ```bash
 cd backend
 pnpm install
-cp .env.example .env.local  # then fill in GEMINI_API_KEY, per this doc's Secrets section
+pnpm run setup:gemini  # your own project's key, per this doc's Secrets section; creates .env.local
 pnpm dev
 pnpm test
 ```
 
-The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. `/api/chat` requires a Firebase App Check token, exactly as in production (see [`contracts.md`](contracts.md)), so a request from the frontend's `live` mode needs its debug token (see "Frontend" below). To call it without one, e.g. with `curl`, set `APP_CHECK=off` in `backend/.env.local`; the server warns at startup while it's off. Only the exact value `off` disables the check, so a deployed service with no setting is always protected, and on Cloud Run (detected by the `K_SERVICE` variable it always sets) `APP_CHECK=off` makes the server refuse to start, so a revision configured that way never serves traffic. `INFERENCE_URL` (default `http://localhost:8000`) points `analyze_pun` at Inference; locally it must be a loopback HTTP origin. Inference doesn't need to be running: if it can't be reached, every `analyze_pun` call returns the undetermined result and Gemini judges the text itself. The warm-up ping to Inference's `/health` then fails too, which logs an "Inference warm-up ping failed" warning on the first chat request and at most once every 5 minutes after that; it never affects the reply. `GEMINI_MODEL` picks the Gemini model `/api/chat` talks to. Unset, it's production's ladder of models (two Flash-Lite models, then `gemini-3.8-flash`; TASK-45), which `/api/chat` steps down when a model fails (see [`contracts.md`](contracts.md)'s "Retries."). Set, it's that one model only: failures are retried but never switched to another model, so a local run measures exactly the model you named (e.g. `gemini-3.5-flash-lite`), with the settings the ladder gives it (`GEMINI_MODEL_CONFIG`, e.g. `gemini-3.1-flash-lite`'s thinking level). `pnpm test` never needs `GEMINI_API_KEY` set — it runs against a Genkit test-double model instead (see [`engineering-practices.md`](engineering-practices.md)'s "Backend in isolation" section). Sanity-check the dev server with:
+The dev server serves `GET /health` and `POST /api/chat` at `http://localhost:8080`. `/api/chat` requires a Firebase App Check token, exactly as in production (see [`contracts.md`](contracts.md)), so a request from the frontend's `live` mode needs its debug token (see "Frontend" below). To call it without one, e.g. with `curl` or from the frontend with `VITE_APP_CHECK=off`, set `APP_CHECK=off` in `backend/.env.local`; the server warns at startup while it's off. Only the exact value `off` disables the check, so a deployed service with no setting is always protected, and on Cloud Run (detected by the `K_SERVICE` variable it always sets) `APP_CHECK=off` makes the server refuse to start, so a revision configured that way never serves traffic. `INFERENCE_URL` (default `http://localhost:8000`) points `analyze_pun` at Inference; locally it must be a loopback HTTP origin. Inference doesn't need to be running: if it can't be reached, every `analyze_pun` call returns the undetermined result and Gemini judges the text itself. The warm-up ping to Inference's `/health` then fails too, which logs an "Inference warm-up ping failed" warning on the first chat request and at most once every 5 minutes after that; it never affects the reply. `GEMINI_MODEL` picks the Gemini model `/api/chat` talks to. Unset, it's production's ladder of models (two Flash-Lite models, then `gemini-3.8-flash`; TASK-45), which `/api/chat` steps down when a model fails (see [`contracts.md`](contracts.md)'s "Retries."). Set, it's that one model only: failures are retried but never switched to another model, so a local run measures exactly the model you named (e.g. `gemini-3.5-flash-lite`), with the settings the ladder gives it (`GEMINI_MODEL_CONFIG`, e.g. `gemini-3.1-flash-lite`'s thinking level). `pnpm test` never needs `GEMINI_API_KEY` set — it runs against a Genkit test-double model instead (see [`engineering-practices.md`](engineering-practices.md)'s "Backend in isolation" section). Sanity-check the dev server with:
 
 ```bash
 curl localhost:8080/health
@@ -176,13 +190,15 @@ Opens the dev server at `http://localhost:5173`. `pnpm test` runs Vitest + React
 VITE_CHAT_ADAPTER=live VITE_BACKEND_URL=http://localhost:8080 pnpm dev
 ```
 
-`live` mode also needs a Firebase App Check token for every request. The deployed site gets one through reCAPTCHA Enterprise, but `localhost` is deliberately not on the reCAPTCHA key's domain allowlist (anyone could serve a page from their own `localhost`), so `pnpm dev` uses an App Check **debug token** instead. The team shares one, registered in the Firebase console (project `pun-agent`, **App Check → Apps → ⋮ → Manage debug tokens**) and kept in the team's 1Password; ask Yai Torres for it. Put it in `frontend/.env.local`:
+`live` mode also needs a Firebase App Check token for every request, unless you switch App Check off on both sides (below). The deployed site gets one through reCAPTCHA Enterprise, but `localhost` is deliberately not on the reCAPTCHA key's domain allowlist (anyone could serve a page from their own `localhost`), so `pnpm dev` uses an App Check **debug token** instead. The team shares one, registered in the Firebase console (project `pun-agent`, **App Check → Apps → ⋮ → Manage debug tokens**) and kept in the team's 1Password; ask Yai Torres for it. Put it in `frontend/.env.local`:
 
 ```bash
 VITE_APPCHECK_DEBUG_TOKEN=<the shared debug token>
 ```
 
-Without it, `live` mode can't get a token, so every message fails with "Couldn't get a reply" before reaching Backend (`APP_CHECK=off` on Backend doesn't help: the frontend stops first). If it's unset, the SDK generates a new token instead, which works once someone with console access registers it.
+Without it, `live` mode can't get a token, so every message fails with "Couldn't get a reply" before reaching Backend (`APP_CHECK=off` on Backend alone doesn't help: the frontend stops first). If it's unset, the SDK generates a new token instead, which works once someone with console access registers it.
+
+To skip App Check entirely, with no debug token and no Firebase project involved, set `VITE_APP_CHECK=off` in `frontend/.env.local` **and** `APP_CHECK=off` in `backend/.env.local`. `live` mode then sends `/api/chat` requests with no `X-Firebase-AppCheck` header and never loads the Firebase SDK, and the browser console warns that it's off. It needs both switches: the frontend's only stops it asking for a token, and a Backend with App Check on answers the token-less request with 401. Like Backend's, only the exact value `off` works, and only under `pnpm dev`: `vite build` drops the code. `test.yml` fails a pull request if a production bundle built with `VITE_APP_CHECK=off` still contains it, and `deploy-frontend.yml` refuses to deploy one that does. The deployed Backend enforces App Check regardless, so even a bundle that did contain it would fail closed.
 
 A debug token gets real App Check tokens from anywhere, so treat it like a password: keep it in `.env.local` and 1Password only, and if it leaks, delete it in the console and share a new one. The SDK prints it to the browser console as `Firebase App Check debug token: <uuid>` on every `pnpm dev` load in `live` mode, whether it's the shared one or a new one, so close devtools before screen sharing, and rotate it if it shows up anywhere. Only `pnpm dev` reads it; production builds drop that code.
 
