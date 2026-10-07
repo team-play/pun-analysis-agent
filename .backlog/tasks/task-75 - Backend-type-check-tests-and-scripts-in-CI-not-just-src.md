@@ -5,6 +5,7 @@ status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-10-07 13:07'
+updated_date: '2026-10-07 13:12'
 labels:
   - backend
   - tooling
@@ -45,3 +46,9 @@ backend/tsconfig.json includes only src/ (rootDir src, so dist/ holds only the s
 4. Verify: injected type error fails the check; dist/ checksums identical to main; tests + Biome + actionlint pass; TASK-74 scripts pass the check.
 5. Subagent code review; docs-drift check of local-setup.md "Lint / test / format everywhere".
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Verified: injected type error in tests/ fails typecheck (TS2322); dist/ checksums identical to main (17 files, lib only affects declarations); 222/222 tests; Biome and actionlint (1.7.12) clean; TASK-74 branch scripts/ and tests/scripts/ pass the check. Subagent review: no defects; took nits N1 (drop redundant allowImportingTsExtensions) and N2 (header comment). Deploy gates intentionally not passed typecheck: tests/scripts never ship and test.yml runs on the same pushes. Heads-up: trivial merge conflicts with TASK-74 in backend/package.json and docs/engineering-practices.md.
+<!-- SECTION:NOTES:END -->
