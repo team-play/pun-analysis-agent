@@ -7,7 +7,7 @@ status: To Do
 assignee:
   - '@Groverpr93'
 created_date: '2026-10-07 09:28'
-updated_date: '2026-10-07 09:31'
+updated_date: '2026-10-07 13:07'
 labels:
   - pun-classifier
 dependencies:
@@ -47,3 +47,9 @@ Depends on TASK-66, which retrains the detector on plain-text negatives. This ta
 - [ ] #2 Architectural review done if this touches contracts.md, project-spec.md topology, or engineering-practices.md isolation/phase order, or adds a service/dependency/deploy target
 - [ ] #3 Docs checked for drift (README.md, project-spec.md, local-setup.md, AGENTS.md); follow-up commit made if any changed
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Another case, 2026-10-07 (found while verifying TASK-73/74 on a fully local run; detector as on main at 502d021, Inference unchanged since): "I used to be a baker, but I couldn't make enough dough." gives is_pun true, confidence 0.997, homographic 0.660 / homophonic 0.337, but words_involved ["baker"] and sense_source llm_fallback. Inference logged "Sense selection fell back to llm_fallback: reason=no_reading ranked_candidates=2". Unlike "The baker needs more dough.", where sense selection still reaches "dough", here it never does: the two ranked candidates yield no reading and the pun word is lost. Gemini's reply still named "dough" correctly, so the user-facing answer was right, but the card's analysis credits the wrong word. A candidate for AC #4's regression check and the AC #1 eval set (same pun word, longer sentence).
+<!-- SECTION:NOTES:END -->
