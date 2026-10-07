@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-10-07 10:47'
-updated_date: '2026-10-07 11:10'
+updated_date: '2026-10-07 13:03'
 labels: []
 dependencies: []
 references:
@@ -68,4 +68,6 @@ The gate must be inline. With the condition in a helper (const skipsAppCheck = (
 End to end (pnpm dev, VITE_APP_CHECK=off; local Backend APP_CHECK=off, no GEMINI_API_KEY): fresh tab loads no firebase SDK chunks and makes no Google requests; POST /api/chat returns 200 and reaches the flow, which then fails FAILED_PRECONDITION for the missing key. A full Gemini reply waits for a personal key (TASK-74).
 
 Reviews: code review mutation-tested the new tests (truthiness, dropped DEV gate, empty header, startAppCheck still called, case-insensitive match, changed warning text: all caught). Fixed from review: tests now clear VITE_APP_CHECK in beforeEach (a contributor's .env.local with off broke 2 tests), restoreAllMocks for the warn spy, CI grep has a positive control so a missing dist can't pass silently. Architectural review: boundary holds; test.yml is not a required check and deploy-frontend.yml doesn't wait for it, so the bundle grep was added to the deploy build too, and docs now say the deploy refuses such a bundle. Known residual: NODE_ENV=development vite build keeps the skip (DEV true); no workflow does this, and the deployed Backend fails closed.
+
+Full end-to-end reply verified 2026-10-07 once TASK-74 gave a personal key (AI Studio project gen-lang-client-0690426664, free tier): pnpm dev with VITE_APP_CHECK=off against a local Backend with APP_CHECK=off answered "I used to be a baker, but I couldn't make enough dough." with a full Gemini reply (homographic pun on "dough"), Inference down so analyze_pun returned undetermined. No request to any Google/Firebase host from the page. The first answer attempt stalled 30 s and Backend's stall-limit retry succeeded (unrelated to this change), so the message cost 3 generate requests on the personal project.
 <!-- SECTION:NOTES:END -->
