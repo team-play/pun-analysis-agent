@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { afterEach, beforeEach, mock, test } from "node:test";
+import { afterEach, beforeEach, type Mock, mock, test } from "node:test";
 import { genkit } from "genkit";
 import { logger } from "genkit/logging";
 import {
@@ -28,7 +28,7 @@ const buildTool = (fetch: typeof globalThis.fetch, timeoutMs?: number) =>
 		timeoutMs,
 	});
 
-let warn: ReturnType<typeof mock.method>;
+let warn: Mock<typeof logger.warn>;
 beforeEach(() => {
 	warn = mock.method(logger, "warn", () => {});
 });

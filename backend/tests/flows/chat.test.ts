@@ -54,7 +54,7 @@ test("chatFlow streams the model's chunks and resolves to the full text", async 
 		messages: [{ role: "user", content: "Hi" }],
 	});
 
-	const chunks: string[] = [];
+	const chunks = [];
 	for await (const chunk of stream) {
 		chunks.push(chunk);
 	}
@@ -536,14 +536,13 @@ test("chatFlow numbers parallel analyze_pun calls so each result carries its cal
 		chunks.push(chunk);
 	}
 
-	const [requestChunk, responseChunk] = chunks as [
-		{ content: Array<{ toolRequest: { ref: string; input: unknown } }> },
-		{ content: Array<{ toolResponse: { ref: string; output: unknown } }> },
-	];
+	const [requestChunk, responseChunk] = chunks;
+	// Tool chunks are Genkit's own chunk objects; text chunks are strings.
+	assert(typeof requestChunk === "object" && typeof responseChunk === "object");
 	assert.deepEqual(
 		requestChunk.content.map(({ toolRequest }) => [
-			toolRequest.ref,
-			toolRequest.input,
+			toolRequest?.ref,
+			toolRequest?.input,
 		]),
 		[
 			["0", { text: "pun" }],
@@ -553,8 +552,8 @@ test("chatFlow numbers parallel analyze_pun calls so each result carries its cal
 	// In finishing order, but each under its own call's ref.
 	assert.deepEqual(
 		responseChunk.content.map(({ toolResponse }) => [
-			toolResponse.ref,
-			toolResponse.output,
+			toolResponse?.ref,
+			toolResponse?.output,
 		]),
 		[
 			["1", notAPun],
