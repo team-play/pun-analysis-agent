@@ -13,7 +13,21 @@ Working across Frontend and Backend at once? `pnpm dev` from the repo root runs 
 CI's deploy credential (`GCP_SA_KEY`) is a **GitHub organization Secret**, and the backend's production Gemini key lives in **GCP Secret Manager** (see "Backend deploy" below). Neither is something you can pull down as a member: GitHub only exposes secret values to Actions runners, and the Gemini secret is readable only by the backend's runtime service account.
 
 For local dev:
-- **Gemini**: get your own key from [Google AI Studio](https://aistudio.google.com/) under the AI Studio project shown as "pun-agent" (`gen-lang-client-0125403786`), not the GCP project `pun-agent`. That project has no billing, so its keys stay on Gemini's free tier; the free-tier limits are per project, so local keys share quota with production's.
+- **Gemini**: use a key from **your own** [Google AI Studio](https://aistudio.google.com/) project, not the team's. Gemini's free-tier limits are per project, not per key, so a key from the team's AI Studio project (shown as "pun-agent", `gen-lang-client-0125403786`) spends production's quota on every local run. Create a personal project, then bind its key with:
+
+  ```bash
+  pnpm --filter backend run setup:gemini
+  ```
+
+  The script reads the key from a hidden prompt (or a pipe, e.g. from a password manager's CLI), never from the command line. It checks the key by reading the model's metadata, not by generating anything, which doesn't count against your quota (checked in TASK-74), then writes `GEMINI_API_KEY` to `backend/.env.local`, keeping your other settings, and pins `GEMINI_MODEL` to a Flash-Lite model unless you've set one. The file is made readable only by you, except on native Windows, which ignores that. On native Windows, run it from PowerShell or Windows Terminal: Git Bash without `winpty` shows the key as you type. In Claude Code, the `gemini-personal-project` skill walks you through the AI Studio steps first.
+
+  A `GEMINI_API_KEY` or `GEMINI_MODEL` exported in your shell (e.g. in `~/.zshrc` for Gemini CLI) beats `backend/.env.local`, since Node's `--env-file` never overrides a variable that's already set. The script warns if it finds one; remove it from your shell profile.
+
+  Already have a local key from the team's project? Run the script with a key from your own project, then delete the old key in AI Studio (team project → **API Keys**) so it can't keep spending production's quota.
+
+  > **Keep billing off on that project.** A project with billing turned on gets charged for usage past the free tier. Without billing, it stops at the free-tier limits with a 429 instead. Don't click **Set up billing**, **Buy credits** or **Setup auto-reload** in AI Studio (labels as of October 2026; see [Google's billing page](https://ai.google.dev/gemini-api/docs/billing)).
+
+  The team's AI Studio project is for production (whose key lives in Secret Manager, see "Backend deploy" below) and for runs that must measure production's own quota.
 - **GCP / Cloud Run**: ask to be added to the shared GCP project's IAM, then `gcloud auth application-default login` with your own account — no key to copy.
 - If you genuinely can't self-serve a key (e.g. a service account credential someone else already created), ask that teammate to share the value out-of-band (1Password, DM) — never post it in Slack/GitHub/issues.
 
@@ -142,7 +156,7 @@ Node/TypeScript + [Hono](https://hono.dev/) (a lightweight, TypeScript-first web
 ```bash
 cd backend
 pnpm install
-cp .env.example .env.local  # then fill in GEMINI_API_KEY, per this doc's Secrets section
+pnpm run setup:gemini  # your own project's key, per this doc's Secrets section; creates .env.local
 pnpm dev
 pnpm test
 ```

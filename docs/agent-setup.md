@@ -2,7 +2,7 @@
 
 Instructions for bootstrapping a fresh clone of this repo into a working local dev environment — written to be followed by **any** coding agent (Claude Code, Cursor, Aider, Copilot, or a human at a terminal), not a Claude-specific mechanism. If you're an agent that discovered this file through [`AGENTS.md`](../AGENTS.md), you're in the right place; there's nothing else you need to read first.
 
-**Out of scope:** Google Cloud / `gcloud` / Firebase CLI setup and API key provisioning. That's being handled separately — see the Secrets section of [`docs/local-setup.md`](local-setup.md) if you need it.
+**Out of scope:** Google Cloud / `gcloud` / Firebase CLI setup, and the Gemini API key. For the key, see the Secrets section of [`docs/local-setup.md`](local-setup.md): contributors bind one from their own AI Studio project with `pnpm --filter backend run setup:gemini` (Claude Code users have the `gemini-personal-project` skill to walk them through it).
 
 Re-running these steps is safe: skip anything already satisfied rather than reinstalling or repeating it.
 
