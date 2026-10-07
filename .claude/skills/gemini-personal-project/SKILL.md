@@ -60,7 +60,7 @@ pnpm --filter backend run setup:gemini
 
 It prompts for the key without echoing it. For someone using a password manager's CLI, piping works too, e.g. `op read "op://…" | pnpm --filter backend run setup:gemini`. The script then:
 
-- checks the key with Google by reading the pinned model's metadata rather than generating anything;
+- checks the key with Google by reading the pinned model's metadata rather than generating anything, which doesn't count against their quota (checked in TASK-74);
 - on success, sets `GEMINI_API_KEY` in `backend/.env.local`. It keeps every other line, creates the file from `.env.example` if it doesn't exist, and makes it readable only by them (native Windows ignores this);
 - pins `GEMINI_MODEL` to a Flash-Lite model unless the file already sets one. Flash-Lite has the most free requests a day, and pinning stops a 429 from stepping down to `gemini-3.8-flash`, which allows only 20 a day.
 

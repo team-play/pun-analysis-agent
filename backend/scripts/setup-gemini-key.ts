@@ -73,9 +73,11 @@ type GoogleError = {
 
 /**
  * Throws a user-facing error unless `apiKey` can use `model`. Asks for the
- * model's metadata (models.get) rather than generating anything, so the
- * check spends no generate request from the project's Gemini quota. The key
- * goes in a header, not the URL, so it can't end up in request logs.
+ * model's metadata (models.get) rather than generating anything, which
+ * doesn't count against the project's Gemini quota: TASK-74 sent 31 of
+ * these in 33 s (twice Flash-Lite's 15/min) with no 429, and AI Studio's
+ * usage page showed the calls but 0 Flash-Lite requests. The key goes in a
+ * header, not the URL, so it can't end up in request logs.
  */
 export const checkGeminiKey = async (
 	apiKey: string,

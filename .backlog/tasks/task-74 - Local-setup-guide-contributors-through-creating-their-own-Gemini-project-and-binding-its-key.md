@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@yaitorr'
 created_date: '2026-10-07 10:47'
-updated_date: '2026-10-07 11:29'
+updated_date: '2026-10-07 13:04'
 labels: []
 dependencies: []
 references:
@@ -37,7 +37,7 @@ Companion task: TASK-73 (frontend App Check skip). Together they cover a fully l
 <!-- AC:BEGIN -->
 - [x] #1 A setup command reads the Gemini key from a hidden prompt (never argv, never echoed) and writes `GEMINI_API_KEY` to `backend/.env.local`, keeping any other settings already in that file
 - [x] #2 The setup command pins `GEMINI_MODEL` to a Flash-Lite model from `GEMINI_MODEL_LADDER` unless one is already set
-- [ ] #3 The setup command checks the key with a call that spends no generation quota (verify that it doesn't) and fails with a clear message for an invalid key; tests cover the file writing and the invalid-key path without calling Gemini
+- [x] #3 The setup command checks the key with a call that spends no generation quota (verify that it doesn't) and fails with a clear message for an invalid key; tests cover the file writing and the invalid-key path without calling Gemini
 - [x] #4 A Claude Code skill walks a contributor with no Google Cloud experience through creating a personal AI Studio project without billing and a key restricted to the Gemini API, then has them run the setup command; the skill never asks for the key in chat
 - [x] #5 The setup-local-env skill points to the new skill instead of saying keys are handled by the maintainer
 - [x] #6 `docs/local-setup.md` makes a personal project the default for local work, with a warning that a project with billing turned on gets charged past the free tier; AGENTS.md's Gemini quota section says its shared-quota rules apply to the team project and production, not to personal projects
@@ -70,4 +70,17 @@ Quota evidence so far (docs only): limits are per project; the free-tier quota m
 Manual runs: under a real pty (script) with input after the prompt, the key never appears in output; bogus keys piped and typed fail clearly and create no .env.local.
 
 Code review fixes: shell-exported GEMINI_API_KEY/GEMINI_MODEL beat --env-file, so the script warns and docs say so; values read with util.parseEnv (quotes, inline comments, CRLF, last-wins, later empty GEMINI_MODEL=); atomic owner-only write via temp file + rename; import.meta.main replaced (needs Node 24.2, engines allows 24); Ctrl-D and EOF cancel; 400 blames the key only for API_KEY_INVALID; tests added for every surviving mutation. Not done: scripts/ and tests/ aren't type-checked in CI (Backend tsconfig covers src/ only; pre-existing for tests); a one-off tsc over them passes.
+
+AC #3 verified 2026-10-07 with a real personal project (AI Studio "pun-agent-local", gen-lang-client-0690426664, free tier, no billing) and a new AQ. authorization key (no Unrestricted label; restricted from the start):
+- setup:gemini succeeded first time, so AQ. keys may call models.get. No shell-override warning. .env.local came out -rw------- with GEMINI_MODEL=gemini-3.5-flash-lite.
+- A probe (key read inside Node, only status codes printed) sent 30 more models.get in 32.9 s, twice Flash-Lite's 15 RPM: 30/30 returned 200, no 429.
+- AI Studio's usage page then showed the models.get calls as API traffic but 0 requests for gemini-3.5-flash-lite.
+Docs and the script comment now say the check doesn't count against quota, citing this.
+The skill was dogfooded for steps 1-5 on this run; the AI Studio flow matched it (existing user saw a prior project, created a fresh one, key defaulted to an authorization key).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Added `pnpm --filter backend run setup:gemini` (backend/scripts/setup-gemini-key.ts): reads a Gemini key from a hidden prompt or pipe, checks it with models.get (verified to spend no quota), and writes it atomically and owner-only to backend/.env.local, keeping other settings and pinning GEMINI_MODEL to Flash-Lite unless set; values are read with util.parseEnv to match --env-file, and shell-exported overrides are warned about. Added the gemini-personal-project skill and pointed setup-local-env, agent-setup.md, local-setup.md and AGENTS.md at a personal project. Verified with 37 node:test tests (mutation-tested by the code review), pty runs showing no echo, and a real personal project + AQ. key run end to end.
+<!-- SECTION:FINAL_SUMMARY:END -->

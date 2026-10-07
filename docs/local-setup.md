@@ -19,7 +19,7 @@ For local dev:
   pnpm --filter backend run setup:gemini
   ```
 
-  The script reads the key from a hidden prompt (or a pipe, e.g. from a password manager's CLI), never from the command line. It checks the key by reading the model's metadata, not by generating anything, then writes `GEMINI_API_KEY` to `backend/.env.local`, keeping your other settings, and pins `GEMINI_MODEL` to a Flash-Lite model unless you've set one. The file is made readable only by you, except on native Windows, which ignores that. On native Windows, run it from PowerShell or Windows Terminal: Git Bash without `winpty` shows the key as you type. In Claude Code, the `gemini-personal-project` skill walks you through the AI Studio steps first.
+  The script reads the key from a hidden prompt (or a pipe, e.g. from a password manager's CLI), never from the command line. It checks the key by reading the model's metadata, not by generating anything, which doesn't count against your quota (checked in TASK-74), then writes `GEMINI_API_KEY` to `backend/.env.local`, keeping your other settings, and pins `GEMINI_MODEL` to a Flash-Lite model unless you've set one. The file is made readable only by you, except on native Windows, which ignores that. On native Windows, run it from PowerShell or Windows Terminal: Git Bash without `winpty` shows the key as you type. In Claude Code, the `gemini-personal-project` skill walks you through the AI Studio steps first.
 
   A `GEMINI_API_KEY` or `GEMINI_MODEL` exported in your shell (e.g. in `~/.zshrc` for Gemini CLI) beats `backend/.env.local`, since Node's `--env-file` never overrides a variable that's already set. The script warns if it finds one; remove it from your shell profile.
 
