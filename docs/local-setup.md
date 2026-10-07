@@ -210,6 +210,9 @@ pnpm run test
 # from the repo root — covers backend/ and frontend/ (shared Biome config)
 pnpm run lint
 
+# from the repo root — type-checks backend/'s src/, tests/ and scripts/ (the build only checks src/)
+pnpm --filter backend run typecheck
+
 # also from the repo root — validates every ```mermaid block in the repo's docs
 pnpm run check:mermaid
 
@@ -221,7 +224,7 @@ uv run ruff format --check .
 docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint:1.7.12 -color
 ```
 
-[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) and [`.github/workflows/test.yml`](../.github/workflows/test.yml) run all of the above (lint/mermaid/ruff lint and format/actionlint, and the frontend/backend/shared-timeouts/inference test suites plus the frontend's production build, respectively) on every push/PR, so failures show up in CI even if you skip running them locally.
+[`.github/workflows/lint.yml`](../.github/workflows/lint.yml) and [`.github/workflows/test.yml`](../.github/workflows/test.yml) run all of the above (lint/mermaid/ruff lint and format/actionlint, and the frontend/backend/shared-timeouts/inference test suites plus the frontend's production build and the backend's type check, respectively) on every push/PR, so failures show up in CI even if you skip running them locally.
 
 ### Pre-commit hook
 
